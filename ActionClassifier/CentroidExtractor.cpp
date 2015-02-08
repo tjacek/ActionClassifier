@@ -7,6 +7,7 @@ void addCentroidExtractor(Dataset * dataset){
 
 FeatureVector CentroidExtractor::getFeatures(DepthImage image){
   FeatureVector features=new vector<float>();
+  cout << *image <<"\n";
   features->push_back(0.0);
   features->push_back(0.0);
   return features;

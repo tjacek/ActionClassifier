@@ -1,9 +1,23 @@
 #include "io.h"
 
 ImageList getImageList(string dirName){
-  ImageList files=new vector<string>();
-  getFilesList(stringToTCHAR(dirName),files);
-  return files;
+  ImageList imageList=new vector<string>();
+  getFilesList(stringToTCHAR(dirName),imageList);
+  appendFullPath(imageList,dirName);
+  showImageList(imageList);
+  return imageList;
+}
+
+void appendFullPath(ImageList imageList, string dirName){
+  vector<string>::iterator it;
+  int k=0;
+  for( it=imageList->begin(); it!=imageList->end(); ++it )
+  {
+	 string oldName= *it;
+	 string newName= dirName+ "/" + oldName;
+	 (*imageList)[k] =newName;
+	 k++;
+  }
 }
 
 TCHAR * stringToTCHAR(string input){
