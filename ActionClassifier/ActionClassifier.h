@@ -16,10 +16,21 @@
 //using namespace cv;
 using namespace std;
 
+typedef vector<float> * FeatureVector;
+typedef cv::Mat * DepthImage;
+typedef void  (*AddExtractorsFunc)(Dataset * data) ;
+
 class Dataset{
+  public:
+    void addExample(DepthImage image);
+  private:
+    vector<FeatureExtractor*> extractors;
+	vector<FeatureVector> examples;
 };
 
 class FeatureExtractor{
+  public:
+    virtual FeatureVector getFeatures(DepthImage image)=0;
 };
 
 class Classifier{
