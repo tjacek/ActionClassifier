@@ -1,10 +1,6 @@
 #include "ActionClassifier.h"
 #include "io.h"
-
-Dataset * getDataset(string dirName){
-	ImageList imageList = getImageList( dirName);
-	return  buildDataset(imageList,NULL);
-}
+#include "features.h"
 
 Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors){
   Dataset * dataset = new Dataset();
@@ -29,3 +25,7 @@ Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors){
    }
    examples.push_back(fullFeatures);
  }
+
+void Dataset::registerExtractor(FeatureExtractor* extractor){
+	extractors.push_back(extractor);
+}

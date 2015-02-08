@@ -1,7 +1,5 @@
 #include "ActionClassifier.h"
 
-typedef vector<string>* ImageList;
-
 extern ImageList getImageList(string dirName);
 extern int getFilesList(TCHAR * directory,ImageList  files);
 extern TCHAR * stringToTCHAR(string input);

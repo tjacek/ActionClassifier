@@ -1,11 +1,18 @@
 #include "ActionClassifier.h"
 #include "io.h"
+#include "features.h"
+
+Dataset * getDataset(string dirName){
+	ImageList imageList = getImageList( dirName);
+	AddExtractorsFunc extractor= &addCentroidExtractor;
+	return  buildDataset(imageList,extractor);
+}
 
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
- ImageList files=getImageList(dirName); 
-// getFilesList(stringToTCHAR(inputFolderPath),files);
- showImageList(files);
+ getDataset(dirName);
+ //ImageList files=getImageList(dirName); 
+ //showImageList(files);
  system("pause");
 
 }

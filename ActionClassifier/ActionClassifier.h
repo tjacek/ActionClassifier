@@ -18,20 +18,25 @@ using namespace std;
 
 typedef vector<float> * FeatureVector;
 typedef cv::Mat * DepthImage;
-typedef void  (*AddExtractorsFunc)(Dataset * data) ;
-
-class Dataset{
-  public:
-    void addExample(DepthImage image);
-  private:
-    vector<FeatureExtractor*> extractors;
-	vector<FeatureVector> examples;
-};
+typedef vector<string>* ImageList;
 
 class FeatureExtractor{
   public:
     virtual FeatureVector getFeatures(DepthImage image)=0;
 };
+
+class Dataset{
+  public:
+    void addExample(DepthImage image);
+	void registerExtractor(FeatureExtractor* extractor);
+  private:
+    vector<FeatureExtractor*> extractors;
+	vector<FeatureVector> examples;
+};
+
+typedef void  (*AddExtractorsFunc)(Dataset * data);
+
+extern Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors);
 
 class Classifier{
 };
