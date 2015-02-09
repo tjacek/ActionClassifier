@@ -16,6 +16,9 @@
 //using namespace cv;
 using namespace std;
 
+static const int heightOfImage=320;
+static const int widthOfImage=640;
+
 typedef vector<float> * FeatureVector;
 typedef cv::Mat * DepthImage;
 typedef vector<string>* ImageList;
