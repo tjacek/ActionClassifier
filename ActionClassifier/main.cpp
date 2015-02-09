@@ -4,7 +4,7 @@
 
 Dataset * getDataset(string dirName){
 	ImageList imageList = getImageList( dirName);
-	AddExtractorsFunc extractor= &addCentroidExtractor;
+	AddExtractorsFunc extractor= &addLinearStdExtractor;
 	return  buildDataset(imageList,extractor);
 }
 

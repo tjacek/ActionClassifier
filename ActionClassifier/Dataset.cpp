@@ -10,7 +10,7 @@ Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors){
   {
 	  string imageName=(*it);
 	  cv::Mat image = cv::imread(imageName, CV_LOAD_IMAGE_GRAYSCALE);
-	 // cout << image.rows << " " << image.cols ;
+	  cout << image.rows << " " << image.cols ;
 	  dataset->addExample(&image);
   }
   return dataset;
