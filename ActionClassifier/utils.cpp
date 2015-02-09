@@ -1,18 +1,25 @@
 #include "utils.h"
 
 float standardDeviation(Sample data){
-  float avg=0.0;
+  double avg=0.0;
   vector<float>::iterator it ;
+  double n= (data.size()-1);
   for (it = data.begin(); it != data.end(); it++){
-    avg+=*it;
+      float x= *it;
+	//  cout << x<<" ";
+	  avg+=x;
   }
-  float sd=0.0;
+  avg /=n;
+  	 //cout << avg <<" ";
+
+  double sd=0.0;
   for(it = data.begin(); it != data.end(); it++){
-     float error=avg - *it;
-	 error=error*error;
+     double error=avg - *it;
+	 error=(error*error)/n;
 	 sd+=error;
   }
-  return sqrt(sd);
+  //cout << sd <<"\n";
+  return sqrt((float) sd);
 }
 
 Histogram::Histogram(StdVector* stdVector,int numberOfBins){
@@ -32,6 +39,7 @@ Histogram::Histogram(StdVector* stdVector,int numberOfBins){
 }
 
 void Histogram::addNumber(float number){
+	//cout << number <<"\n";
    	for(int i=0;i<numberOfBins;i++){
 	  float threshold=min+ (1.0+i)*step;
 	  if(number<threshold){

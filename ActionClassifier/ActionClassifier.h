@@ -32,6 +32,7 @@ class Dataset{
   public:
     void addExample(DepthImage image);
 	void registerExtractor(FeatureExtractor* extractor);
+	string toString();
   private:
     vector<FeatureExtractor*> extractors;
 	vector<FeatureVector> examples;

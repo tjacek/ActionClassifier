@@ -1,4 +1,5 @@
 #include "ActionClassifier.h"
+#include <math.h>
 
 typedef vector<float> Sample;
 typedef vector<float> StdVector;
@@ -13,7 +14,7 @@ class Histogram{
 	float min;
 	float step;
 
-	Histogram(StdVector* stdVector,int numberOfBins=10 );
+	Histogram(StdVector* stdVector,int numberOfBins=5 );
 	void addNumber(float number);
 	FeatureVector getFeatures();
 };

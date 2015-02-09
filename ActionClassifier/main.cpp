@@ -10,7 +10,8 @@ Dataset * getDataset(string dirName){
 
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
- getDataset(dirName);
+ Dataset * dataset=getDataset(dirName);
+ cout << dataset->toString();
  //ImageList files=getImageList(dirName); 
  //showImageList(files);
  system("pause");

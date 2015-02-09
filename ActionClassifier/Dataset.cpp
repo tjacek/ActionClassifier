@@ -30,3 +30,22 @@ Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors){
 void Dataset::registerExtractor(FeatureExtractor* extractor){
 	extractors.push_back(extractor);
 }
+
+string Dataset::toString(){
+  string str="";
+  vector<FeatureVector>::iterator it;
+  for(it=examples.begin(); it!=examples.end(); ++it )
+  {
+     FeatureVector features=*it;
+	 vector<float>::iterator it;
+
+	 for(it=features->begin(); it!=features->end(); ++it )
+     {
+       float atr=*it;
+	   str+= to_string(atr) + ",";
+     }
+	 str+="\n";
+  }
+  return str;
+}
+
