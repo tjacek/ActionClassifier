@@ -13,7 +13,6 @@ FeatureVector LinearStdExtractor::getFeatures(DepthImage image){
 	Sample sample;
 	for(int j = 0; j < image->cols; j++){
 	  sample.push_back((float) row_i[j]);
-	 // cout << (float) row_i[j] <<",";
 	}
 	float std=standardDeviation(sample);
 	stdVector.push_back(std);

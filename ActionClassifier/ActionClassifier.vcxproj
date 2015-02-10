@@ -100,13 +100,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENCV_DIR)\build\x64\vc10\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENCV_DIR)\build\x64\vc10\lib;D:\pcl\PCL 1.6.0\3rdParty\Eigen\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opencv_core2410d.lib;opencv_imgproc2410d.lib;opencv_highgui2410d.lib;opencv_ml2410d.lib;opencv_video2410.lib;opencv_features2d2410d.lib;opencv_calib3d2410d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\opencv2410\build\x64\vc10\lib;C:\opencv2410\build\x64\vc10\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\opencv2410\build\x64\vc10\lib;C:\opencv2410\build\x64\vc10\bin;D:\pcl\PCL 1.6.0\3rdParty\Eigen\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -152,12 +152,14 @@
     <ClCompile Include="io.cpp" />
     <ClCompile Include="LinearStdExtracor.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pca.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActionClassifier.h" />
     <ClInclude Include="features.h" />
     <ClInclude Include="io.h" />
+    <ClInclude Include="pca.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

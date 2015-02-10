@@ -33,6 +33,9 @@
     <ClCompile Include="LinearStdExtracor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pca.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActionClassifier.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pca.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
