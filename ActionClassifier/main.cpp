@@ -3,11 +3,9 @@
 #include "features.h"
 #include "pca.h"
 
-
-
 void addAllExtractors(Dataset * dataset){
-  //addLinearStdExtractor(dataset);
-  addPcaExtractor(dataset);
+  addLinearStdExtractor(dataset);
+ // addPcaExtractor(dataset);
 }
 
 Dataset * getDataset(string dirName){

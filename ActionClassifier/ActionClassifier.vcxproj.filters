@@ -36,6 +36,9 @@
     <ClCompile Include="pca.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SVMClassifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActionClassifier.h">

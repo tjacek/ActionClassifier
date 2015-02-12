@@ -1,6 +1,7 @@
 #pragma once
 
 #include <opencv\cv.h>
+#include <opencv\ml.h>
 #include <opencv\highgui.h>
 
 #include <stdio.h>
@@ -13,15 +14,14 @@
 #include <tchar.h> 
 #include <strsafe.h>
 
-//using namespace cv;
 using namespace std;
+using cv::Mat;
 
-static const int heightOfImage=320;
-static const int widthOfImage=640;
-
-typedef vector<float> * FeatureVector;
+typedef vector<float>* FeatureVector;
+typedef cv::Mat ImageDescriptor;
 typedef cv::Mat * DepthImage;
 typedef vector<string>* ImageList;
+typedef cv::Mat * Labels;
 
 class FeatureExtractor{
   public:
@@ -30,17 +30,23 @@ class FeatureExtractor{
 
 class Dataset{
   public:
+    vector<FeatureExtractor*> extractors;
+
     void addExample(DepthImage image);
 	void registerExtractor(FeatureExtractor* extractor);
+	Mat toMat();
 	string toString();
   private:
-    vector<FeatureExtractor*> extractors;
-	vector<FeatureVector> examples;
+	vector<ImageDescriptor> examples;
 };
 
 typedef void  (*AddExtractorsFunc)(Dataset * data);
 
-extern Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors);
-
 class Classifier{
+  public:
+    virtual void learn(Labels labels,Dataset * dataset)=0;
+    virtual float predict(DepthImage img)=0;
 };
+
+extern Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors);
+extern ImageDescriptor getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors);
