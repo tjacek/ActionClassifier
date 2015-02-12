@@ -9,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include<map>
 
 #include <windows.h>
 #include <tchar.h> 
@@ -19,9 +20,15 @@ using cv::Mat;
 
 typedef vector<float>* FeatureVector;
 typedef cv::Mat ImageDescriptor;
-typedef cv::Mat * DepthImage;
 typedef vector<string>* ImageList;
 typedef cv::Mat * Labels;
+
+class DepthImage{
+  public:
+    string name;
+	Mat image;
+    DepthImage(string imageName);
+};
 
 class FeatureExtractor{
   public:
@@ -34,7 +41,7 @@ class Dataset{
 
     void addExample(DepthImage image);
 	void registerExtractor(FeatureExtractor* extractor);
-	Mat toMat();
+	Mat * toMat();
 	string toString();
   private:
 	vector<ImageDescriptor> examples;
@@ -50,3 +57,4 @@ class Classifier{
 
 extern Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors);
 extern ImageDescriptor getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors);
+extern void addAllExtractors(Dataset * dataset);

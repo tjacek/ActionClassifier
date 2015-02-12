@@ -9,6 +9,6 @@ using namespace Eigen;
 
 typedef MatrixXd EigenVectors;
 
-extern MatrixXd imageToMatrix(DepthImage image);
+extern MatrixXd imageToMatrix(Mat* image);
 extern EigenVectors pca(MatrixXd xd);
 extern void test_pca();

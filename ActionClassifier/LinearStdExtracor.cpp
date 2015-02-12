@@ -8,10 +8,12 @@ void addLinearStdExtractor(Dataset * dataset){
 
 FeatureVector LinearStdExtractor::getFeatures(DepthImage image){
   StdVector stdVector;  
-  for(int i=0;i<image->rows;i++){
-    const uchar* row_i = image->ptr<uchar>(i);
+  Mat * m_image=&image.image;
+
+  for(int i=0;i<m_image->rows;i++){
+    const uchar* row_i = m_image->ptr<uchar>(i);
 	Sample sample;
-	for(int j = 0; j < image->cols; j++){
+	for(int j = 0; j < m_image->cols; j++){
 	  sample.push_back((float) row_i[j]);
 	}
 	float std=standardDeviation(sample);

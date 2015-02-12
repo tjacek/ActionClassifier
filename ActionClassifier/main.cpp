@@ -1,6 +1,7 @@
 #include "ActionClassifier.h"
 #include "io.h"
 #include "features.h"
+#include "classifiers.h"
 #include "pca.h"
 
 void addAllExtractors(Dataset * dataset){
@@ -16,11 +17,13 @@ Dataset * getDataset(string dirName){
 
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
+ string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
+ evaluate(dirName,labels);
+ //readCategories(labels);
  //test_pca();
- Dataset * dataset=getDataset(dirName);
- cout << dataset->toString();
- //ImageList files=getImageList(dirName); 
- //showImageList(files);
+// Dataset * dataset=getDataset(dirName);
+// cout << dataset->toString();
+
  system("pause");
 
 }

@@ -1,16 +1,5 @@
 #include "ActionClassifier.h"
-
-class SVMClassifier:public Classifier{   
-  public:
-    SVMClassifier();
-    void learn(Labels labels, Dataset* trainingData);
-    float predict(DepthImage img);
-
-  private:
-    CvSVM * svm;
-    CvSVMParams params;
-	vector<FeatureExtractor*> extractors;
-};
+#include "classifiers.h"
 
 SVMClassifier::SVMClassifier(){
   svm=new CvSVM();
@@ -27,7 +16,8 @@ float SVMClassifier::predict(DepthImage image){
 }
 
 void SVMClassifier::learn(Labels labels,Dataset* trainingData){
+	cout << *labels;
 	this->extractors=trainingData->extractors;
-    bool res=svm->train(trainingData->toMat(),*labels,cv::Mat(),cv::Mat(),params);
+	Mat * data=trainingData->toMat();
+    bool res=svm->train(*data,*labels,cv::Mat(),cv::Mat(),params);
 }
-

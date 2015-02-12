@@ -13,11 +13,9 @@ void addPcaExtractor(Dataset * dataset){
 
 FeatureVector PcaExtractor::getFeatures(DepthImage image){
   FeatureVector features=new vector<float>();
-  MatrixXd dataPoints=imageToMatrix(image);
+  MatrixXd dataPoints=imageToMatrix(&image.image);
   EigenVectors eigenVectors=pca( dataPoints);
- // cout << eigenVectors << "End of eigenvector";
   for(int i=0;i<eigenVectors.rows();i++){
-    //MatrixXd eigenvector=eigenVectors.row(i);
 	for(int j=0;j<eigenVectors.cols();j++){
 		features->push_back(eigenVectors(i,j));
 	}
@@ -25,7 +23,7 @@ FeatureVector PcaExtractor::getFeatures(DepthImage image){
   return features;
 }
 
-MatrixXd imageToMatrix(DepthImage image){
+MatrixXd imageToMatrix(Mat* image){
 	int size=(image->cols/100 +1) * (image->rows/100 + 1);
 	//cout << "\n size" << size;
 	MatrixXd data=MatrixXd::Zero(3, size);
@@ -42,8 +40,6 @@ MatrixXd imageToMatrix(DepthImage image){
 		  }
 	  }
     }
-	//cout << " " << k;
-	//cout << data;
 	return data;
 }
 
