@@ -1,12 +1,53 @@
 #include "classifiers.h"
 #include "io.h"
+#include "utils.h"
 
+class SplitedImages{
+  public:
+    ImageList training;
+    ImageList test;
+    SplitedImages(ImageList fullSet);
+};
 
+SplitedImages::SplitedImages(ImageList imageList){
+  srand( time( NULL ) );
+  training=new vector<string>();
+  test=new vector<string>();
+  vector<string>::iterator it;
+  for(it=imageList->begin(); it!=imageList->end(); ++it )
+  {
+	string filename= *it;
+	if(biasedCoin()){
+	  training->push_back(filename);
+	}else{
+      test->push_back(filename);
+	}
+  }
+}
 
 void evaluate(string imageDir,string categoryFile){
   Categories categories=readCategories(categoryFile);
-  ImageList trainingSet=getImageList(imageDir);
-  Classifier * cls=buildClassifier(trainingSet,categories);
+  ImageList fullSet=getImageList(imageDir);
+  SplitedImages splitedImages(fullSet);
+  Classifier * cls=buildClassifier(splitedImages.training,categories);
+  Labels  trueLabels= getLabels(splitedImages.test,categories);
+  Labels predictedLabels=getPredictedLabels(splitedImages.test, cls);
+  cout << "\n True "<< *trueLabels <<"\n";
+  cout << "Predict "<< *predictedLabels <<"\n";
+
+}
+
+Labels getPredictedLabels(ImageList imageList,Classifier * cls){
+  vector<string>::iterator it;
+  vector<float>* fullFeatures = new vector<float>();
+  for(it=imageList->begin(); it!=imageList->end(); ++it )
+  {
+	 string filename= *it;
+     DepthImage image(filename);
+	 double category=cls->predict(image);
+	 fullFeatures->push_back(category);
+  }
+  return new cv::Mat(*fullFeatures);
 }
 
 Classifier * buildClassifier(ImageList trainingSet,Categories categories){
@@ -29,7 +70,6 @@ Labels getLabels(ImageList imageList,Categories categories ){
   }
   return new cv::Mat(*fullFeatures);
 }
-
 
 Categories readCategories(string name){
   Categories categories;

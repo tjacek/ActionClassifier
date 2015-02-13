@@ -6,7 +6,7 @@
 
 void addAllExtractors(Dataset * dataset){
   addLinearStdExtractor(dataset);
- // addPcaExtractor(dataset);
+  addPcaExtractor(dataset);
 }
 
 Dataset * getDataset(string dirName){

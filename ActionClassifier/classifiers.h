@@ -6,6 +6,7 @@ extern void evaluate(string imageDir,string categoryFile);
 extern Classifier * buildClassifier(ImageList trainingSet,Categories categories);
 extern Categories readCategories(string name);
 extern Labels getLabels(ImageList imageList,Categories categories );
+extern Labels getPredictedLabels(ImageList imageList,Classifier * classifier);
 
 class SVMClassifier:public Classifier{   
   public:

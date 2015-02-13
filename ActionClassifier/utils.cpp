@@ -22,6 +22,14 @@ float standardDeviation(Sample data){
   return sqrt((float) sd);
 }
 
+bool biasedCoin(){
+  int n= rand() % 3;
+  if(n==0)
+	  return false;
+  return true;
+}
+
+
 Histogram::Histogram(StdVector* stdVector,int numberOfBins){
     this->numberOfBins=numberOfBins;
 	this->bins=new int[numberOfBins];

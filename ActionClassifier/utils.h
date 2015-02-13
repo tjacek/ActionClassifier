@@ -5,6 +5,7 @@ typedef vector<float> Sample;
 typedef vector<float> StdVector;
 
 extern float standardDeviation(Sample sample);
+extern bool biasedCoin();
 
 class Histogram{
   public:
