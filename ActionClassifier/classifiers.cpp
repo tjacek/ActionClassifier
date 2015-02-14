@@ -2,13 +2,6 @@
 #include "io.h"
 #include "utils.h"
 
-class SplitedImages{
-  public:
-    ImageList training;
-    ImageList test;
-    SplitedImages(ImageList fullSet);
-};
-
 SplitedImages::SplitedImages(ImageList imageList){
   srand( time( NULL ) );
   training=new vector<string>();
@@ -34,7 +27,19 @@ void evaluate(string imageDir,string categoryFile){
   Labels predictedLabels=getPredictedLabels(splitedImages.test, cls);
   cout << "\n True "<< *trueLabels <<"\n";
   cout << "Predict "<< *predictedLabels <<"\n";
+  cout << "TP "<< truePositives(trueLabels,predictedLabels)<<"\n";
+}
 
+int truePositives(Labels  trueLabels,Labels predictedLabels){
+  int tp=0;
+  for(int i=0;i<trueLabels->cols;i++){
+	 double tl=trueLabels->data[i]; //at<double>(i,0);
+	 double pl=predictedLabels->data[i]; //->at<double>(i,0);
+	 if(tl==pl){
+		tp++;
+	 }
+  }
+  return tp;
 }
 
 Labels getPredictedLabels(ImageList imageList,Classifier * cls){
@@ -64,8 +69,7 @@ Labels getLabels(ImageList imageList,Categories categories ){
   for(it=imageList->begin(); it!=imageList->end(); ++it )
   {
 	 string filename= *it;
-	 int i=categories[filename];
-     cout << i <<"\n";
+	 double i=categories[filename];
 	 fullFeatures->push_back(i);
   }
   return new cv::Mat(*fullFeatures);
