@@ -68,12 +68,12 @@ string  matToString(Mat mat){
   string s="";
   cv::Size size = mat.size();
   for(int i=0;i<size.height;i++){
-	float raw= mat.data[i];
+	  float raw= mat.at<float>(i,0);
 	string tmp; 
     sprintf((char*)tmp.c_str(), "%f", raw);
     string str2 = tmp.c_str();
 	if(i==size.height-1){
-	  s+= str2 +"\n";
+	  s+= str2 ;
 	}else{
       s+=str2+",";
 	}
@@ -81,11 +81,12 @@ string  matToString(Mat mat){
   return s;
 }
 
-string Dataset::toArff(){
+string Dataset::toArff(Labels labels){
   string arff="@RELATION DepthMaps \n";
   arff+=getAttributes();
+  arff+="@attribute class numeric";
   arff+="\n @DATA \n";
-  arff+=getData();
+  arff+=getData(labels);
   return arff;
 }
 
@@ -110,20 +111,24 @@ string  Dataset::getAttributes(){
 	int size=(*it)->numberOfFeatures();
 	for(int i=0;i<size;i++){
 	  string feature=(*it)->featureName(i);
-	  str+="@ATTRIBUTE " + feature +" REAL\n";
+	  str+="@ATTRIBUTE " + feature +" numeric\n";
 	}
   }
   return str;
 }
 
-string Dataset::getData(){
+string Dataset::getData(Labels labels){
   string str="";
   vector<ImageDescriptor>::iterator it;
+  int i=0;
   for(it=examples.begin(); it!=examples.end(); ++it )
   {
      ImageDescriptor features=*it;
-     string buf = matToString(features);
+	 int category=(int) labels->at<float>(i,0);
+	 string value= matToString(features);
+     string buf = value+","+intToString(category) +"\n" ;
 	 str+=buf;
+	 i++;
   }
   return str;
 }

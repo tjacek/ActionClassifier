@@ -92,7 +92,6 @@ Categories readCategories(string name){
 	getline(ss, catStr, ',');
 	istringstream iss(catStr);
 	iss >> category;
-	cout << filename << " ^^^" <<category << "\n";
 	categories.insert ( std::pair<string,int>(filename,category));
   }
   return categories;

@@ -6,7 +6,7 @@
 
 void addAllExtractors(Dataset * dataset){
   addLinearStdExtractor(dataset);
-  addPcaExtractor(dataset);
+  //addPcaExtractor(dataset);
 }
 
 Dataset * getDataset(string dirName){
@@ -17,12 +17,16 @@ Dataset * getDataset(string dirName){
 
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
- //string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
+ string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
+ Categories categories=readCategories(labels);
+ ImageList fullSet=getImageList(dirName);
 // evaluate(dirName,labels);
  //readCategories(labels);
  //test_pca();
+ Labels tlabels= getLabels(fullSet,categories);
+
  Dataset * dataset=getDataset(dirName);
- cout << dataset->toArff();
+ cout << dataset->toArff(tlabels);
 
  system("pause");
 

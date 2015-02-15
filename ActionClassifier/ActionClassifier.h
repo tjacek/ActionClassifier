@@ -45,11 +45,11 @@ class Dataset{
 	int numberOfFeatures();
 	Mat * toMat();
 	string toString();
-	string toArff();
+	string toArff(Labels labels);
   private:
 	vector<ImageDescriptor> examples;
 	string getAttributes();
-	string getData();
+	string getData(Labels labels);
 };
 
 typedef void  (*AddExtractorsFunc)(Dataset * data);
