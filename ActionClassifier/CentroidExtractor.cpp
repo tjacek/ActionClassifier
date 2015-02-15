@@ -5,6 +5,15 @@ void addCentroidExtractor(Dataset * dataset){
   dataset->registerExtractor(centroidExtractor);
 }
 
+int CentroidExtractor::numberOfFeatures(){
+  return 2;
+}
+
+string CentroidExtractor:: featureName(int i){
+  string str="centroid_" + intToString(i);
+  return str;
+}
+
 FeatureVector CentroidExtractor::getFeatures(DepthImage image){
   FeatureVector features=new vector<float>();
   double x=0.0;

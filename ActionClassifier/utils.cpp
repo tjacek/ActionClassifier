@@ -6,11 +6,9 @@ float standardDeviation(Sample data){
   double n= (data.size()-1);
   for (it = data.begin(); it != data.end(); it++){
       float x= *it;
-	//  cout << x<<" ";
 	  avg+=x;
   }
   avg /=n;
-  	 //cout << avg <<" ";
 
   double sd=0.0;
   for(it = data.begin(); it != data.end(); it++){
@@ -18,7 +16,6 @@ float standardDeviation(Sample data){
 	 error=(error*error)/n;
 	 sd+=error;
   }
-  //cout << sd <<"\n";
   return sqrt((float) sd);
 }
 

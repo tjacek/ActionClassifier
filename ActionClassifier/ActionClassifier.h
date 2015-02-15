@@ -32,19 +32,24 @@ class DepthImage{
 
 class FeatureExtractor{
   public:
+	virtual int numberOfFeatures()=0;
+	virtual string featureName(int i)=0;
     virtual FeatureVector getFeatures(DepthImage image)=0;
 };
 
 class Dataset{
   public:
     vector<FeatureExtractor*> extractors;
-
     void addExample(DepthImage image);
 	void registerExtractor(FeatureExtractor* extractor);
+	int numberOfFeatures();
 	Mat * toMat();
 	string toString();
+	string toArff();
   private:
 	vector<ImageDescriptor> examples;
+	string getAttributes();
+	string getData();
 };
 
 typedef void  (*AddExtractorsFunc)(Dataset * data);

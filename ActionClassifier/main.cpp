@@ -17,12 +17,12 @@ Dataset * getDataset(string dirName){
 
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
- string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
- evaluate(dirName,labels);
+ //string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
+// evaluate(dirName,labels);
  //readCategories(labels);
  //test_pca();
-// Dataset * dataset=getDataset(dirName);
-// cout << dataset->toString();
+ Dataset * dataset=getDataset(dirName);
+ cout << dataset->toArff();
 
  system("pause");
 

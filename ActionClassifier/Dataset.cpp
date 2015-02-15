@@ -39,15 +39,17 @@ void Dataset::registerExtractor(FeatureExtractor* extractor){
 	extractors.push_back(extractor);
 }
 
+int Dataset::numberOfFeatures(){
+  vector<FeatureExtractor*>::iterator it;
+  int counter=0;
+  for(it=extractors.begin(); it!=extractors.end(); ++it )
+  {
+	counter+= (*it)->numberOfFeatures();
+  }
+  return counter;
+}
+
 Mat* Dataset::toMat(){
-  /*examples.size;
-  cv::Mat matAngles(examples.size, examples.at(0).size,CV_LOAD_IMAGE_GRAYSCALE);
-  for(int i=0; i<matAngles.rows; ++i){
-    for(int j=0; j<matAngles.cols; ++j){
-       
-      matAngles.at<uchar>(i) = examples.at(i);
-    }
-  }*/
   int size=examples.size();
   int dim=examples[0].rows;
   Mat * mat2D=new Mat(size,dim,CV_32F);
@@ -59,7 +61,6 @@ Mat* Dataset::toMat(){
 	  mat2D->row(i)=mat1D.row(0);
 	  i++;
   }
-  //cout << &mat2D;
   return mat2D;
 }
 
@@ -67,13 +68,25 @@ string  matToString(Mat mat){
   string s="";
   cv::Size size = mat.size();
   for(int i=0;i<size.height;i++){
-	int raw= mat.data[i];
+	float raw= mat.data[i];
 	string tmp; 
-    sprintf((char*)tmp.c_str(), "%d", raw);
+    sprintf((char*)tmp.c_str(), "%f", raw);
     string str2 = tmp.c_str();
-	s+= str2 +",";
+	if(i==size.height-1){
+	  s+= str2 +"\n";
+	}else{
+      s+=str2+",";
+	}
   }
   return s;
+}
+
+string Dataset::toArff(){
+  string arff="@RELATION DepthMaps \n";
+  arff+=getAttributes();
+  arff+="\n @DATA \n";
+  arff+=getData();
+  return arff;
 }
 
 string Dataset::toString(){
@@ -88,3 +101,29 @@ string Dataset::toString(){
   return str;
 }
 
+string  Dataset::getAttributes(){
+  string str="";
+  vector<FeatureExtractor*>::iterator it;
+  vector<float>* fullFeatures = new vector<float>();
+  for(it=extractors.begin(); it!=extractors.end(); ++it )
+  {
+	int size=(*it)->numberOfFeatures();
+	for(int i=0;i<size;i++){
+	  string feature=(*it)->featureName(i);
+	  str+="@ATTRIBUTE " + feature +" REAL\n";
+	}
+  }
+  return str;
+}
+
+string Dataset::getData(){
+  string str="";
+  vector<ImageDescriptor>::iterator it;
+  for(it=examples.begin(); it!=examples.end(); ++it )
+  {
+     ImageDescriptor features=*it;
+     string buf = matToString(features);
+	 str+=buf;
+  }
+  return str;
+}

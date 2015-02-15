@@ -2,13 +2,21 @@
 
 void test_pca(){
   MatrixXd dataPoints = MatrixXd::Random(5, 10);
-  //cout <<
   pca(dataPoints);
 }
 
 void addPcaExtractor(Dataset * dataset){
   PcaExtractor* extractor=new PcaExtractor();
   dataset->registerExtractor(extractor);
+}
+
+int PcaExtractor::numberOfFeatures(){
+  return 9;
+}
+
+string PcaExtractor:: featureName(int i){
+  string str="pca_" + intToString(i);
+  return str;
 }
 
 FeatureVector PcaExtractor::getFeatures(DepthImage image){

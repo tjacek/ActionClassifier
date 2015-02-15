@@ -6,6 +6,15 @@ void addLinearStdExtractor(Dataset * dataset){
   dataset->registerExtractor(extractor);
 }
 
+int LinearStdExtractor::numberOfFeatures(){
+  return 5;
+}
+
+string LinearStdExtractor:: featureName(int i){
+  string str="bin_" + intToString(i);
+  return str;
+}
+
 FeatureVector LinearStdExtractor::getFeatures(DepthImage image){
   StdVector stdVector;  
   Mat * m_image=&image.image;

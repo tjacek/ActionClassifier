@@ -8,6 +8,14 @@ ImageList getImageList(string dirName){
   return imageList;
 }
 
+string intToString(int i){
+    string tmp; 
+  sprintf((char*)tmp.c_str(), "%d", i);
+ // string tmp2 = tmp.c_str();
+  string * str=new string(tmp.c_str());
+  return *str;
+}
+
 void appendFullPath(ImageList imageList, string dirName){
   vector<string>::iterator it;
   int k=0;
