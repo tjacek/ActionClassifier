@@ -18,15 +18,15 @@ Dataset * getDataset(string dirName){
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
  string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
- Categories categories=readCategories(labels);
+ //Categories categories=readCategories(labels);
  ImageList fullSet=getImageList(dirName);
 // evaluate(dirName,labels);
  //readCategories(labels);
  //test_pca();
- Labels tlabels= getLabels(fullSet,categories);
-
- Dataset * dataset=getDataset(dirName);
- cout << dataset->toArff(tlabels);
+ //Labels tlabels= getLabels(fullSet,categories);
+ showImages(readImages(fullSet));
+ //Dataset * dataset=getDataset(dirName);
+ //cout << dataset->toArff(tlabels);
 
  system("pause");
 

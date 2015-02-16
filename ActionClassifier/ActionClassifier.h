@@ -63,3 +63,5 @@ class Classifier{
 extern Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors);
 extern ImageDescriptor getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors);
 extern void addAllExtractors(Dataset * dataset);
+extern void showImages(vector<DepthImage>* images);
+extern vector<DepthImage> * readImages(ImageList images);

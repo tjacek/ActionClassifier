@@ -132,3 +132,27 @@ string Dataset::getData(Labels labels){
   }
   return str;
 }
+
+vector<DepthImage>* readImages(ImageList imageNames){
+  vector<string>::iterator it;
+  vector<DepthImage>* dimages=new vector<DepthImage>();
+  for(it=imageNames->begin(); it!=imageNames->end(); ++it )
+  {
+    string name=*it;
+	DepthImage image(name);
+	dimages->push_back(image);
+  }
+  return dimages;
+}
+
+void showImages(vector<DepthImage> * images){
+  vector<DepthImage>::iterator it;
+  int i=0;
+  for(it=images->begin(); it!=images->end(); ++it )
+  {
+     DepthImage image=*it;
+	 cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+	 cv::imshow( "Display window", image.image );                  
+     cv::waitKey(0);
+  }
+}
