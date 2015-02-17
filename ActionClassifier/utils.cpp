@@ -1,5 +1,15 @@
 #include "utils.h"
 
+void applyTransform(Images images,ImageTransform fun){
+  vector<DepthImage>::iterator it;
+  int i=0;
+  for(it=images->begin(); it!=images->end(); ++it )
+  {
+     DepthImage image=*it;
+	 fun(&image.image);
+  }
+}
+
 float standardDeviation(Sample data){
   double avg=0.0;
   vector<float>::iterator it ;

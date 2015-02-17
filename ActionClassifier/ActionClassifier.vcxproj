@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="CentroidExtractor.cpp" />
     <ClCompile Include="classifiers.cpp" />
+    <ClCompile Include="css.cpp" />
     <ClCompile Include="Dataset.cpp" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="LinearStdExtracor.cpp" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="ActionClassifier.h" />
     <ClInclude Include="classifiers.h" />
+    <ClInclude Include="css.h" />
     <ClInclude Include="features.h" />
     <ClInclude Include="io.h" />
     <ClInclude Include="pca.h" />

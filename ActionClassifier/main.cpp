@@ -3,6 +3,8 @@
 #include "features.h"
 #include "classifiers.h"
 #include "pca.h"
+#include "css.h"
+#include "utils.h"
 
 void addAllExtractors(Dataset * dataset){
   addLinearStdExtractor(dataset);
@@ -15,19 +17,18 @@ Dataset * getDataset(string dirName){
 	return  buildDataset(imageList,addAllExtractors);
 }
 
+void testCSS(ImageList imageList){
+	Images images=readImages(imageList);
+	DepthImage dimage=images->at(0);
+    extractCSSFeatures(&dimage.image);
+	//showImages(images);
+}
+
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
  string labels ="C:/Users/user/Desktop/kwolek/labels.txt";
  //Categories categories=readCategories(labels);
- ImageList fullSet=getImageList(dirName);
-// evaluate(dirName,labels);
- //readCategories(labels);
- //test_pca();
- //Labels tlabels= getLabels(fullSet,categories);
- showImages(readImages(fullSet));
- //Dataset * dataset=getDataset(dirName);
- //cout << dataset->toArff(tlabels);
-
+ ImageList imageList=getImageList(dirName);
+ testCSS( imageList);
  system("pause");
-
 }
