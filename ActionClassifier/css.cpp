@@ -4,7 +4,8 @@
    vector<Point>* points=new vector<Point>();
    detectEdge(image);
    Curve* curve=getCurve(image);
-  // curve->smooth(2.0);
+   curve->smooth(2.0);
+   curve->computeDervatives();
    return points;
  }
 
@@ -20,16 +21,14 @@ void detectEdge(Mat * mat){
 Curve * getCurve(Mat * image){
   vector<vector<cv::Point> > contours;
   vector<cv::Vec4i> hierarchy;
-
-  	 cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
+  /*	 cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
 	 cv::imshow( "Display window", *image );                  
-     cv::waitKey(0);
-
-   cv::findContours(*image, contours, hierarchy,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-   draw( *image, &contours, &hierarchy);
-  //vector<cv::Point> countur=contours.at(0);
-  //Curve * curve = new Curve(countur);
-  return NULL;//curve;
+     cv::waitKey(0);*/
+  cv::findContours(*image, contours, hierarchy,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+  //draw( *image, &contours, &hierarchy);
+  vector<cv::Point> countur=contours.at(0);
+  Curve * curve = new Curve(countur);
+  return curve;
 }
 
 Curve::Curve(vector<cv::Point> countur){
@@ -50,25 +49,43 @@ Curve::Curve(vector<cv::Point> countur){
 void Curve::smooth(double sigma){
   smooth_x=new Mat();
   smooth_y=new Mat();
-  cout << *x;
+  //cout << *x;
   gauss_conv(*x,*smooth_x, sigma);
-  gauss_conv(*y,*smooth_y, sigma);
+  G=gauss_conv(*y,*smooth_y, sigma);
 }
 
-void gauss_conv(Mat in,Mat out,double sigma){
+void Curve::computeDervatives(){
+  cv::Sobel(G, dG, -1, 1, 0, 3);
+  cv::Sobel(G, ddG, -1, 2, 0, 3);
+  cv::flip(dG, dG, 0);
+  cv::flip(ddG, ddG, 0);
+  /*int xa=dG.cols; 
+  xa-= 0 -1;
+  int ya= dG.rows;
+  ya-= 1;*/
+  Point anchor(-1,-1);
+
+  filter2D(*x, dX,  -1, dG, anchor);
+  filter2D(*y, dY,  -1, dG, anchor);
+  filter2D(*x, ddX, -1, ddG, anchor);
+  filter2D(*y, ddY, -1, ddG, anchor);
+}
+
+Mat gauss_conv(Mat in,Mat out,double sigma){
   int width=in.rows;
   Mat G;
   cv::transpose(cv::getGaussianKernel(width, sigma, CV_64FC1), G);
  // cout << G;
-//  filter2D(in, out, out.depth(), G);
+  filter2D(in, out, out.depth(), G);
+  return G;
 }
 
 void draw(Mat image,vector<vector<cv::Point> > *contours,vector<cv::Vec4i> *hierarchy){
   Mat drawing = Mat::zeros( image.size(), CV_8UC3 );
   //for( int i = 0; i< contours.size(); i++ )
   //   {
-       cv::Scalar color = cv::Scalar( rand() % 255, rand() % 255, rand() % 255 );
-       drawContours( drawing, *contours, -1, color, 2, 8, *hierarchy, 0, Point() );
+  cv::Scalar color = cv::Scalar( rand() % 255, rand() % 255, rand() % 255 );
+  drawContours( drawing, *contours, -1, color, 2, 8, *hierarchy, 0, Point() );
   //   }
 
   cv::namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
