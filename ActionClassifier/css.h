@@ -17,10 +17,13 @@ class Curve{
    Curve(vector<cv::Point> countur);
    void smooth(double sigma);
    void computeDervatives();
+   vector<Point>* crossingPoints();
+   double curvatureAt(int i);
 };
 
 extern vector<Point>* extractCSSFeatures(Mat * image);
 extern void detectEdge(Mat * mat);
 extern Curve * getCurve(Mat * image);
+extern double curvature(double dx,double dy,double ddx,double ddy);
 extern Mat gauss_conv(Mat in,Mat out,double sigma);
 extern void draw(Mat image,vector<vector<cv::Point> >* contours,vector<cv::Vec4i>* hierarchy);

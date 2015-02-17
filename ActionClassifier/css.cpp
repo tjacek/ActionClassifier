@@ -1,12 +1,11 @@
 #include "css.h"
 
  vector<Point>* extractCSSFeatures(Mat * image){
-   vector<Point>* points=new vector<Point>();
    detectEdge(image);
    Curve* curve=getCurve(image);
    curve->smooth(2.0);
    curve->computeDervatives();
-   return points;
+   return curve->crossingPoints();
  }
 
 static const double minThreshold = 30.0;
@@ -69,6 +68,44 @@ void Curve::computeDervatives(){
   filter2D(*y, dY,  -1, dG, anchor);
   filter2D(*x, ddX, -1, ddG, anchor);
   filter2D(*y, ddY, -1, ddG, anchor);
+}
+
+bool sign(double x){
+  if(x<0){
+    return true;
+  }
+  return false;
+}
+
+vector<Point>*  Curve::crossingPoints(){
+  vector<Point>* crossingPoints= new vector<Point>();
+  int size=this->x->rows;
+  double last=curvatureAt(0);
+  for(int i=1;i<size;i++){
+    double current=curvatureAt(i);
+	bool signChange=(sign(current)==sign(last) );
+	if(current==0 || signChange){
+        Point point;
+		point.x=x->at<double>(i,0);
+		point.y=y->at<double>(i,0);
+		crossingPoints->push_back(point);
+	}
+	last=current;
+  }
+  return crossingPoints;
+}
+
+double Curve::curvatureAt(int i){
+  double dx_i =dX.at<double>(i,0);
+  double dy_i =dY.at<double>(i,0);
+  double ddx_i=ddX.at<double>(i,0);
+  double ddy_i=ddY.at<double>(i,0);
+  return curvature( dx_i, dy_i, ddx_i, ddy_i);
+}
+
+double curvature(double dx,double dy,double ddx,double ddy){
+  double div=pow ( dx*dx + dy*dy, 1.5);
+  return (dx*ddy - ddx*dy)/div;
 }
 
 Mat gauss_conv(Mat in,Mat out,double sigma){
