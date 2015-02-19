@@ -11,10 +11,10 @@
 static const double minThreshold = 30.0;
 static const double maxThreshold = 50.0;
 
-void detectEdge(Mat * mat){
-  cv:blur(*mat,*mat,cv::Size(20,20));
-  cv::threshold(*mat,*mat,128,255,0);
-  cv::Canny(*mat, *mat, minThreshold, maxThreshold); 
+void detectEdge(Mat * image){
+  cv::blur(*image,*image,cv::Size(21,21));
+  cv::threshold(*image,*image,128,255,0);
+  cv::Canny(*image, *image, minThreshold, maxThreshold); 
 }
 
 Curve * getCurve(Mat * image){
@@ -88,6 +88,7 @@ vector<Point>*  Curve::crossingPoints(){
         Point point;
 		point.x=x->at<double>(i,0);
 		point.y=y->at<double>(i,0);
+		//cout << point;
 		crossingPoints->push_back(point);
 	}
 	last=current;

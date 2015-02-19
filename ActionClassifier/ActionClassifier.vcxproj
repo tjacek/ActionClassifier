@@ -151,6 +151,7 @@
     <ClCompile Include="classifiers.cpp" />
     <ClCompile Include="css.cpp" />
     <ClCompile Include="Dataset.cpp" />
+    <ClCompile Include="fisherVector.cpp" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="LinearStdExtracor.cpp" />
     <ClCompile Include="main.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="classifiers.h" />
     <ClInclude Include="css.h" />
     <ClInclude Include="features.h" />
+    <ClInclude Include="fisherVector.h" />
     <ClInclude Include="io.h" />
     <ClInclude Include="pca.h" />
     <ClInclude Include="utils.h" />

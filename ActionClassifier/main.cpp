@@ -3,7 +3,7 @@
 #include "features.h"
 #include "classifiers.h"
 #include "pca.h"
-#include "css.h"
+#include "fisherVector.h"
 #include "utils.h"
 
 void addAllExtractors(Dataset * dataset){
@@ -20,7 +20,8 @@ Dataset * getDataset(string dirName){
 void testCSS(ImageList imageList){
 	Images images=readImages(imageList);
 	DepthImage dimage=images->at(0);
-    extractCSSFeatures(&dimage.image);
+	getFisherVector(&dimage.image,5);
+    //extractCSSFeatures(&dimage.image);
 	//showImages(images);
 }
 
