@@ -54,6 +54,9 @@
     <ClCompile Include="fisherVector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shapeContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ActionClassifier.h">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fisherVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shapeContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

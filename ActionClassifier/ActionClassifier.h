@@ -9,7 +9,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include<map>
+#include <map>
+#include <math.h>
 
 #include <windows.h>
 #include <tchar.h> 

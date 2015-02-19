@@ -20,11 +20,7 @@ void detectEdge(Mat * image){
 Curve * getCurve(Mat * image){
   vector<vector<cv::Point> > contours;
   vector<cv::Vec4i> hierarchy;
-  /*	 cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );
-	 cv::imshow( "Display window", *image );                  
-     cv::waitKey(0);*/
   cv::findContours(*image, contours, hierarchy,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-  //draw( *image, &contours, &hierarchy);
   vector<cv::Point> countur=contours.at(0);
   Curve * curve = new Curve(countur);
   return curve;
