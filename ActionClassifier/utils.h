@@ -10,6 +10,8 @@ typedef vector<float> StdVector;
 
 extern void applyTransform(Images images,ImageTransform fun);
 extern void morfologicalEdge(Mat * m);
+extern void saveImages(vector<Mat> images);
+extern vector<Mat> projection(Mat * orginal);
 extern void showImage(Mat * m,const char * name);
 extern float standardDeviation(Sample sample);
 extern bool biasedCoin();
