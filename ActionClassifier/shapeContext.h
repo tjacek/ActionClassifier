@@ -12,12 +12,14 @@ class OnlineHistogram{
   public:
 	int dimR;
 	int dimTheta;
-	int ** bins;
+	double ** bins;
 	double maxR;
     double maxTheta;
 
 	OnlineHistogram(int dimR,int dimTheta,double maxR=800);
 	void addToHistogram(double r_i,double theta_i);
+	void normalize();
+	void show();
  
   private:
     double rStep;
