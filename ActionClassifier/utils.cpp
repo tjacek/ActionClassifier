@@ -1,5 +1,25 @@
 #include "utils.h"
 
+void morfologicalEdge(Mat * m){
+  int morph_elem = 0;
+  int morph_size = 1;
+  int const max_elem = 2;
+  Mat element = getStructuringElement( morph_elem, cv::Size( 2*morph_size + 1, 2*morph_size+1 ), cv::Point( morph_size, morph_size ) );
+  //cv::blur(*m,*m,cv::Size(21,21));
+   cv::threshold(*m,*m,128,255,0);
+ // Mat  dst;
+  cv::morphologyEx( *m, *m, cv::MORPH_GRADIENT , element );
+  const char * window_name= "Morphology";
+  showImage(m,window_name);
+ 
+}
+
+void showImage(Mat * m,const char * name){
+  cv::namedWindow( name, CV_WINDOW_AUTOSIZE );
+  cv::imshow( name, *m);
+  cv::waitKey(0);
+}
+
 void applyTransform(Images images,ImageTransform fun){
   vector<DepthImage>::iterator it;
   int i=0;

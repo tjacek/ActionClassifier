@@ -1,7 +1,7 @@
 #include "shapeContext.h"
 
 OnlineHistogram * getShapeContext(int n,Mat * image){
-  detectEdge( image);
+  morfologicalEdge( image);
   Points points=samplePoints( n, image);
   int size=points.size();
   OnlineHistogram * histogram=new OnlineHistogram(10,8,10);

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ActionClassifier.h"
 #include <math.h>
 
@@ -7,6 +9,8 @@ typedef vector<float> Sample;
 typedef vector<float> StdVector;
 
 extern void applyTransform(Images images,ImageTransform fun);
+extern void morfologicalEdge(Mat * m);
+extern void showImage(Mat * m,const char * name);
 extern float standardDeviation(Sample sample);
 extern bool biasedCoin();
 
