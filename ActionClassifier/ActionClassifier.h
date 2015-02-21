@@ -42,14 +42,17 @@ class FeatureExtractor{
 class Dataset{
   public:
     vector<FeatureExtractor*> extractors;
+	Dataset();
     void addExample(DepthImage image);
 	void registerExtractor(FeatureExtractor* extractor);
 	int numberOfFeatures();
 	Mat * toMat();
+	void dimReduction(int k);
 	string toString();
 	string toArff(Labels labels);
   private:
-	vector<ImageDescriptor> examples;
+	//vector<double> *examples;
+	vector<vector<double>> * desc;
 	string getAttributes();
 	string getData(Labels labels);
 };
@@ -63,7 +66,7 @@ class Classifier{
 };
 
 extern Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors);
-extern ImageDescriptor getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors);
+extern vector<double> getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors);
 extern void addAllExtractors(Dataset * dataset);
 extern void showImages(vector<DepthImage>* images);
 extern vector<DepthImage> * readImages(ImageList images);

@@ -11,8 +11,8 @@ SVMClassifier::SVMClassifier(){
 }
  
 float SVMClassifier::predict(DepthImage image){
-  ImageDescriptor desc=getImageDescriptor(image, extractors);
-  return svm->predict(desc);
+  //ImageDescriptor desc=getImageDescriptor(image, extractors);
+  return 1.0;//svm->predict(desc);
 }
 
 void SVMClassifier::learn(Labels labels,Dataset* trainingData){

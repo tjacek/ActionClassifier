@@ -1,21 +1,22 @@
 #include "ActionClassifier.h"
 #include "io.h"
 #include "features.h"
+#include "pca.h"
 
 DepthImage::DepthImage(string imageName){
   this->name=imageName;
   this->image = cv::imread(imageName, CV_LOAD_IMAGE_GRAYSCALE);
 }
 
-ImageDescriptor getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors){
+vector<double> getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors){
   vector<FeatureExtractor*>::iterator it;
-  vector<float>* fullFeatures = new vector<float>();
+  vector<double>* fullFeatures = new vector<double>();
   for(it=extractors.begin(); it!=extractors.end(); ++it )
   {
 	FeatureVector featureVector = (*it)->getFeatures(image);
 	fullFeatures->insert(fullFeatures->end(), featureVector->begin(), featureVector->end());
   }
-  return cv::Mat(*fullFeatures);
+  return *fullFeatures;
 }
 
 Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors){
@@ -32,7 +33,7 @@ Dataset * buildDataset(ImageList imageList, AddExtractorsFunc addExtractors){
 }
 
  void Dataset::addExample(DepthImage image){
-   examples.push_back(getImageDescriptor(image,extractors));
+   desc->push_back(getImageDescriptor(image,extractors));
  }
 
 void Dataset::registerExtractor(FeatureExtractor* extractor){
@@ -50,17 +51,17 @@ int Dataset::numberOfFeatures(){
 }
 
 Mat* Dataset::toMat(){
-  int size=examples.size();
-  int dim=examples[0].rows;
-  Mat * mat2D=new Mat(size,dim,CV_32F);
-  vector<ImageDescriptor>::iterator it;
+//  int size=examples->size();
+  //int dim=examples->at(0).rows();
+  Mat * mat2D=new Mat(8,20,CV_32F);
+  /*vector<ImageDescriptor>::iterator it;
   int i=0;
-  for(it=examples.begin(); it!=examples.end(); ++it )
+  for(it=examples->begin(); it!=examples->end(); ++it )
   {   
 	  Mat mat1D=*it;
 	  mat2D->row(i)=mat1D.row(0);
 	  i++;
-  }
+  }*/
   return mat2D;
 }
 
@@ -81,6 +82,22 @@ string  matToString(Mat mat){
   return s;
 }
 
+Dataset::Dataset(){
+  desc=new  vector<vector<double>>;
+//  examples=new vector<ImageDescriptor>();
+}
+
+void Dataset::dimReduction(int k){
+  vector<vector<double>> * old=desc;
+  this->desc=new vector<vector<double>>();
+  MatrixXd pca_projc=pca(20,vectorsToMat(*old));
+  for(int i=0;i<old->size();i++){
+    vector<double> point=old->at(i);
+	vector<double> newPoint= applyProjection(point,pca_projc);
+	desc->push_back(newPoint);
+  }
+}
+
 string Dataset::toArff(Labels labels){
   string arff="@RELATION DepthMaps \n";
   arff+=getAttributes();
@@ -93,12 +110,12 @@ string Dataset::toArff(Labels labels){
 string Dataset::toString(){
   string str="";
   vector<ImageDescriptor>::iterator it;
-  for(it=examples.begin(); it!=examples.end(); ++it )
+  /*for(it=examples->begin(); it!=examples->end(); ++it )
   {
      ImageDescriptor features=*it;
      string buf = matToString(features);
 	 str+=buf + "\n";
-  }
+  }*/
   return str;
 }
 
@@ -121,7 +138,23 @@ string Dataset::getData(Labels labels){
   string str="";
   vector<ImageDescriptor>::iterator it;
   int i=0;
-  for(it=examples.begin(); it!=examples.end(); ++it )
+
+  for(int i=0;i<desc->size();i++){
+    vector<double> v=desc->at(i);
+	for(int j=0;i<v.size();i++){
+      double raw=v.at(i);
+      string tmp; 
+      sprintf((char*)tmp.c_str(), "%f", raw);
+      string str2 = tmp.c_str();
+	  if(i==v.size()-1){
+	    str+= str2 ;
+	  }else{
+       str+=str2+",";
+	  }
+	}
+    str+="  @@@@ ";
+  }
+  /*for(it=examples->begin(); it!=examples->end(); ++it )
   {
      ImageDescriptor features=*it;
 	 int category=(int) labels->at<float>(i,0);
@@ -129,7 +162,7 @@ string Dataset::getData(Labels labels){
      string buf = value+","+intToString(category) +"\n" ;
 	 str+=buf;
 	 i++;
-  }
+  }*/
   return str;
 }
 
