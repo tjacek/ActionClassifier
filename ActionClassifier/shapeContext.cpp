@@ -4,7 +4,7 @@ OnlineHistogram * getShapeContext(int n,Mat * image){
   morfologicalEdge( image);
   Points points=samplePoints( n, image);
   int size=points.size();
-  OnlineHistogram * histogram=new OnlineHistogram(10,8,10);
+  OnlineHistogram * histogram=new OnlineHistogram(log(1000),8,10);
   for(int i=0;i<size;i++){
     for(int j=i+1;j<size;j++){
       Point point1= points.at(i);
@@ -35,12 +35,19 @@ Points samplePoints(int n,Mat * image){
   return points;
 }
 
+double trueAcos(double x){
+  if(0<x){
+    return acos(x);
+  }
+  return M_PI + acos(x);
+}
+
 PolarVector getPolarVector(cv::Point p1,cv::Point p2){
   PolarVector polarVector= new Point();
   double x=p1.x - p2.x;
   double y=p1.y - p2.y;
   polarVector->x=sqrt(x*x + y*y);
-  polarVector->y= acos(x/polarVector->x);
+  polarVector->y= trueAcos(x/polarVector->x);
   return polarVector;
 }
 
@@ -61,7 +68,6 @@ OnlineHistogram::OnlineHistogram(int dimR,int dimTheta,double maxR){
 }
 
 void OnlineHistogram::addToHistogram(double r_i,double theta_i){
-  cout << rStep << "\n";
   for(int i=0;i<dimR;i++){
 	if(r_i < rStep * ((double)i) ){
       for(int j=0;j<dimTheta;j++){
@@ -95,4 +101,14 @@ void OnlineHistogram::show(){
 	}
 	cout << "\n";
   }
+}
+
+vector<double> OnlineHistogram::toVector(){
+  vector<double> vector;
+  for(int i=0;i<dimR;i++){
+	for(int j=0;j<dimTheta;j++){
+		vector.push_back(bins[i][j]); 
+	}
+  }
+  return vector;
 }

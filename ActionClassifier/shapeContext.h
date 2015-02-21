@@ -20,7 +20,8 @@ class OnlineHistogram{
 	void addToHistogram(double r_i,double theta_i);
 	void normalize();
 	void show();
- 
+    vector<double> toVector();
+
   private:
     double rStep;
 	double thetaStep;

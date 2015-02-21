@@ -20,9 +20,10 @@ Dataset * getDataset(string dirName){
 void testCSS(ImageList imageList){
   Images images=readImages(imageList);
   DepthImage dimage=images->at(0);
-  vector<Mat> im=projection(&dimage.image);
-  saveImages(im);
-  //getShapeContext(100,&dimage.image);
+  
+  //vector<Mat> im=projection(&dimage.image);
+  //saveImages(im);
+  cout << getShapeContext(100,&dimage.image)->toVector().at(0);
 	//showImages(images);
 }
 
