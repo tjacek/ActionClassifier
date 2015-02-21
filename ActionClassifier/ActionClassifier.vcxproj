@@ -157,6 +157,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pca.cpp" />
     <ClCompile Include="shapeContext.cpp" />
+    <ClCompile Include="ShapeContextExtractor.cpp" />
     <ClCompile Include="SVMClassifier.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

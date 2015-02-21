@@ -23,7 +23,7 @@ string PcaExtractor:: featureName(int i){
 }
 
 FeatureVector PcaExtractor::getFeatures(DepthImage image){
-  FeatureVector features=new vector<float>();
+  FeatureVector features=new vector<double>();
   /*MatrixXd dataPoints=imageToMatrix(&image.image);
   EigenVectors eigenVectors=pca(3,dataPoints);
   for(int i=0;i<eigenVectors.rows();i++){

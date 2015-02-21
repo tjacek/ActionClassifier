@@ -5,6 +5,7 @@
 extern void addCentroidExtractor(Dataset * dataset);
 extern void addLinearStdExtractor(Dataset * dataset);
 extern void addPcaExtractor(Dataset * dataset);
+extern void addShapeContextExtractor(Dataset * dataset);
 
 class CentroidExtractor:public FeatureExtractor{
   public:
@@ -21,6 +22,13 @@ class LinearStdExtractor:public FeatureExtractor{
 };
 
 class PcaExtractor:public FeatureExtractor{
+  public:
+    int numberOfFeatures();
+    string featureName(int i);
+    FeatureVector getFeatures(DepthImage image);
+};
+
+class ShapeContextExtractor:public FeatureExtractor{
   public:
     int numberOfFeatures();
     string featureName(int i);

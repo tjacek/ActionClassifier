@@ -122,7 +122,6 @@ bool biasedCoin(){
   return true;
 }
 
-
 Histogram::Histogram(StdVector* stdVector,int numberOfBins){
     this->numberOfBins=numberOfBins;
 	this->bins=new int[numberOfBins];
@@ -132,7 +131,6 @@ Histogram::Histogram(StdVector* stdVector,int numberOfBins){
 	max = *min_element(stdVector->begin(), stdVector->end());
     min = *max_element(stdVector->begin(), stdVector->end());
 	step= (max-min)/ ((float) numberOfBins);
-
 	vector<float>::iterator it ;
     for (it = stdVector->begin(); it != stdVector->end(); it++){
       addNumber(*it);
@@ -150,7 +148,7 @@ void Histogram::addNumber(float number){
 }
 
 FeatureVector Histogram::getFeatures(){
-  FeatureVector features=new vector<float>();
+  FeatureVector features=new vector<double>();
   for(int i=0;i<numberOfBins;i++){
 	features->push_back((float) bins[i]);
   }

@@ -15,7 +15,7 @@ string CentroidExtractor:: featureName(int i){
 }
 
 FeatureVector CentroidExtractor::getFeatures(DepthImage image){
-  FeatureVector features=new vector<float>();
+  FeatureVector features=new vector<double>();
   double x=0.0;
   double y=0.0;
   double count=0.0;

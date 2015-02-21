@@ -20,14 +20,17 @@ OnlineHistogram * getShapeContext(int n,Mat * image){
 }
 
 Points samplePoints(int n,Mat * image){
+  vector<cv::Point> points;
   vector<vector<cv::Point> > contours;
   vector<cv::Vec4i> hierarchy;
   cv::findContours(*image, contours, hierarchy,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+  if(contours.size()==0){
+    return points;
+  }
   vector<cv::Point> countur=contours.at(0);
   if(countur.size()<=n){
 	  return countur;
   }
-  vector<cv::Point> points;
   for(int i=0;i<n;i++){
     int rn=rand() % countur.size();
 	points.push_back(countur.at(rn));
@@ -103,12 +106,12 @@ void OnlineHistogram::show(){
   }
 }
 
-vector<double> OnlineHistogram::toVector(){
-  vector<double> vector;
+FeatureVector OnlineHistogram::toVector(){
+  FeatureVector vect= new vector<double>();
   for(int i=0;i<dimR;i++){
 	for(int j=0;j<dimTheta;j++){
-		vector.push_back(bins[i][j]); 
+		vect->push_back(bins[i][j]); 
 	}
   }
-  return vector;
+  return vect;
 }

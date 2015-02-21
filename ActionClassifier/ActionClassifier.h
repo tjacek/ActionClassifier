@@ -20,7 +20,7 @@
 using namespace std;
 using cv::Mat;
 
-typedef vector<float>* FeatureVector;
+typedef vector<double>* FeatureVector;
 typedef cv::Mat ImageDescriptor;
 typedef vector<string>* ImageList;
 typedef cv::Mat * Labels;
