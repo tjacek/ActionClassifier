@@ -1,9 +1,10 @@
 #include "pca.h"
 
 void test_pca(){
-  MatrixXd dataPoints = vectorsToMat(generateData(200));
-  cout << dataPoints;
-  cout << pca(dataPoints);
+  MatrixXd dataPoints = vectorsToMat(generateData(100));
+  //cout <<dataPoints;
+  MatrixXd projection=pca(2,dataPoints);
+  cout << projection;
 }
 
 void addPcaExtractor(Dataset * dataset){
@@ -22,13 +23,13 @@ string PcaExtractor:: featureName(int i){
 
 FeatureVector PcaExtractor::getFeatures(DepthImage image){
   FeatureVector features=new vector<float>();
-  MatrixXd dataPoints=imageToMatrix(&image.image);
-  EigenVectors eigenVectors=pca( dataPoints);
+  /*MatrixXd dataPoints=imageToMatrix(&image.image);
+  EigenVectors eigenVectors=pca(3,dataPoints);
   for(int i=0;i<eigenVectors.rows();i++){
 	for(int j=0;j<eigenVectors.cols();j++){
 		features->push_back(eigenVectors(i,j));
 	}
-  }
+  }*/
   return features;
 }
 
@@ -62,29 +63,28 @@ MatrixXd vectorsToMat(vector<vector<double>>  vectors){
 		 matrix(i,j) =vector.at(j);
     } 
   }  
-  return matrix;
+  return matrix.transpose();
 }
 
-EigenVectors pca(MatrixXd dataPoints){
-  int dim = dataPoints.cols(); 
-  int size = dataPoints.rows();
+EigenVectors pca(int newDim,MatrixXd dataPoints){
+  int dim = dataPoints.rows(); 
+  int size = dataPoints.cols();
   
   cout << dim << " " ;
-//  cout << size << " ";
+  cout << size << "\n";
   double mean; VectorXd meanVector;
   for (int i = 0; i < dim; i++){
-	   mean = (dataPoints.col(i).sum())/  ((double)size);		 
+	   mean = (dataPoints.row(i).sum())/  ((double)size);		 
 	   meanVector  = VectorXd::Constant(size,mean); 
-	   dataPoints.col(i) -= meanVector;
+	   dataPoints.row(i) -= meanVector;
 	  // std::cout << meanVector.transpose() << "\n" << DataPoints.col(i).transpose() << "\n\n";
   }
   //  cout << dataPoints;
-  
   MatrixXd Covariance = MatrixXd::Zero(dim, dim);
-  Covariance = (1 / (double) size)  * dataPoints.transpose()* dataPoints;
+  Covariance = (1 / (double) size)  * dataPoints* dataPoints.transpose();
   EigenSolver<MatrixXd> m_solve(Covariance);
  
- // cout << Covariance.cols();
+  //cout << Covariance;
 
   MatrixXd eigenVectors = MatrixXd::Zero(dim,dim); 
   eigenVectors = m_solve.eigenvectors().real();
@@ -98,22 +98,33 @@ EigenVectors pca(MatrixXd dataPoints){
 
   sort(pi.begin(), pi.end());
   
-  int index=pi.at(0).second;
-  return eigenVectors.col(index);
+  //cout << eigenVectors;//<< "eigen" << pi.at(0).first <<" ";
+  //cout << pi.at(1).first << " "<< pi.at(2).first;
+  //int index=pi.at(0).second;
+  return getProjectionMatrix(newDim, eigenVectors, pi);
+}
+
+MatrixXd getProjectionMatrix(int k,EigenVectors eigenVectors,PermutationIndices pi){
+  int size=pi.size();
+  MatrixXd projection=MatrixXd::Zero(k,pi.size());
+  for(int i=0;i<k;i++){
+	  int index=pi.at(size-i-1).second;
+	  projection.row(i) =eigenVectors.col(i).transpose();
+  }
+  return projection;
 }
 
 vector<vector<double>> generateData(int n){
   vector<vector<double>> vectors;
      std::default_random_engine re;
   std::uniform_real_distribution<double> unif(0,100.0);
-  std::uniform_real_distribution<double> noise(0,1.0);
+  std::uniform_real_distribution<double> noise(0,0.1);
   for(int i=0;i<n;i++){
 	 vector<double> vector;
 	 double x=unif(re);
 	 double y=unif(re);
-	 double z=0.0;//noise(re);
-	 double t=0.0;//noise(re);
-	 //cout << x << " " << y << " " << z << " " << t <<"\n";
+	 double z=noise(re);
+	 double t=noise(re);
 	 vector.push_back(x);
      vector.push_back(y);
      vector.push_back(z);
