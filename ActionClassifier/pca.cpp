@@ -1,10 +1,11 @@
 #include "pca.h"
 
 void test_pca(){
-  MatrixXd dataPoints = vectorsToMat(generateData(100));
+  vector<vector<double>> points=generateData(100);
+  MatrixXd dataPoints = vectorsToMat(points);
   //cout <<dataPoints;
   MatrixXd projection=pca(2,dataPoints);
-  cout << projection;
+  cout <<  applyProjection(points.at(0),projection).size();
 }
 
 void addPcaExtractor(Dataset * dataset){
@@ -97,10 +98,7 @@ EigenVectors pca(int newDim,MatrixXd dataPoints){
 	  pi.push_back(std::make_pair(eigenvalues(i), i));
 
   sort(pi.begin(), pi.end());
-  
-  //cout << eigenVectors;//<< "eigen" << pi.at(0).first <<" ";
-  //cout << pi.at(1).first << " "<< pi.at(2).first;
-  //int index=pi.at(0).second;
+
   return getProjectionMatrix(newDim, eigenVectors, pi);
 }
 
@@ -112,6 +110,19 @@ MatrixXd getProjectionMatrix(int k,EigenVectors eigenVectors,PermutationIndices 
 	  projection.row(i) =eigenVectors.col(i).transpose();
   }
   return projection;
+}
+
+vector<double> applyProjection(vector<double> point, MatrixXd projection){
+  vector<double> newPoint;
+  VectorXd v=VectorXd::Zero(point.size());
+  for(int i=0;i<point.size();i++){
+	v[i]=point.at(i);
+  }
+  VectorXd v2=projection * v;
+  for(int i=0;i<v2.size();i++){
+	newPoint.push_back(v2[i]);
+  }
+  return newPoint;
 }
 
 vector<vector<double>> generateData(int n){
