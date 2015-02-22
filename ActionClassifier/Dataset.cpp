@@ -90,8 +90,10 @@ Dataset::Dataset(){
 void Dataset::dimReduction(int k){
   vector<vector<double>> * old=desc;
   this->desc=new vector<vector<double>>();
+  int size=old->size();
   MatrixXd pca_projc=pca(20,vectorsToMat(*old));
-  for(int i=0;i<old->size();i++){
+  cout << "\n & "<< size <<"\n"; 
+  for(int i=0;i<size;i++){
     vector<double> point=old->at(i);
 	vector<double> newPoint= applyProjection(point,pca_projc);
 	desc->push_back(newPoint);
@@ -137,22 +139,24 @@ string  Dataset::getAttributes(){
 string Dataset::getData(Labels labels){
   string str="";
   vector<ImageDescriptor>::iterator it;
-  int i=0;
-
+  cout << desc->size() << " \n";
   for(int i=0;i<desc->size();i++){
+    string line="";
     vector<double> v=desc->at(i);
-	for(int j=0;i<v.size();i++){
-      double raw=v.at(i);
+	for(int j=0;j<v.size();j++){
+      double raw=v.at(j);
       string tmp; 
       sprintf((char*)tmp.c_str(), "%f", raw);
       string str2 = tmp.c_str();
 	  if(i==v.size()-1){
-	    str+= str2 ;
+	    line+= str2 ;
 	  }else{
-       str+=str2+",";
+       line+=str2+",";
 	  }
 	}
-    str+="  @@@@ ";
+    line+="@\n";
+	cout << "\n \n\n" << i <<" " << i << "&&&\n \n";
+	str+=line;
   }
   /*for(it=examples->begin(); it!=examples->end(); ++it )
   {

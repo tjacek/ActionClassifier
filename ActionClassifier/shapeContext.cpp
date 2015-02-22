@@ -24,6 +24,7 @@ Points samplePoints(int n,Mat * image){
   vector<vector<cv::Point> > contours;
   vector<cv::Vec4i> hierarchy;
   cv::findContours(*image, contours, hierarchy,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
   if(contours.size()==0){
     return points;
   }

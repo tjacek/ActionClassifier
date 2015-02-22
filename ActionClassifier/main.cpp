@@ -32,14 +32,16 @@ void testCSS(ImageList imageList){
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
- Categories cat=readCategories(labelsFile);
+/* Categories cat=readCategories(labelsFile);
  ImageList imageList = getImageList( dirName);
  Labels labels= getLabels(imageList, cat );
  Dataset * dataset=getDataset( dirName);
  dataset->dimReduction(20);
- cout <<dataset->toArff(labels);
+ cout <<dataset->toArff(labels);*/
  //Categories categories=readCategories(labels);
- //ImageList imageList=getImageList(dirName);
+/* ImageList imageList=getImageList(dirName);
+ Images images=readImages(imageList);
+ showProjections(images);*/
  //testCSS( imageList);
  system("pause");
 }
