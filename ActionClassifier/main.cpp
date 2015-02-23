@@ -28,20 +28,31 @@ void testCSS(ImageList imageList){
 	//showImages(images);
 
 }
-
-int main(){
+ 
+void createArffDataset(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
-/* Categories cat=readCategories(labelsFile);
+ Categories cat=readCategories(labelsFile);
  ImageList imageList = getImageList( dirName);
  Labels labels= getLabels(imageList, cat );
  Dataset * dataset=getDataset( dirName);
  dataset->dimReduction(20);
- cout <<dataset->toArff(labels);*/
+ ofstream myfile;
+ myfile.open ("shapeContext.arff");
+ myfile << dataset->toArff(labels);
+ myfile.close();
+// cout <<dataset->toArff(labels);
+}
+
+int main(){
+ string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
+ string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
+ createArffDataset();
+/* 
  //Categories categories=readCategories(labels);
-/* ImageList imageList=getImageList(dirName);
+ /*ImageList imageList=getImageList(dirName);
  Images images=readImages(imageList);
- showProjections(images);*/
+ showCounturs(images);*/
  //testCSS( imageList);
  system("pause");
 }

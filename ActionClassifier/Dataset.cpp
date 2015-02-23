@@ -148,14 +148,10 @@ string Dataset::getData(Labels labels){
       string tmp; 
       sprintf((char*)tmp.c_str(), "%f", raw);
       string str2 = tmp.c_str();
-	  if(i==v.size()-1){
-	    line+= str2 ;
-	  }else{
-       line+=str2+",";
-	  }
+      line+=str2+",";
 	}
-    line+="@\n";
-	cout << "\n \n\n" << i <<" " << i << "&&&\n \n";
+    int category=(int) labels->at<float>(i,0);
+    line+=intToString(category)+"\n";
 	str+=line;
   }
   /*for(it=examples->begin(); it!=examples->end(); ++it )

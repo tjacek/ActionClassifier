@@ -52,9 +52,9 @@ vector<Mat> projection(Mat * img){
   morfologicalEdge(&y_0);
   morfologicalEdge(&z_0);
 
-  connectedCommponents(&x_0);
+  /*connectedCommponents(&x_0);
   connectedCommponents(&y_0);
-  connectedCommponents(&z_0);
+  connectedCommponents(&z_0);*/
 
   //showImage(&z_0,"x");
   results.push_back(x_0);
@@ -81,10 +81,10 @@ void showCounturs(Images images){
 		Mat mat= xyz.at(j);
 		vector<vector<cv::Point> > contours;
         vector<cv::Vec4i> hierarchy;
-        cv::findContours(mat, contours, hierarchy,CV_RETR_LIST , CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+        cv::findContours(mat, contours, hierarchy,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 		cv::Scalar color = cv::Scalar( rand() % 255, rand() % 255, rand() % 255 );
 		Mat drawing = Mat::zeros( mat.size(), CV_8UC3 );
-		int largestIndex=0;
+		/*int largestIndex=0;
 		int countSize=0;
 		for( int i = 0; i< contours.size(); i++ ) {
 			int n=contours.at(i).size();
@@ -92,8 +92,8 @@ void showCounturs(Images images){
 			  largestIndex=i;
 			  countSize=n;
 			}
-		}
-		drawContours( drawing, contours, largestIndex, color, 2, 8, hierarchy, 0, cv::Point(0,0) );
+		}*/
+		drawContours( drawing, contours, -1, color, 2, 8, hierarchy, 0, cv::Point(0,0) );
 		showImage(&drawing,"contours");
     }
   }
@@ -109,7 +109,7 @@ void saveImages(vector<Mat> images){
 void morfologicalEdge(Mat * m){
   cv::blur(*m,*m,cv::Size(11,11));
   cv::threshold(*m,*m,128,255,0);
-  //connectedCommponents(m);
+  connectedCommponents(m);
   int morph_elem = 0;
   int morph_size = 1;
   int const max_elem = 2;
