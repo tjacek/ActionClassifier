@@ -8,6 +8,17 @@ DepthImage::DepthImage(string imageName){
   this->image = cv::imread(imageName, CV_LOAD_IMAGE_GRAYSCALE);
 }
 
+
+vector<string> getClassNames(){
+  vector<string> classNames;
+  classNames.push_back("A");
+  classNames.push_back("B");
+  classNames.push_back("C");
+  classNames.push_back("D");
+  classNames.push_back("E");
+  return classNames;
+}
+
 vector<double> getImageDescriptor(DepthImage image,vector<FeatureExtractor*> extractors){
   vector<FeatureExtractor*>::iterator it;
   vector<double>* fullFeatures = new vector<double>();
@@ -103,7 +114,6 @@ void Dataset::dimReduction(int k){
 string Dataset::toArff(Labels labels){
   string arff="@RELATION DepthMaps \n";
   arff+=getAttributes();
-  arff+="@attribute class numeric";
   arff+="\n @DATA \n";
   arff+=getData(labels);
   return arff;
@@ -133,13 +143,19 @@ string  Dataset::getAttributes(){
 	  str+="@ATTRIBUTE " + feature +" numeric\n";
 	}
   }
+  vector<string> classes= getClassNames();
+  str+="@ATTRIBUTE class { ";
+  for(int i=0;i<classes.size();i++){
+	  str+=classes.at(i)+" ";
+  }
+  str+=" } \n";
   return str;
 }
 
 string Dataset::getData(Labels labels){
   string str="";
   vector<ImageDescriptor>::iterator it;
-  cout << desc->size() << " \n";
+  vector<string> classes= getClassNames();
   for(int i=0;i<desc->size();i++){
     string line="";
     vector<double> v=desc->at(i);
@@ -151,18 +167,9 @@ string Dataset::getData(Labels labels){
       line+=str2+",";
 	}
     int category=(int) labels->at<float>(i,0);
-    line+=intToString(category)+"\n";
+    line+=classes.at(category)+"\n";
 	str+=line;
   }
-  /*for(it=examples->begin(); it!=examples->end(); ++it )
-  {
-     ImageDescriptor features=*it;
-	 int category=(int) labels->at<float>(i,0);
-	 string value= matToString(features);
-     string buf = value+","+intToString(category) +"\n" ;
-	 str+=buf;
-	 i++;
-  }*/
   return str;
 }
 
