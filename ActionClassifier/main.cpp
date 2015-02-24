@@ -19,7 +19,8 @@ Dataset * getDataset(string dirName){
 
 void testCSS(ImageList imageList){
 
-  //Images images=readImages(imageList);
+  Images images=readImages(imageList);
+  showHistograms(images);
   //DepthImage dimage=images->at(0);
   //test_pca();
   //vector<Mat> im=projection(&dimage.image);
@@ -38,7 +39,7 @@ void createArffDataset(){
  Dataset * dataset=getDataset( dirName);
  dataset->dimReduction(20);
  ofstream myfile;
- myfile.open ("shapeContext.arff");
+ myfile.open ("shapeContext2.arff");
  myfile << dataset->toArff(labels);
  myfile.close();
 // cout <<dataset->toArff(labels);
@@ -47,12 +48,14 @@ void createArffDataset(){
 int main(){
  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
+ ImageList imageList = getImageList( dirName);
+
+// testCSS(imageList);
  createArffDataset();
 /* 
  //Categories categories=readCategories(labels);
  /*ImageList imageList=getImageList(dirName);
  Images images=readImages(imageList);
  showCounturs(images);*/
- //testCSS( imageList);
  system("pause");
 }

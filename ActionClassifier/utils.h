@@ -12,6 +12,7 @@ extern void applyTransform(Images images,ImageTransform fun);
 extern void morfologicalEdge(Mat * m);
 extern void showProjections(Images images);
 extern void showCounturs(Images images);
+extern void showHistograms(Images images);
 extern void saveImages(vector<Mat> images);
 extern vector<Mat> projection(Mat * orginal);
 extern void showImage(Mat * m,const char * name);

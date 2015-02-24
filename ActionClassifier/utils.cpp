@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "shapeContext.h"
 
 void scaleImageX(int x,int y,int scaleFactor,Mat * mat){
  for(int i=0;i<scaleFactor+1;i++){
@@ -84,17 +85,31 @@ void showCounturs(Images images){
         cv::findContours(mat, contours, hierarchy,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 		cv::Scalar color = cv::Scalar( rand() % 255, rand() % 255, rand() % 255 );
 		Mat drawing = Mat::zeros( mat.size(), CV_8UC3 );
-		/*int largestIndex=0;
-		int countSize=0;
-		for( int i = 0; i< contours.size(); i++ ) {
-			int n=contours.at(i).size();
-			if(n<countSize){
-			  largestIndex=i;
-			  countSize=n;
-			}
-		}*/
 		drawContours( drawing, contours, -1, color, 2, 8, hierarchy, 0, cv::Point(0,0) );
 		showImage(&drawing,"contours");
+    }
+  }
+}
+
+void showHistograms(Images images){
+  for(int i=0;i<images->size(); i++){
+	  vector<Mat> xyz= projection(&images->at(i).image);
+	for(int j=0;j<xyz.size(); j++){
+		Mat mat= xyz.at(j);
+				
+		//showImage(&mat,"contours");
+		OnlineHistogram * hist= getShapeContext(100, &mat);
+		hist->show();
+		//showImage(&mat,"contours");
+		/*vector<vector<cv::Point> > contours;
+        vector<cv::Vec4i> hierarchy;
+        cv::findContours(mat, contours, hierarchy,CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+		cv::Scalar color = cv::Scalar( rand() % 255, rand() % 255, rand() % 255 );
+		Mat drawing = Mat::zeros( mat.size(), CV_8UC3 );
+		drawContours( drawing, contours, -1, color, 2, 8, hierarchy, 0, cv::Point(0,0) );*/
+		cout << "\n############## "<< i <"###################\n";
+				hist->show();
+
     }
   }
 }

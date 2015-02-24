@@ -16,14 +16,15 @@ string ShapeContextExtractor:: featureName(int i){
 }
 
 FeatureVector ShapeContextExtractor::getFeatures(DepthImage image){
-	OnlineHistogram * hist= getShapeContext(200,&image.image);
-  FeatureVector newVect=hist->toVector();
- /* vector<Mat> projImages= projection(&image.image);
+/*	OnlineHistogram * hist= getShapeContext(200,&image.image);*/
+  FeatureVector fullVect= new vector<double>();
+  vector<Mat> projImages= projection(&image.image);
   for(int i=0;i<projImages.size();i++){
     Mat m=projImages.at(i);
 	OnlineHistogram * hist= getShapeContext(200,&m);
 	FeatureVector newVect=hist->toVector();
-	//features->insert(features->end(), newVect->begin(), newVect->end());
-  }*/
-  return newVect;
+	fullVect->insert(fullVect->end(), newVect->begin(), newVect->end());
+  }
+  cout << "@& "<< fullVect->size();
+  return fullVect;
 }
