@@ -42,9 +42,6 @@
     <ClCompile Include="LinearStdExtracor.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
-    <ClCompile Include="pca.cpp">
-      <Filter>Source Files\Features</Filter>
-    </ClCompile>
     <ClCompile Include="SVMClassifier.cpp">
       <Filter>Source Files\Classifiers</Filter>
     </ClCompile>
@@ -59,6 +56,15 @@
     </ClCompile>
     <ClCompile Include="ShapeContextExtractor.cpp">
       <Filter>Source Files\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="PcaExtractor.cpp">
+      <Filter>Source Files\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="pca.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloud.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="shapeContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pointCloud.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

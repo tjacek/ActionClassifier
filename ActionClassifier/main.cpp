@@ -5,6 +5,7 @@
 #include "pca.h"
 #include "shapeContext.h"
 #include "utils.h"
+#include "pointCloud.h"
 
 void addAllExtractors(Dataset * dataset){
   addShapeContextExtractor(dataset);
@@ -20,8 +21,10 @@ Dataset * getDataset(string dirName){
 void testCSS(ImageList imageList){
 
   Images images=readImages(imageList);
-  showHistograms(images);
-  //DepthImage dimage=images->at(0);
+  //showHistograms(images);
+  DepthImage dimage=images->at(0);
+  PointCloud pointCloud(dimage.image);
+  pointCloud.normalize();
   //test_pca();
   //vector<Mat> im=projection(&dimage.image);
   //saveImages(im);
@@ -50,8 +53,8 @@ int main(){
  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
  ImageList imageList = getImageList( dirName);
 
-// testCSS(imageList);
- createArffDataset();
+ testCSS(imageList);
+// createArffDataset();
 /* 
  //Categories categories=readCategories(labels);
  /*ImageList imageList=getImageList(dirName);

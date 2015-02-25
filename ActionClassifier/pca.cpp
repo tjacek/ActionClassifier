@@ -8,51 +8,7 @@ void test_pca(){
   cout <<  applyProjection(points.at(0),projection).size();
 }
 
-void addPcaExtractor(Dataset * dataset){
-  PcaExtractor* extractor=new PcaExtractor();
-  dataset->registerExtractor(extractor);
-}
 
-int PcaExtractor::numberOfFeatures(){
-  return 9;
-}
-
-string PcaExtractor:: featureName(int i){
-  string str="pca_" + intToString(i);
-  return str;
-}
-
-FeatureVector PcaExtractor::getFeatures(DepthImage image){
-  FeatureVector features=new vector<double>();
-  /*MatrixXd dataPoints=imageToMatrix(&image.image);
-  EigenVectors eigenVectors=pca(3,dataPoints);
-  for(int i=0;i<eigenVectors.rows();i++){
-	for(int j=0;j<eigenVectors.cols();j++){
-		features->push_back(eigenVectors(i,j));
-	}
-  }*/
-  return features;
-}
-
-MatrixXd imageToMatrix(Mat* image){
-	int size=(image->cols/100 +1) * (image->rows/100 + 1);
-	//cout << "\n size" << size;
-	MatrixXd data=MatrixXd::Zero(3, size);
-	int k=0;
-	for(int i=0;i<image->rows;i++){
-	const uchar* row_i = image->ptr<uchar>(i);
-	  for(int j = 0; j < image->cols; j++){
-		  if( (i % 100)==0 && (j % 100)==0){
-		    double x=i;
-		    double y=j;
-		    double z=row_i[j];
-		    data.col(k) << x, y, z;
-		    k++;
-		  }
-	  }
-    }
-	return data;
-}
 
 MatrixXd vectorsToMat(vector<vector<double>>  vectors){
   int height=vectors.size();
@@ -67,18 +23,18 @@ MatrixXd vectorsToMat(vector<vector<double>>  vectors){
   return matrix.transpose();
 }
 
+
+
 EigenVectors pca(int newDim,MatrixXd dataPoints){
   int dim = dataPoints.rows(); 
   int size = dataPoints.cols();
   
-  cout << dim << " " ;
-  cout << size << "\n";
   double mean; VectorXd meanVector;
+ 
   for (int i = 0; i < dim; i++){
 	   mean = (dataPoints.row(i).sum())/  ((double)size);		 
 	   meanVector  = VectorXd::Constant(size,mean); 
 	   dataPoints.row(i) -= meanVector;
-	  // std::cout << meanVector.transpose() << "\n" << DataPoints.col(i).transpose() << "\n\n";
   }
   //  cout << dataPoints;
   MatrixXd Covariance = MatrixXd::Zero(dim, dim);
@@ -107,6 +63,7 @@ MatrixXd getProjectionMatrix(int k,EigenVectors eigenVectors,PermutationIndices 
   MatrixXd projection=MatrixXd::Zero(k,pi.size());
   for(int i=0;i<k;i++){
 	  int index=pi.at(size-i-1).second;
+	  eigenVectors.col(i).normalize();
 	  projection.row(i) =eigenVectors.col(i).transpose();
   }
   return projection;

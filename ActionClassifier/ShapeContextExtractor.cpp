@@ -16,7 +16,6 @@ string ShapeContextExtractor:: featureName(int i){
 }
 
 FeatureVector ShapeContextExtractor::getFeatures(DepthImage image){
-/*	OnlineHistogram * hist= getShapeContext(200,&image.image);*/
   FeatureVector fullVect= new vector<double>();
   vector<Mat> projImages= projection(&image.image);
   for(int i=0;i<projImages.size();i++){
@@ -25,6 +24,5 @@ FeatureVector ShapeContextExtractor::getFeatures(DepthImage image){
 	FeatureVector newVect=hist->toVector();
 	fullVect->insert(fullVect->end(), newVect->begin(), newVect->end());
   }
-  cout << "@& "<< fullVect->size();
   return fullVect;
 }

@@ -156,6 +156,8 @@
     <ClCompile Include="LinearStdExtracor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pca.cpp" />
+    <ClCompile Include="PcaExtractor.cpp" />
+    <ClCompile Include="PointCloud.cpp" />
     <ClCompile Include="shapeContext.cpp" />
     <ClCompile Include="ShapeContextExtractor.cpp" />
     <ClCompile Include="SVMClassifier.cpp" />
@@ -169,6 +171,7 @@
     <ClInclude Include="fisherVector.h" />
     <ClInclude Include="io.h" />
     <ClInclude Include="pca.h" />
+    <ClInclude Include="pointCloud.h" />
     <ClInclude Include="shapeContext.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
