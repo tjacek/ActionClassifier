@@ -1,4 +1,6 @@
 #include "ActionClassifier.h"
+#include "utils.h"
+#include "pca.h"
 
 using cv::Vec;
 
@@ -11,7 +13,12 @@ class PointCloud{
 
 	PointCloud(Mat mat);
 	void normalize();
+	Point3D getCentroid();
+	Point3D getStds();
+	pair<Point3D, Point3D> getPrincipalComponents();
 
-  private:
+private:
     pair<Point3D, Point3D> computeExtremes();
+    MatrixXd imageToMatrix();
 };
+

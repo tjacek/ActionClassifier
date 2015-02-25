@@ -10,6 +10,45 @@ PointCloud::PointCloud(Mat mat){
   }
 }
 
+Point3D PointCloud::getCentroid(){
+  Point3D centroid(0,0,0);
+  double size=(double) points.size();
+  for(int i=0;i<points.size();i++){
+    Point3D current=points.at(i);
+	centroid+=current;
+  }
+  centroid/=size;
+  return centroid;
+}
+
+pair<Point3D, Point3D> PointCloud::getPrincipalComponents(){
+  pair<Point3D, Point3D> pair;
+  MatrixXd x=imageToMatrix();
+  MatrixXd eigen=pca(2,x);
+  for(int j=0;j<3;j++){
+	pair.first.val[j]=eigen(0,j);
+	pair.first.val[j]=eigen(0,j);
+  }
+  return pair;
+}
+
+Point3D PointCloud::getStds(){
+  Point3D stds(0,0,0);
+  Sample x;
+  Sample y;
+  Sample z;
+  for(int i=0;i<points.size();i++){
+    Point3D current=points.at(i);
+	x.push_back(current.val[0]);
+	y.push_back(current.val[1]);
+	z.push_back(current.val[2]);
+  }
+  stds.val[0]=standardDeviation(x);
+  stds.val[1]=standardDeviation(y);
+  stds.val[2]=standardDeviation(z);
+  return stds;
+}
+
 void PointCloud::normalize(){
   pair<Point3D, Point3D> extremes=computeExtremes();
   Point3D min=extremes.first;
@@ -29,24 +68,33 @@ void PointCloud::normalize(){
 
 pair<Point3D, Point3D> PointCloud::computeExtremes(){
   pair<Point3D, Point3D> extremes;
-  Point3D min;
-  Point3D max;
-  min.zeros();
-  max.zeros();
+  Point3D minV(0,0,0);
+  Point3D maxV(0,0,0);
   for(int i=0;i<points.size();i++){
     Point3D current=points.at(i);
 	for(int j=0;j<3;j++){
-	  if(current.val[j]< min.val[j]){
-		min.val[j]=current.val[j];
+	  if(current.val[j]< minV.val[j]){
+		minV.val[j]=current.val[j];
 	  }
 	}
 	for(int j=0;j<3;j++){
-	  if(current.val[j]> max.val[j]){
-		max.val[j]=current.val[j];
+	  if(current.val[j]> maxV.val[j]){
+		maxV.val[j]=current.val[j];
 	  }
 	}
   }
-  extremes.first=min;
-  extremes.second=min;
+  extremes.first =minV;
+  extremes.second=minV;
   return extremes;
+}
+
+MatrixXd PointCloud::imageToMatrix(){
+  MatrixXd data=MatrixXd::Zero(3, points.size());
+  for(int i=0;i<points.size();i++){	
+    Point3D current=points.at(i);
+	for(int j=0;j<3;j++){	 
+	  data(j,i)=current.val[j];
+	}
+  }
+  return data;
 }

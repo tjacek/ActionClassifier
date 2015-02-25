@@ -151,9 +151,9 @@ void applyTransform(Images images,ImageTransform fun){
   }
 }
 
-float standardDeviation(Sample data){
+double standardDeviation(Sample data){
   double avg=0.0;
-  vector<float>::iterator it ;
+  vector<double>::iterator it ;
   double n= (data.size()-1);
   for (it = data.begin(); it != data.end(); it++){
       float x= *it;
@@ -167,7 +167,7 @@ float standardDeviation(Sample data){
 	 error=(error*error)/n;
 	 sd+=error;
   }
-  return sqrt((float) sd);
+  return sqrt( sd);
 }
 
 bool biasedCoin(){

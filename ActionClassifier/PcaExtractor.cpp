@@ -5,26 +5,6 @@ void addPcaExtractor(Dataset * dataset){
   dataset->registerExtractor(extractor);
 }
 
-MatrixXd imageToMatrix(Mat* image){
-	int size=(image->cols/100 +1) * (image->rows/100 + 1);
-	//cout << "\n size" << size;
-	MatrixXd data=MatrixXd::Zero(3, size);
-	int k=0;
-	for(int i=0;i<image->rows;i++){
-	const uchar* row_i = image->ptr<uchar>(i);
-	  for(int j = 0; j < image->cols; j++){
-		  if( (i % 100)==0 && (j % 100)==0){
-		    double x=i;
-		    double y=j;
-		    double z=row_i[j];
-		    data.col(k) << x, y, z;
-		    k++;
-		  }
-	  }
-    }
-	return data;
-}
-
 int PcaExtractor::numberOfFeatures(){
   return 9;
 }

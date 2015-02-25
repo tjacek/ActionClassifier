@@ -25,6 +25,9 @@ void testCSS(ImageList imageList){
   DepthImage dimage=images->at(0);
   PointCloud pointCloud(dimage.image);
   pointCloud.normalize();
+  pointCloud.getCentroid();
+  pointCloud.getStds();
+  pointCloud.getPrincipalComponents();
   //test_pca();
   //vector<Mat> im=projection(&dimage.image);
   //saveImages(im);

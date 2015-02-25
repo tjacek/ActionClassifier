@@ -8,8 +8,6 @@ void test_pca(){
   cout <<  applyProjection(points.at(0),projection).size();
 }
 
-
-
 MatrixXd vectorsToMat(vector<vector<double>>  vectors){
   int height=vectors.size();
   int width=vectors.at(0).size();
@@ -22,8 +20,6 @@ MatrixXd vectorsToMat(vector<vector<double>>  vectors){
   }  
   return matrix.transpose();
 }
-
-
 
 EigenVectors pca(int newDim,MatrixXd dataPoints){
   int dim = dataPoints.rows(); 

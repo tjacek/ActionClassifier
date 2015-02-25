@@ -5,7 +5,7 @@
 
 typedef vector<DepthImage>* Images;
 typedef void (*ImageTransform)(Mat * m);
-typedef vector<float> Sample;
+typedef vector<double> Sample;
 typedef vector<float> StdVector;
 
 extern void applyTransform(Images images,ImageTransform fun);
@@ -22,7 +22,7 @@ extern void clean(int maxComponent,int ** relation,Mat * dimage);
 extern void init(int **  table,int height,int width);
 extern void connectedCommponents(Mat * dimage);
 
-extern float standardDeviation(Sample sample);
+extern double standardDeviation(Sample sample);
 extern bool biasedCoin();
 
 class Histogram{
