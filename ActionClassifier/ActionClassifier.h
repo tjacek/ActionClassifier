@@ -43,9 +43,11 @@ class Dataset{
   public:
     vector<FeatureExtractor*> extractors;
 	Dataset();
+	Dataset(Dataset * dataset1,Dataset * dataset2);
     void addExample(DepthImage image);
 	void registerExtractor(FeatureExtractor* extractor);
 	int numberOfFeatures();
+	vector<double> getSample(int i);
 	Mat * toMat();
 	void dimReduction(int k);
 	string toString();

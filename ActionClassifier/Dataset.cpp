@@ -98,6 +98,31 @@ Dataset::Dataset(){
 //  examples=new vector<ImageDescriptor>();
 }
 
+Dataset::Dataset(Dataset * dataset1,Dataset * dataset2){
+  desc=new  vector<vector<double>>;
+
+  for(int i=0;i<dataset1->extractors.size();i++){
+	  this->extractors.push_back(dataset1->extractors.at(i));
+  }
+  for(int i=0;i<dataset2->extractors.size();i++){
+	this->extractors.push_back(dataset2->extractors.at(i));
+  }
+  int numberOfSamples=dataset1->desc->size();
+  for(int i=0;i<numberOfSamples;i++){
+	vector<double>* newVector=new vector<double>();
+	vector<double> vec1=dataset1->getSample(i);
+    vector<double> vec2=dataset2->getSample(i);
+	newVector->insert(newVector->end(),vec1.begin(),vec1.end());
+	newVector->insert(newVector->end(),vec2.begin(),vec2.end());
+	desc->push_back(*newVector);
+  }
+
+}
+
+vector<double> Dataset::getSample(int i){
+  return desc->at(i);
+}
+
 void Dataset::dimReduction(int k){
   vector<vector<double>> * old=desc;
   this->desc=new vector<vector<double>>();

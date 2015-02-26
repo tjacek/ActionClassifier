@@ -17,6 +17,26 @@ Dataset * getDataset(string dirName){
 	return  buildDataset(imageList,addAllExtractors);
 }
 
+void fullFeatures(){
+  string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
+  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
+
+  Categories cat=readCategories(labelsFile);
+ ImageList imageList = getImageList( dirName);
+ Labels labels= getLabels(imageList, cat );
+ Dataset * data1=buildDataset(imageList,addShapeContextExtractor);
+  data1->dimReduction(20);
+
+  Dataset * data2=buildDataset(imageList, addPointCloudExtractor);
+  Dataset * data3=new Dataset(data1,data2);
+
+
+   ofstream myfile;
+   myfile.open ("full.arff");
+   myfile << data3->toArff(labels);
+   myfile.close();
+}
+
 void testCSS(ImageList imageList){
 
   Images images=readImages(imageList);
@@ -51,11 +71,12 @@ void createArffDataset(){
 }
 
 int main(){
- string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
+ fullFeatures();
+ /*string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
  ImageList imageList = getImageList( dirName);
 
- testCSS(imageList);
+ testCSS(imageList);*/
 // createArffDataset();
 /* 
  //Categories categories=readCategories(labels);
