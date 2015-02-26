@@ -36,12 +36,6 @@
     <ClCompile Include="classifiers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CentroidExtractor.cpp">
-      <Filter>Source Files\Features</Filter>
-    </ClCompile>
-    <ClCompile Include="LinearStdExtracor.cpp">
-      <Filter>Source Files\Features</Filter>
-    </ClCompile>
     <ClCompile Include="SVMClassifier.cpp">
       <Filter>Source Files\Classifiers</Filter>
     </ClCompile>
@@ -57,14 +51,14 @@
     <ClCompile Include="ShapeContextExtractor.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
-    <ClCompile Include="PcaExtractor.cpp">
-      <Filter>Source Files\Features</Filter>
-    </ClCompile>
     <ClCompile Include="pca.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointCloud.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudExtractor.cpp">
+      <Filter>Source Files\Features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

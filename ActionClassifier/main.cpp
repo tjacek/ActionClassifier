@@ -14,7 +14,6 @@ void addAllExtractors(Dataset * dataset){
 
 Dataset * getDataset(string dirName){
 	ImageList imageList = getImageList( dirName);
-	AddExtractorsFunc extractor= &addLinearStdExtractor;
 	return  buildDataset(imageList,addAllExtractors);
 }
 

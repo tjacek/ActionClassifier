@@ -147,17 +147,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CentroidExtractor.cpp" />
     <ClCompile Include="classifiers.cpp" />
     <ClCompile Include="css.cpp" />
     <ClCompile Include="Dataset.cpp" />
     <ClCompile Include="fisherVector.cpp" />
     <ClCompile Include="io.cpp" />
-    <ClCompile Include="LinearStdExtracor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pca.cpp" />
-    <ClCompile Include="PcaExtractor.cpp" />
     <ClCompile Include="PointCloud.cpp" />
+    <ClCompile Include="PointCloudExtractor.cpp" />
     <ClCompile Include="shapeContext.cpp" />
     <ClCompile Include="ShapeContextExtractor.cpp" />
     <ClCompile Include="SVMClassifier.cpp" />
