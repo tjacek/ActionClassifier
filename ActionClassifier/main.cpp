@@ -25,16 +25,15 @@ void fullFeatures(){
  ImageList imageList = getImageList( dirName);
  Labels labels= getLabels(imageList, cat );
  Dataset * data1=buildDataset(imageList,addShapeContextExtractor);
-  data1->dimReduction(20);
+ data1->dimReduction(20);
 
-  Dataset * data2=buildDataset(imageList, addPointCloudExtractor);
-  Dataset * data3=new Dataset(data1,data2);
+ Dataset * data2=buildDataset(imageList, addPointCloudExtractor);
+ Dataset * data3=new Dataset(data1,data2);
 
-
-   ofstream myfile;
-   myfile.open ("full.arff");
-   myfile << data3->toArff(labels);
-   myfile.close();
+ ofstream myfile;
+ myfile.open ("full.arff");
+ myfile << data3->toArff(labels);
+ myfile.close();
 }
 
 void testCSS(ImageList imageList){
@@ -43,10 +42,11 @@ void testCSS(ImageList imageList){
   //showHistograms(images);
   DepthImage dimage=images->at(0);
   PointCloud pointCloud(dimage.image);
-  pointCloud.normalize();
-  pointCloud.getCentroid();
+  pointCloud.show();
+  //pointCloud.normalize();
+  /*pointCloud.getCentroid();
   pointCloud.getStds();
-  pointCloud.getPrincipalComponents();
+  pointCloud.getPrincipalComponents();*/
   //test_pca();
   //vector<Mat> im=projection(&dimage.image);
   //saveImages(im);
@@ -71,13 +71,13 @@ void createArffDataset(){
 }
 
 int main(){
- fullFeatures();
- /*string dirName ="C:/Users/user/Desktop/kwolek/dataset"; 
- string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
+	fullFeatures();
+ /*string dirName ="C:/Users/user/Desktop/kwolek/dataset";
  ImageList imageList = getImageList( dirName);
-
+ string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
  testCSS(imageList);*/
-// createArffDataset();
+
+ //createArffDataset();
 /* 
  //Categories categories=readCategories(labels);
  /*ImageList imageList=getImageList(dirName);

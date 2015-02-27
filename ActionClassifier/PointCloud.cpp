@@ -4,8 +4,10 @@ PointCloud::PointCloud(Mat mat){
   for(int i=0;i<mat.rows;i++){
     for(int j=0;j<mat.cols;j++){
       double z= (double) mat.at<uchar>(i,j);
-	  Point3D point3D(i,j,z);
-	  points.push_back(point3D);
+	  if(z!=255){
+	    Point3D point3D(i,j,z);
+	    points.push_back(point3D);
+	  }
     } 
   }
 }
@@ -27,7 +29,7 @@ pair<Point3D, Point3D> PointCloud::getPrincipalComponents(){
   MatrixXd eigen=pca(2,x);
   for(int j=0;j<3;j++){
 	pair.first.val[j]=eigen(0,j);
-	pair.first.val[j]=eigen(0,j);
+	pair.second.val[j]=eigen(1,j);
   }
   return pair;
 }
@@ -49,7 +51,28 @@ Point3D PointCloud::getStds(){
   return stds;
 }
 
+Point3D PointCloud::getDims(){
+  double r=0;
+ 
+  for(int i=0;i<3;i++){
+	  r+=maxValues.val[i] *maxValues.val[i];
+  }
+  r=sqrt(r);
+  cout <<  r;
+  for(int i=0;i<3;i++){
+	  maxValues.val[i]/=r;
+  }
+  return maxValues;
+}
+
+void PointCloud::show(){
+  for(int i=0;i<points.size();i++){
+    cout << points.at(i);
+  }
+}
+
 void PointCloud::normalize(){
+  maxValues.zeros();
   pair<Point3D, Point3D> extremes=computeExtremes();
   Point3D min=extremes.first;
   Point3D max=extremes.second;
@@ -84,7 +107,7 @@ pair<Point3D, Point3D> PointCloud::computeExtremes(){
 	}
   }
   extremes.first =minV;
-  extremes.second=minV;
+  extremes.second=maxV;
   return extremes;
 }
 

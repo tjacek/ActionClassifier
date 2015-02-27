@@ -16,6 +16,8 @@ class PointCloud{
 	Point3D getCentroid();
 	Point3D getStds();
 	pair<Point3D, Point3D> getPrincipalComponents();
+	Point3D getDims();
+	void show();
 
 private:
     pair<Point3D, Point3D> computeExtremes();

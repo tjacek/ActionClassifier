@@ -3,7 +3,7 @@
 #include "pointCloud.h"
 
 void addFeatures(FeatureVector features, Point3D point){
-  for(int i=0;i<point.cols;i++){
+  for(int i=0;i<point.rows;i++){
 	features->push_back(point.val[i]);
   }
 }
@@ -14,7 +14,7 @@ void addPointCloudExtractor(Dataset * dataset){
 }
 
 int PointCloudExtractor::numberOfFeatures(){
-  return 20;
+  return 15;
 }
 
 string PointCloudExtractor:: featureName(int i){
@@ -31,5 +31,6 @@ FeatureVector PointCloudExtractor::getFeatures(DepthImage image){
   pair<Point3D,Point3D> eigenvectors=pointCloud.getPrincipalComponents();
   addFeatures(fullVect,eigenvectors.first);
   addFeatures(fullVect,eigenvectors.second);
+  addFeatures(fullVect,pointCloud.getDims());
   return fullVect;
 }
