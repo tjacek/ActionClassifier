@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 
 #include "ActionClassifier.h"
+#include "PointCloud.h"
 #include "utils.h"
 
 using cv::Point;
@@ -31,3 +32,4 @@ class OnlineHistogram{
 extern OnlineHistogram * getShapeContext(int n,Mat * image);
 extern Points samplePoints(int n,Mat * image);
 extern PolarVector getPolarVector(Point p1,Point p2);
+extern OnlineHistogram * getShapeContext3D(int n,PointCloud point);

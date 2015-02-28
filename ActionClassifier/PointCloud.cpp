@@ -55,14 +55,14 @@ Point3D PointCloud::getDims(){
   double r=0;
  
   for(int i=0;i<3;i++){
-	  r+=maxValues.val[i] *maxValues.val[i];
+	  r+=cloudSize.val[i] *cloudSize.val[i];
   }
   r=sqrt(r);
   cout <<  r;
   for(int i=0;i<3;i++){
-	  maxValues.val[i]/=r;
+	  cloudSize.val[i]/=r;
   }
-  return maxValues;
+  return cloudSize;
 }
 
 void PointCloud::show(){
@@ -72,7 +72,6 @@ void PointCloud::show(){
 }
 
 void PointCloud::normalize(){
-  maxValues.zeros();
   pair<Point3D, Point3D> extremes=computeExtremes();
   Point3D min=extremes.first;
   Point3D max=extremes.second;
@@ -80,11 +79,11 @@ void PointCloud::normalize(){
     Point3D current=points.at(i);
 	current-=min;
   }
-  maxValues=max-min;
+  cloudSize=max-min;
   for(int i=0;i<points.size();i++){
     Point3D current=points.at(i);
 	for(int j=0;j<3;j++){
-	  current.val[j]/=maxValues.val[j];
+	  current.val[j]/=cloudSize.val[j];
 	}
   }
 }
@@ -93,19 +92,33 @@ pair<Point3D, Point3D> PointCloud::computeExtremes(){
   pair<Point3D, Point3D> extremes;
   Point3D minV(0,0,0);
   Point3D maxV(0,0,0);
+  Vec<int, 3> minIndex(0,0,0);
+  Vec<int, 3> maxIndex(0,0,0);
+
   for(int i=0;i<points.size();i++){
     Point3D current=points.at(i);
 	for(int j=0;j<3;j++){
 	  if(current.val[j]< minV.val[j]){
 		minV.val[j]=current.val[j];
+		minIndex.val[j]=j;
 	  }
 	}
 	for(int j=0;j<3;j++){
 	  if(current.val[j]> maxV.val[j]){
 		maxV.val[j]=current.val[j];
+		minIndex.val[j]=j;
 	  }
 	}
   }
+
+  x_max=points.at(maxIndex.val[0]);
+  y_max=points.at(maxIndex.val[1]);
+  y_max=points.at(maxIndex.val[2]);
+
+  x_min=points.at(minIndex.val[0]);
+  y_min=points.at(minIndex.val[1]);
+  y_min=points.at(minIndex.val[2]);
+
   extremes.first =minV;
   extremes.second=maxV;
   return extremes;
