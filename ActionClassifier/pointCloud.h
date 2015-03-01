@@ -18,6 +18,7 @@ class PointCloud{
     Point3D x_min;
 	Point3D y_min;
 	Point3D z_min;
+	Point3D centroid;
 
 	Point3D cloudSize;
 
@@ -27,6 +28,8 @@ class PointCloud{
 	Point3D getStds();
 	pair<Point3D, Point3D> getPrincipalComponents();
 	Point3D getDims();
+	vector<Point3D> getExtremePoints();
+	vector<Point3D> sample(int n);
 	void show();
 
 private:

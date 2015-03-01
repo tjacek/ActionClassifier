@@ -13,7 +13,7 @@ PointCloud::PointCloud(Mat mat){
 }
 
 Point3D PointCloud::getCentroid(){
-  Point3D centroid(0,0,0);
+  centroid.zeros();
   double size=(double) points.size();
   for(int i=0;i<points.size();i++){
     Point3D current=points.at(i);
@@ -63,6 +63,27 @@ Point3D PointCloud::getDims(){
 	  cloudSize.val[i]/=r;
   }
   return cloudSize;
+}
+
+vector<Point3D> PointCloud::getExtremePoints(){
+  vector<Point3D> points;
+  points.push_back(x_min);
+  points.push_back(y_min);
+  points.push_back(z_min);
+  points.push_back(x_max);
+  points.push_back(y_max);
+  points.push_back(z_max);
+  points.push_back(centroid);
+  return points;
+}
+
+vector<Point3D> PointCloud::sample(int n){
+  vector<Point3D> points;
+  for(int i=0;i<n;i++){
+	int index= rand() % points.size(); 
+	points.push_back( points.at(index));
+  }
+  return points;
 }
 
 void PointCloud::show(){

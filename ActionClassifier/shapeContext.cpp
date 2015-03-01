@@ -21,6 +21,8 @@ OnlineHistogram * getShapeContext(int n,Mat * image){
   return histogram;
 }
 
+
+
 Points samplePoints(int n,Mat * image){
   vector<cv::Point> points;
   vector<vector<cv::Point> > contours;

@@ -29,7 +29,23 @@ class OnlineHistogram{
 	double thetaStep;
 };
 
+class Histogram3D{
+  public:
+    double *** bins;
+    int size;
+    Point3D maxValues;
+  
+    Histogram3D(double r);
+    void addToHistogram(double ksi,double theta,double psi);
+    void normalize();
+    void show();
+    FeatureVector toVector();
+};
+
 extern OnlineHistogram * getShapeContext(int n,Mat * image);
 extern Points samplePoints(int n,Mat * image);
 extern PolarVector getPolarVector(Point p1,Point p2);
-extern OnlineHistogram * getShapeContext3D(int n,PointCloud point);
+
+extern Histogram3D * getShapeContext3D(int n,PointCloud point);
+extern void addPoints(Point3D point,PointCloud pointCloud,Histogram3D * histogram);
+extern double L2(Point3D point);
