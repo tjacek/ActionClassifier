@@ -151,7 +151,7 @@ void applyTransform(Images images,ImageTransform fun){
   }
 }
 
-double standardDeviation(Sample data){
+double mean(Sample data){
   double avg=0.0;
   vector<double>::iterator it ;
   double n= (data.size()-1);
@@ -160,8 +160,14 @@ double standardDeviation(Sample data){
 	  avg+=x;
   }
   avg /=n;
+  return avg;
+}
 
+double standardDeviation(Sample data){
+  vector<double>::iterator it ;
+  double avg=mean(data);
   double sd=0.0;
+  double n= (data.size()-1);
   for(it = data.begin(); it != data.end(); it++){
      double error=avg - *it;
 	 error=(error*error)/n;

@@ -1,27 +1,37 @@
 #include "shapeContext.h"
 
 Histogram3D * getShapeContext3D(int n,PointCloud pointCloud){
+  pointCloud.save("pointCloud.xyz");
+  //pointCloud.removeOutliers();
+  //pointCloud.show();
+  pointCloud.normalize();
+  pointCloud.getCentroid();
   vector<Point3D> points=pointCloud.getExtremePoints();
-  Histogram3D * histogram;
+  Histogram3D * histogram=new Histogram3D(1000.0*sqrt(3.0));
   for(int i=0;i<points.size();i++){
     Point3D current=points.at(i);
+	//cout << current << "\n";
 	vector<Point3D> points=pointCloud.sample(n);
 	addPoints(current, points, histogram);
   }
   histogram->normalize();
+ // histogram->show();
   return histogram;
 }
 
-void addPoints(Point3D centre,vector<Point3D> points,Histogram3D * histogram){
+void addPoints(Point3D  centre,vector<Point3D> points,Histogram3D * histogram){
   for(int i=0;i<points.size();i++){
     Point3D rawpoint=points.at(i);
     Point3D point= rawpoint - centre;
-
 	double ksi=log(L2(point));
 	double theta=atan2(point.val[1],point.val[0]) + M_PI;
 	double x=point.val[0];
 	double y=point.val[1];
 	double beta=atan2(point.val[3],sqrt(x*x+y*y)) + M_PI;
+	if(i % 100){
+		//cout << point << endl;
+		//cout << ksi << " " << theta << " " << beta << " " << endl;
+	}
 	histogram->addToHistogram(ksi,theta,beta);
   }
 }
@@ -34,7 +44,7 @@ double L2(Point3D point){
 }
 
 Histogram3D::Histogram3D(double r){
-  const int size=4;
+  this->size=4;
   maxValues.val[0]=log(r);
   maxValues.val[1]=2*M_PI;
   maxValues.val[2]=2*M_PI;
@@ -51,8 +61,17 @@ Histogram3D::Histogram3D(double r){
 }
 
 int getIndex(double value,double size,double max){
-  double step=max/size;
-  return floor(value/step);
+  if(value<0.0){
+	  return 0;
+  }
+  double step=max/ ((double)size);
+  int index=floor(value/step);
+  if(index<size){
+    return index;
+  }else{
+    cout << max << " " << value <<"\n";
+	return size-1;
+  }
 }
 
 void Histogram3D::addToHistogram(double ksi,double theta,double psi){
@@ -74,7 +93,7 @@ void Histogram3D::normalize(){
   for(int i=0;i<size;i++){
 	for(int j=0;j<size;j++){
       for(int k=0;k<size;k++){
-        normalizeConst+=bins[i][j][k];
+        bins[i][j][k]/=normalizeConst;
 	  }
 	}
   }
@@ -90,4 +109,16 @@ FeatureVector Histogram3D::toVector(){
 	}
   }
   return vect;
+}
+
+void Histogram3D::show(){
+  for(int i=0;i<size;i++){
+	for(int j=0;j<size;j++){
+	  for(int k=0;k<size;k++){
+		cout << bins[i][j][k] << " "; 
+	  }
+	  cout << "\n";
+	}
+	cout << "\n \n";
+  }
 }

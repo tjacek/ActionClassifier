@@ -24,6 +24,7 @@ typedef vector<double>* FeatureVector;
 typedef cv::Mat ImageDescriptor;
 typedef vector<string>* ImageList;
 typedef cv::Mat * Labels;
+typedef cv::Vec<double, 3> Point3D;
 
 class DepthImage{
   public:
@@ -60,6 +61,7 @@ class Dataset{
 };
 
 typedef void  (*AddExtractorsFunc)(Dataset * data);
+
 
 class Classifier{
   public:

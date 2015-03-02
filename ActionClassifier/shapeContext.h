@@ -33,7 +33,8 @@ class Histogram3D{
   public:
     double *** bins;
     int size;
-    Point3D maxValues;
+    
+	Point3D maxValues;
   
     Histogram3D(double r);
     void addToHistogram(double ksi,double theta,double psi);
@@ -47,5 +48,5 @@ extern Points samplePoints(int n,Mat * image);
 extern PolarVector getPolarVector(Point p1,Point p2);
 
 extern Histogram3D * getShapeContext3D(int n,PointCloud point);
-extern void addPoints(Point3D point,PointCloud pointCloud,Histogram3D * histogram);
+extern void addPoints(Point3D centre,vector<Point3D> points,Histogram3D * histogram);
 extern double L2(Point3D point);

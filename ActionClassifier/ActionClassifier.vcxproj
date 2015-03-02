@@ -158,6 +158,7 @@
     <ClCompile Include="PointCloudExtractor.cpp" />
     <ClCompile Include="shapeContext.cpp" />
     <ClCompile Include="ShapeContext3D.cpp" />
+    <ClCompile Include="ShapeContext3DExtractor.cpp" />
     <ClCompile Include="ShapeContextExtractor.cpp" />
     <ClCompile Include="SVMClassifier.cpp" />
     <ClCompile Include="utils.cpp" />

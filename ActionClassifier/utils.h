@@ -22,6 +22,7 @@ extern void clean(int maxComponent,int ** relation,Mat * dimage);
 extern void init(int **  table,int height,int width);
 extern void connectedCommponents(Mat * dimage);
 
+extern double mean(Sample data);
 extern double standardDeviation(Sample sample);
 extern bool biasedCoin();
 
