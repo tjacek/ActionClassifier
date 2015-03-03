@@ -127,12 +127,13 @@ void morfologicalEdge(Mat * m){
   connectedCommponents(m);
   int morph_elem = 0;
   int morph_size = 1;
-  int const max_elem = 2;
+  int const max_elem = 1;
   Mat element = cv::getStructuringElement( cv::MORPH_RECT,
                                        cv::Size( 2*morph_size + 1, 2*morph_size+1 ),
                                        cv::Point( morph_size, morph_size ) );
 
   morphologyEx( *m, *m, cv::MORPH_GRADIENT, element );
+  
 }
 
 void showImage(Mat * m,const char * name){

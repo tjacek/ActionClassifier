@@ -42,10 +42,12 @@ void testCSS(ImageList imageList){
   Images images=readImages(imageList);
   //showHistograms(images);
   DepthImage dimage=images->at(0);
-      Mat newImage=medianaFilter(&dimage.image);
-  showImage(&newImage,"OK");
+  Mat newImage=cleanEdge(&dimage.image);
+
+  //showImage(&newImage,"OK");
   PointCloud pointCloud(newImage);
-  getShapeContext3D(200, pointCloud);
+  pointCloud.save("pointCloud.xyz");
+  //getShapeContext3D(200, pointCloud);*/
   //pointCloud.show();
   //pointCloud.normalize();
   /*pointCloud.getCentroid();
