@@ -6,6 +6,7 @@
 #include "shapeContext.h"
 #include "utils.h"
 #include "pointCloud.h"
+#include "transform.h"
 
 void addAllExtractors(Dataset * dataset){
   addShapeContext3DExtractor(dataset);
@@ -40,8 +41,10 @@ void testCSS(ImageList imageList){
 
   Images images=readImages(imageList);
   //showHistograms(images);
-  DepthImage dimage=images->at(1);
-  PointCloud pointCloud(dimage.image);
+  DepthImage dimage=images->at(0);
+      Mat newImage=medianaFilter(&dimage.image);
+  showImage(&newImage,"OK");
+  PointCloud pointCloud(newImage);
   getShapeContext3D(200, pointCloud);
   //pointCloud.show();
   //pointCloud.normalize();

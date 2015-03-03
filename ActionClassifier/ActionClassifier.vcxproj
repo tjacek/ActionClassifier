@@ -161,6 +161,7 @@
     <ClCompile Include="ShapeContext3DExtractor.cpp" />
     <ClCompile Include="ShapeContextExtractor.cpp" />
     <ClCompile Include="SVMClassifier.cpp" />
+    <ClCompile Include="transforms.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +174,7 @@
     <ClInclude Include="pca.h" />
     <ClInclude Include="pointCloud.h" />
     <ClInclude Include="shapeContext.h" />
+    <ClInclude Include="transform.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

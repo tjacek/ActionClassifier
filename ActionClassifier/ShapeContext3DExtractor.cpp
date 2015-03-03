@@ -1,5 +1,6 @@
 #include "features.h"
 #include "ShapeContext.h"
+#include "transform.h"
 
 void addShapeContext3DExtractor(Dataset * dataset){
   ShapeContext3DExtractor* extractor=new ShapeContext3DExtractor();
@@ -16,7 +17,9 @@ string ShapeContext3DExtractor:: featureName(int i){
 }
 
 FeatureVector ShapeContext3DExtractor::getFeatures(DepthImage image){
-  PointCloud pointCloud(image.image);
+
+    PointCloud pointCloud(image.image);
+
   Histogram3D * hist=getShapeContext3D(200,pointCloud);
   return hist->toVector();
 }

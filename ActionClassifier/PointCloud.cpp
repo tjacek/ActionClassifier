@@ -20,7 +20,7 @@ PointCloud::PointCloud(Mat mat){
     for(int j=0;j<mat.cols;j++){
       double z= (double) mat.at<uchar>(i,j);
 	  if(z!=255){
-	    Point3D point=getPoint(i,j,z,320,640);
+		  Point3D point=getPoint(i,j,z,mat.cols,mat.rows);
 	    points.push_back(point);
 	  }
     } 
