@@ -17,9 +17,9 @@ string ShapeContext3DExtractor:: featureName(int i){
 }
 
 FeatureVector ShapeContext3DExtractor::getFeatures(DepthImage image){
+	cout << image.name <<"\n";
+  PointCloud pointCloud(cleanEdge(&image.image));
 
-    PointCloud pointCloud(image.image);
-
-  Histogram3D * hist=getShapeContext3D(200,pointCloud);
+  Histogram3D * hist=getShapeContext3D(500,pointCloud);
   return hist->toVector();
 }

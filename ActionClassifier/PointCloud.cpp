@@ -131,11 +131,11 @@ vector<Point3D> PointCloud::getExtremePoints(){
   //epoints.push_back(points.at(x_min));
   /*epoints.push_back(points.at(y_min));
   epoints.push_back(points.at(z_min));*/
-  epoints.push_back(points.at(x_max));
+  //epoints.push_back(points.at(x_max));
   /*epoints.push_back(points.at(y_max));
   epoints.push_back(points.at(z_max));*/
   
- // epoints.push_back(centroid);
+  epoints.push_back(centroid);
   return epoints;
 }
 
@@ -157,6 +157,7 @@ void PointCloud::show(){
 }
 
 void PointCloud::normalize(){
+//	show();
   pair<Point3D, Point3D> extremes=computeExtremes();
   Point3D min=extremes.first;
   Point3D max=extremes.second;
@@ -167,19 +168,23 @@ void PointCloud::normalize(){
 	  current->val[j]-=min.val[j];
 	 }
   }
-  
+  //cout << "******************************\n";
+  //show();
+   //cout << "min " << min <<"\n";
   cloudSize=max-min;
- // cout << cloudSize << endl;
+  //cout << cloudSize << endl;
+  double r=L2(cloudSize);
   for(int i=0;i<points.size();i++){
     Point3D * current=&points.at(i);
 	for(int j=0;j<3;j++){
-	  current->val[j]/=cloudSize.val[j];
+	  current->val[j]/=r;
 	  current->val[j]*=1000.0;
 	}
 	//cout << current << endl;
   }
+  cloudSize*=1000;
   //show();
-  // cout << x_min;
+   cout << x_min;
 
 }
 

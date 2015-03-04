@@ -1,6 +1,7 @@
 #include "features.h"
 #include "utils.h"
 #include "pointCloud.h"
+#include "transform.h"
 
 void addFeatures(FeatureVector features, Point3D point){
   for(int i=0;i<point.rows;i++){
@@ -24,7 +25,7 @@ string PointCloudExtractor:: featureName(int i){
 
 FeatureVector PointCloudExtractor::getFeatures(DepthImage image){
   FeatureVector fullVect= new vector<double>();
-  PointCloud pointCloud(image.image);
+  PointCloud pointCloud(cleanEdge(&image.image));
   pointCloud.normalize();
   addFeatures(fullVect,pointCloud.getCentroid());
   addFeatures(fullVect,pointCloud.getStds());

@@ -46,8 +46,8 @@ void testCSS(ImageList imageList){
 
   //showImage(&newImage,"OK");
   PointCloud pointCloud(newImage);
-  pointCloud.save("pointCloud.xyz");
-  //getShapeContext3D(200, pointCloud);*/
+ // pointCloud.save("pointCloud.xyz");
+  getShapeContext3D(200, pointCloud);
   //pointCloud.show();
   //pointCloud.normalize();
   /*pointCloud.getCentroid();
@@ -77,11 +77,11 @@ void createArffDataset(){
 }
 
 int main(){
-	//fullFeatures();
- string dirName ="C:/Users/user/Desktop/kwolek/dataset";
+ fullFeatures();
+ /*string dirName ="C:/Users/user/Desktop/kwolek/dataset";
  ImageList imageList = getImageList( dirName);
  string labelsFile ="C:/Users/user/Desktop/kwolek/labels.txt";
- testCSS(imageList);
+ testCSS(imageList);*/
 
  //createArffDataset();
 /* 

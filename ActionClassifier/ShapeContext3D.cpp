@@ -1,21 +1,23 @@
 #include "shapeContext.h"
 
 Histogram3D * getShapeContext3D(int n,PointCloud pointCloud){
-  pointCloud.save("pointCloud.xyz");
+ // pointCloud.save("pointCloud.xyz");
   //pointCloud.removeOutliers();
-  //pointCloud.show();
   pointCloud.normalize();
+  //  pointCloud.show();
+
   pointCloud.getCentroid();
+  cout << pointCloud.centroid <<"\n";
   vector<Point3D> points=pointCloud.getExtremePoints();
-  Histogram3D * histogram=new Histogram3D(1000.0*sqrt(3.0));
+  Histogram3D * histogram=new Histogram3D(pointCloud.r());
   for(int i=0;i<points.size();i++){
     Point3D current=points.at(i);
 	//cout << current << "\n";
-	vector<Point3D> points=pointCloud.sample(n);
-	addPoints(current, points, histogram);
+	//vector<Point3D> points=pointCloud.sample(n);
+	addPoints(current, pointCloud.points, histogram);
   }
   histogram->normalize();
- // histogram->show();
+  histogram->show();
   return histogram;
 }
 
@@ -27,11 +29,12 @@ void addPoints(Point3D  centre,vector<Point3D> points,Histogram3D * histogram){
 	double theta=atan2(point.val[1],point.val[0]) + M_PI;
 	double x=point.val[0];
 	double y=point.val[1];
-	double beta=atan2(point.val[3],sqrt(x*x+y*y)) + M_PI;
-	if(i % 100){
-		//cout << point << endl;
-		//cout << ksi << " " << theta << " " << beta << " " << endl;
-	}
+	double beta=atan2(point.val[2],sqrt(x*x+y*y)) + M_PI;
+	/*if(i % 100){
+		cout << point << endl;
+		cout << point.val[2] << " " << sqrt(x*x+y*y)<< endl;
+		cout << ksi << " " << theta << " " << beta << " " << endl;
+	}*/
 	histogram->addToHistogram(ksi,theta,beta);
   }
 }
