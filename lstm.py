@@ -4,9 +4,10 @@ from keras.layers import Input, Dense, LSTM, MaxPooling1D, Conv1D
 from keras.preprocessing import sequence
 from keras.models import Model,Sequential
 from sklearn.metrics import classification_report
+from sklearn import preprocessing
 import data
 
-def simple_exp(in_path,n_epochs=5):
+def simple_exp(in_path,n_epochs=100):
     train_X,train_y,test_X,test_y,max_len,n_feats,n_cats=prepare_data(in_path)
     model=make_base_lstm(n_cats,max_len,n_feats)
     model.summary()
@@ -17,17 +18,19 @@ def simple_exp(in_path,n_epochs=5):
     pred_y,test_y=np.argmax(raw_pred,axis=1),np.argmax(test_y,axis=1)
     print(classification_report(test_y, pred_y,digits=4))
 
-
 def prepare_data(in_path):
     (train_X,train_y),(test_X,test_y)=data.get_dataset(in_path)
     max_len=max(max_seq_len(train_X),max_seq_len(test_X))
-    train_X=sequence.pad_sequences(train_X,maxlen=max_len)
-    test_X=sequence.pad_sequences(test_X,maxlen=max_len)  
     n_feats=train_X[0].shape[1]
     n_cats=np.unique(train_y).shape[0]
-    train_y=keras.utils.to_categorical(train_y)  
-    test_y=keras.utils.to_categorical(test_y)  
+    (train_X,train_y),(test_X,test_y)=format_data(train_X,train_y,max_len),format_data(test_X,test_y,max_len)
     return train_X,train_y,test_X,test_y,max_len,n_feats,n_cats
+
+def format_data(X,y,max_len):
+    X=sequence.pad_sequences(X,maxlen=max_len)
+    y=keras.utils.to_categorical(y)  
+    X=np.array([ preprocessing.scale(X_i) for X_i in X])
+    return X,y
 
 def make_base_lstm(n_cats,max_len,n_feats):
     model = Sequential()
