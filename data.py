@@ -7,6 +7,20 @@ def get_dataset(in_path):
     return to_array(train),to_array(test)
 
 def read_data(in_path):
+    if(multiple_dataset(in_path)):
+        datasets=[read_single(path_i) for path_i in top_files(in_path)]
+        names=datasets[0].keys()
+        def name_helper(name_i):
+            values=[dataset_i[name_i] for dataset_i in datasets]
+            seq_len= min([value_i.shape[0] for value_i in values])
+            values=[value_i[:seq_len] for value_i in values]
+            data_i=np.concatenate(values,axis=1)
+            return name_i,data_i
+        return dict([ name_helper(name_i) for name_i in names])
+    else:
+        return read_single(in_path)
+
+def read_single(in_path):
     all_paths=bottom_files(in_path)
     return dict([read_seq(path_i) for path_i in all_paths])
 
@@ -31,14 +45,17 @@ def to_array(data_dict):
     X=[data_dict[name_i] for name_i in names]
     y=[ int(name_i.split('_')[0])-1 for name_i in names]
     return X,y
+
+def top_files(path):
+    return [ path+'/'+file_i for file_i in os.listdir(path)]
     	
-def bottom_files(path):
+def bottom_files(path,full_paths=True):
     all_paths=[]
     for root, directories, filenames in os.walk(path):
         if(not directories):
-            paths=[ root+'/'+filename_i 
-                for filename_i in filenames]
-            all_paths+=paths
+            for filename_i in filenames:
+                path_i= root+'/'+filename_i if(full_paths) else filename_i
+                all_paths.append(path_i)
     all_paths.sort(key=natural_keys)        
     return all_paths
 
@@ -51,3 +68,11 @@ def atoi(text):
 def show_seq_len(data_dict):
     for name_i,data_i in data_dict.items():
         print((name_i+" %d %d") % data_i.shape )
+
+def multiple_dataset(in_path):
+    names=bottom_files(in_path,False)
+    first=names[0]
+    for name_i in names[1:]:
+        if(first==name_i):
+            return True
+    return False

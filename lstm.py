@@ -3,21 +3,20 @@ import keras.utils
 from keras.layers import Input, Dense, LSTM, MaxPooling1D, Conv1D
 from keras.preprocessing import sequence
 from keras.models import Model,Sequential
-#from keras.layers import Dense,Embedding,LSTM
+from sklearn.metrics import classification_report
 import data
 
-def simple_exp(in_path):
+def simple_exp(in_path,n_epochs=5):
     train_X,train_y,test_X,test_y,max_len,n_feats,n_cats=prepare_data(in_path)
     model=make_base_lstm(n_cats,max_len,n_feats)
     model.summary()
     model.compile(loss='categorical_crossentropy',
-    	          optimizer='adam')#,
-    #	          metric=['accuracy'])
-    model.fit(train_X,train_y,batch_size=32)
-    y_pred=model.predict(test_X,batch_size=32)
-    print(y_pred.shape)
-    #acc=model.evaluate(test_X,test_y,batch_size=32)
-    #print("Test accuracy",socore,acc)
+    	          optimizer='adam')
+    model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
+    raw_pred=model.predict(test_X,batch_size=32)
+    pred_y,test_y=np.argmax(raw_pred,axis=1),np.argmax(test_y,axis=1)
+    print(classification_report(test_y, pred_y,digits=4))
+
 
 def prepare_data(in_path):
     (train_X,train_y),(test_X,test_y)=data.get_dataset(in_path)
@@ -52,5 +51,5 @@ def make_model(max_len,n_feats):
 def max_seq_len(seqs):
 	return max([seq_i.shape[0] for seq_i in seqs])
 
-simple_exp("mra/all")
+simple_exp("mra")
 #model.summary()
