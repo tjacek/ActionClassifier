@@ -3,6 +3,7 @@ import numpy as np
 
 def get_dataset(in_path):
     data_dict=read_data(in_path)
+    data_dict=norm_seqs(data_dict)
     train,test=split(data_dict)
     return to_array(train),to_array(test)
 
@@ -76,3 +77,11 @@ def multiple_dataset(in_path):
         if(first==name_i):
             return True
     return False
+
+def norm_seqs(data_dict):
+    all_X=np.concatenate(data_dict.values(),axis=0)
+    all_mean=np.mean(all_X,axis=0)
+    all_std=np.std(all_X,axis=0)
+    for name_i,data_i in data_dict.items():
+        data_dict[name_i]=(data_i-all_mean)/all_std
+    return data_dict

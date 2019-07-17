@@ -9,7 +9,7 @@ import data
 
 def simple_exp(in_path,n_epochs=100):
     train_X,train_y,test_X,test_y,max_len,n_feats,n_cats=prepare_data(in_path)
-    model=make_base_lstm(n_cats,max_len,n_feats)
+    model=make_conv_lstm(n_cats,max_len,n_feats)
     model.summary()
     model.compile(loss='categorical_crossentropy',
     	          optimizer='adam')
@@ -29,7 +29,7 @@ def prepare_data(in_path):
 def format_data(X,y,max_len):
     X=sequence.pad_sequences(X,maxlen=max_len)
     y=keras.utils.to_categorical(y)  
-    X=np.array([ preprocessing.scale(X_i) for X_i in X])
+    #X=np.array([ preprocessing.scale(X_i) for X_i in X])
     return X,y
 
 def make_base_lstm(n_cats,max_len,n_feats):
@@ -40,15 +40,16 @@ def make_base_lstm(n_cats,max_len,n_feats):
     model.add(Dense(units=n_cats,activation='softmax'))
     return model
 
-def make_model(max_len,n_feats):
+def make_conv_lstm(n_cats,max_len,n_feats):
     input_layer = Input(shape=(max_len, n_feats))
-    conv1 = Conv1D(filters=32,
+    conv1 = Conv1D(filters=16,
                kernel_size=8,
                strides=1,
                activation='relu',
                padding='same')(input_layer)
     lstm1 = LSTM(32, return_sequences=True)(conv1)
-    output_layer = Dense(n_cats, activation='softmax')(lstm1)
+    lstm2 = LSTM(32)(lstm1)
+    output_layer = Dense(units=n_cats, activation='softmax')(lstm2)
     return Model(inputs=input_layer, outputs=output_layer)
 
 def max_seq_len(seqs):
