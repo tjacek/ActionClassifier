@@ -29,7 +29,7 @@ def split(data_dict):
 def to_array(data_dict):
     names=sorted(data_dict.keys(),key=natural_keys) 
     X=[data_dict[name_i] for name_i in names]
-    y=[ int(name_i.split('_')[0]) for name_i in names]
+    y=[ int(name_i.split('_')[0])-1 for name_i in names]
     return X,y
     	
 def bottom_files(path):
