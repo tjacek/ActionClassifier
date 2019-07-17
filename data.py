@@ -2,9 +2,9 @@ import os,re
 import numpy as np
 
 def get_dataset(in_path):
-	data_dict=read_data(in_path)
-	train,test=split(data_dict)
-	return to_array(train),to_array(test)
+    data_dict=read_data(in_path)
+    train,test=split(data_dict)
+    return to_array(train),to_array(test)
 
 def read_data(in_path):
     all_paths=bottom_files(in_path)
@@ -47,3 +47,7 @@ def natural_keys(text):
 
 def atoi(text):
     return int(text) if text.isdigit() else text
+
+def show_seq_len(data_dict):
+    for name_i,data_i in data_dict.items():
+        print((name_i+" %d %d") % data_i.shape )
