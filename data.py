@@ -1,11 +1,13 @@
 import os,re
 import numpy as np
 
-def get_dataset(in_path):
+def get_dataset(in_path,splited=True):
     data_dict=read_data(in_path)
     data_dict=norm_seqs(data_dict)
-    train,test=split(data_dict)
-    return to_array(train),to_array(test)
+    if(splited):
+        train,test=split(data_dict)
+        return to_array(train),to_array(test)
+    return data_dict
 
 def read_data(in_path):
     if(multiple_dataset(in_path)):
