@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report
 from sklearn import preprocessing
 import data
 
-def extract_features(in_path,out_path,n_epochs=10):
+def extract_features(in_path,out_path,n_epochs=100):
     extractor_model=make_extractor(in_path,n_epochs=n_epochs)
     data_dict=data.get_dataset(in_path,splited=False)
     max_len=max([x_i.shape[0] for x_i  in data_dict.values()])
@@ -20,10 +20,8 @@ def extract_features(in_path,out_path,n_epochs=10):
     save_feats(feat_dict,out_path)
 
 def make_extractor(in_path,n_epochs=10):
-    train_X,train_y,test_X,test_y,max_len,n_feats,n_cats=prepare_data(in_path)
-    model=make_conv_lstm(n_cats,max_len,n_feats)
-    model.compile(loss='categorical_crossentropy',
-                optimizer='adam')
+    train_X,train_y,test_X,test_y,params=prepare_data(in_path)
+    model=make_conv_lstm(params)
     model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
     extractor_model=Model(inputs=model.input,
                           outputs=model.get_layer("hidden").output)
@@ -39,12 +37,10 @@ def save_feats(feat_dict,out_path):
     file_str.write(text)
     file_str.close()
 
-def simple_exp(in_path,n_epochs=100):
-    train_X,train_y,test_X,test_y,max_len,n_feats,n_cats=prepare_data(in_path)
-    model=make_conv_lstm(n_cats,max_len,n_feats)
+def simple_exp(in_path,n_epochs=50):
+    train_X,train_y,test_X,test_y,params=prepare_data(in_path)
+    model=make_conv_lstm(params)
     model.summary()
-    model.compile(loss='categorical_crossentropy',
-                optimizer='adam')
     model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
     raw_pred=model.predict(test_X,batch_size=32)
     pred_y,test_y=np.argmax(raw_pred,axis=1),np.argmax(test_y,axis=1)
@@ -56,7 +52,8 @@ def prepare_data(in_path):
     n_feats=train_X[0].shape[1]
     n_cats=np.unique(train_y).shape[0]
     (train_X,train_y),(test_X,test_y)=format_data(train_X,train_y,max_len),format_data(test_X,test_y,max_len)
-    return train_X,train_y,test_X,test_y,max_len,n_feats,n_cats
+    params={'max_len':max_len,'n_feats':n_feats,'n_cats':n_cats}
+    return train_X,train_y,test_X,test_y,params
 
 def format_data(X,y,max_len):
     X=sequence.pad_sequences(X,maxlen=max_len)
@@ -64,16 +61,18 @@ def format_data(X,y,max_len):
     #X=np.array([ preprocessing.scale(X_i) for X_i in X])
     return X,y
 
-def make_base_lstm(n_cats,max_len,n_feats):
+def make_base_lstm(params):
     model = Sequential()
-    model.add(LSTM(units=30, return_sequences= True, input_shape=(max_len,n_feats)))
-    model.add(LSTM(units=30, return_sequences=True))
-    model.add(LSTM(units=30,name="hidden"))
+    model.add(LSTM(units=32, return_sequences= True, input_shape=(params['max_len'],params['n_feats'])))
+    model.add(LSTM(units=32, return_sequences=True))
+    model.add(LSTM(units=32,name="hidden"))
     model.add(Dense(units=n_cats,activation='softmax',name="hidden"))
+    model.compile(loss='categorical_crossentropy',
+                optimizer='adam')
     return model
 
-def make_conv_lstm(n_cats,max_len,n_feats):
-    input_layer = Input(shape=(max_len, n_feats))
+def make_conv_lstm(params):
+    input_layer = Input(shape=(params['max_len'], params['n_feats']))
     conv1 = Conv1D(filters=32,
                kernel_size=8,
                strides=1,
@@ -81,12 +80,15 @@ def make_conv_lstm(n_cats,max_len,n_feats):
                padding='same')(input_layer)
     lstm1 = LSTM(32, return_sequences=True)(conv1)
     lstm2 = LSTM(32,name="hidden")(lstm1)
-    #lstm2=LSTM(32,return_sequences=False)(conv1)
-    output_layer = Dense(units=n_cats, activation='softmax')(lstm2)
-    return Model(inputs=input_layer, outputs=output_layer)
+    output_layer = Dense(units=params['n_cats'], activation='softmax')(lstm2)
+    model=Model(inputs=input_layer, outputs=output_layer)
+    model.compile(loss='categorical_crossentropy',
+                optimizer='adam')
+    return model
 
 def max_seq_len(seqs):
 	return max([seq_i.shape[0] for seq_i in seqs])
 
-extract_features("mra","lstm.txt")
-#model.summary()
+if __name__ == "__main__":
+    simple_exp("mra")
+    #extract_features("mra","lstm.txt")
