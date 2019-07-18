@@ -8,34 +8,30 @@ from sklearn import preprocessing
 import data
 
 def extract_features(in_path,out_path,n_epochs=100):
-    extractor_model=make_extractor(in_path,n_epochs=n_epochs)
+    model=train_model(in_path,n_epochs=n_epochs)
+    extractor_model=make_extractor(model)
     data_dict=data.get_dataset(in_path,splited=False)
+    feat_dict=lstm_extraction(data_dict,extractor_model)
+    save_feats(feat_dict,out_path)
+
+def lstm_extraction(data_dict,extractor_model):
     max_len=max([x_i.shape[0] for x_i  in data_dict.values()])
     def seq_helper(x_i):
         x_i=sequence.pad_sequences(x_i.T,maxlen=max_len).T
         x_i=np.expand_dims(x_i,axis=0)
         return extractor_model.predict(x_i)
-    feat_dict={name_i:seq_helper(data_i)
-                  for name_i,data_i in data_dict.items()}
-    save_feats(feat_dict,out_path)
+    return {name_i:seq_helper(data_i)
+                for name_i,data_i in data_dict.items()}
 
-def make_extractor(in_path,n_epochs=10):
+def make_extractor(model):
+    return Model(inputs=model.input,
+                outputs=model.get_layer("hidden").output)
+
+def train_model(in_path,n_epochs=10):
     train_X,train_y,test_X,test_y,params=prepare_data(in_path)
     model=make_conv_lstm(params)
     model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
-    extractor_model=Model(inputs=model.input,
-                          outputs=model.get_layer("hidden").output)
-    return extractor_model
-
-def save_feats(feat_dict,out_path):
-    text=""
-    for name_i,x_i in feat_dict.items():
-        sample_i=np.array2string(x_i,separator=",").replace('\n',"")
-        text+=sample_i+'#'+name_i+'\n'
-    text=text.replace("[","").replace("]","")
-    file_str = open(out_path,'w')
-    file_str.write(text)
-    file_str.close()
+    return model
 
 def simple_exp(in_path,n_epochs=50):
     train_X,train_y,test_X,test_y,params=prepare_data(in_path)

@@ -1,4 +1,4 @@
-import os,re
+import os,os.path,re
 import numpy as np
 
 def get_dataset(in_path,splited=True):
@@ -87,3 +87,17 @@ def norm_seqs(data_dict):
     for name_i,data_i in data_dict.items():
         data_dict[name_i]=(data_i-all_mean)/all_std
     return data_dict
+
+def make_dir(path):
+    if(not os.path.isdir(path)):
+        os.mkdir(path)
+
+def save_feats(feat_dict,out_path):
+    text=""
+    for name_i,x_i in feat_dict.items():
+        sample_i=np.array2string(x_i,separator=",").replace('\n',"")
+        text+=sample_i+'#'+name_i+'\n'
+    text=text.replace("[","").replace("]","")
+    file_str = open(out_path,'w')
+    file_str.write(text)
+    file_str.close()
