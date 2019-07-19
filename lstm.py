@@ -3,9 +3,7 @@ import keras.utils
 from keras.layers import Input, Dense, LSTM, MaxPooling1D, Conv1D
 from keras.preprocessing import sequence
 from keras.models import Model,Sequential
-from sklearn.metrics import classification_report
-from sklearn import preprocessing
-import data
+import data,utils
 
 def extract_features(in_path,out_path,n_epochs=100):
     model=train_model(in_path,n_epochs=n_epochs)
@@ -33,14 +31,9 @@ def train_model(in_path,n_epochs=10):
     model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
     return model
 
-def simple_exp(in_path,n_epochs=50):
-    train_X,train_y,test_X,test_y,params=prepare_data(in_path)
-    model=make_conv_lstm(params)
-    model.summary()
-    model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
-    raw_pred=model.predict(test_X,batch_size=32)
-    pred_y,test_y=np.argmax(raw_pred,axis=1),np.argmax(test_y,axis=1)
-    print(classification_report(test_y, pred_y,digits=4))
+def simple_exp(in_path,n_epochs=100):
+    utils.simple_exp(in_path,n_epochs=n_epochs,
+                        prepare=prepare_data,make_model=make_conv_lstm)
 
 def prepare_data(in_path):
     (train_X,train_y),(test_X,test_y)=data.get_dataset(in_path)
@@ -54,7 +47,6 @@ def prepare_data(in_path):
 def format_data(X,y,max_len):
     X=sequence.pad_sequences(X,maxlen=max_len)
     y=keras.utils.to_categorical(y)  
-    #X=np.array([ preprocessing.scale(X_i) for X_i in X])
     return X,y
 
 def make_base_lstm(params):
@@ -67,15 +59,15 @@ def make_base_lstm(params):
                 optimizer='adam')
     return model
 
-def make_conv_lstm(params):
+def make_conv_lstm(params,n_hidden=32):
     input_layer = Input(shape=(params['max_len'], params['n_feats']))
     conv1 = Conv1D(filters=32,
                kernel_size=8,
                strides=1,
                activation='relu',
                padding='same')(input_layer)
-    lstm1 = LSTM(32, return_sequences=True)(conv1)
-    lstm2 = LSTM(32,name="hidden")(lstm1)
+    lstm1 = LSTM(n_hidden, return_sequences=True)(conv1)
+    lstm2 = LSTM(n_hidden,name="hidden")(lstm1)
     output_layer = Dense(units=params['n_cats'], activation='softmax')(lstm2)
     model=Model(inputs=input_layer, outputs=output_layer)
     model.compile(loss='categorical_crossentropy',

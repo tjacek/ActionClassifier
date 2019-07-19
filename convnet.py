@@ -4,18 +4,11 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 import numpy as np
 from scipy.interpolate import CubicSpline
-from sklearn.metrics import classification_report
-import data
+import data,utils
 
 def simple_exp(in_path,n_epochs=100):
-    train_X,train_y,test_X,test_y,params=prepare_data(in_path)
-    model=make_conv(params)
-    model.summary()
-    #raise Exception(train_X.shape)
-    model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
-    raw_pred=model.predict(test_X,batch_size=32)
-    pred_y,test_y=np.argmax(raw_pred,axis=1),np.argmax(test_y,axis=1)
-    print(classification_report(test_y, pred_y,digits=4))
+    utils.simple_exp(in_path,n_epochs=n_epochs,
+                        prepare=prepare_data,make_model=make_conv)
 
 def prepare_data(in_path,n=128):
     (train_X,train_y),(test_X,test_y)=data.get_dataset(in_path)
