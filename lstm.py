@@ -5,12 +5,14 @@ from keras.preprocessing import sequence
 from keras.models import Model,Sequential
 import data,utils
 
+def simple_exp(in_path,n_epochs=100):
+    utils.simple_exp(in_path,n_epochs=n_epochs,
+                        prepare=prepare_data,make_model=make_conv_lstm)
+
 def extract_features(in_path,out_path,n_epochs=100):
-    model=train_model(in_path,n_epochs=n_epochs)
-    extractor_model=make_extractor(model)
-    data_dict=data.get_dataset(in_path,splited=False)
-    feat_dict=lstm_extraction(data_dict,extractor_model)
-    save_feats(feat_dict,out_path)
+    utils.extract_features(in_path,out_path,n_epochs=n_epochs,
+                        prepare=prepare_data,make_model=make_conv_lstm,
+                        extraction=lstm_extraction)
 
 def lstm_extraction(data_dict,extractor_model):
     max_len=max([x_i.shape[0] for x_i  in data_dict.values()])
@@ -20,20 +22,6 @@ def lstm_extraction(data_dict,extractor_model):
         return extractor_model.predict(x_i)
     return {name_i:seq_helper(data_i)
                 for name_i,data_i in data_dict.items()}
-
-def make_extractor(model):
-    return Model(inputs=model.input,
-                outputs=model.get_layer("hidden").output)
-
-def train_model(in_path,n_epochs=10):
-    train_X,train_y,test_X,test_y,params=prepare_data(in_path)
-    model=make_conv_lstm(params)
-    model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
-    return model
-
-def simple_exp(in_path,n_epochs=100):
-    utils.simple_exp(in_path,n_epochs=n_epochs,
-                        prepare=prepare_data,make_model=make_conv_lstm)
 
 def prepare_data(in_path):
     (train_X,train_y),(test_X,test_y)=data.get_dataset(in_path)
@@ -78,5 +66,5 @@ def max_seq_len(seqs):
 	return max([seq_i.shape[0] for seq_i in seqs])
 
 if __name__ == "__main__":
-    simple_exp("mra")
-    #extract_features("mra","lstm.txt")
+    #simple_exp("mra")
+    extract_features("mra","lstm.txt",n_epochs=10)
