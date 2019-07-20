@@ -1,13 +1,17 @@
+import keras,keras.utils
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
 import numpy as np
 import re,cv2
 import data
 
-def train_model(in_path,out_path,out_path,n_epochs=10):
-    train_X,y,test_X,test_y,params=prepare(in_path)
-    model=make_model(params)
+def train_model(in_path,out_path,n_epochs=10):
+    train_X,train_y=read_imgs(in_path)
+    model=make_conv()
     model.summary()
     model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
-    model.binary(out_path)
+    model.save(out_path)
 
 def read_imgs(in_path,n_split=4):
     action_dirs=data.top_files(in_path)
@@ -22,30 +26,30 @@ def read_imgs(in_path,n_split=4):
                 frame_ij=cv2.imread(frame_ij_path,0)
                 frame_ij=np.array(np.vsplit(frame_ij,n_split)).T
                 X.append(frame_ij)
-                y.append( person_i)
-    return np.array(X),y
+                y.append( person_i/2)
+    return np.array(X),keras.utils.to_categorical(y)
 
 def get_person(action_i):
     name_i=action_i.split("/")[-1]
     name_i=re.sub('[a-z]','',name_i)
     return int(name_i.split('_')[1])
 
-def make_conv(params):
+def make_conv():
     model = Sequential()
     model.add(Conv2D(16, kernel_size=(5, 5),
                  activation='relu',
                  input_shape=(64,64,4)))
     model.add(MaxPooling2D(pool_size=(4, 4)))
     model.add(Conv2D(16, kernel_size=(5, 5),
-                 activation='relu')
+                 activation='relu'))
     model.add(MaxPooling2D(pool_size=(4, 4)))
     model.add(Flatten())
     model.add(Dense(100, activation='relu',name="hidden"))
-    model.add(Dropout(0.5))
-    model.add(Dense(units=params['n_cats'], activation='softmax'))
+    model.add(Dropout(0.25))
+    model.add(Dense(units=5, activation='softmax'))
     model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
     return model
 
 
-train_model("mra","persons",n_epochs=10)
+train_model("mra","persons",n_epochs=1500)
