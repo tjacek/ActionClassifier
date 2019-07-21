@@ -29,7 +29,7 @@ def read_single(in_path):
 
 def read_seq(path_i):
     name_i=path_i.split('/')[-1]
-    name_i=re.sub(r'[a-z]','',name_i.strip())
+    name_i=clean(name_i)#re.sub(r'[a-z]','',name_i.strip())
     data_i=np.loadtxt(path_i,dtype=float,delimiter=",")
     return (name_i,data_i)
 
@@ -73,7 +73,7 @@ def show_seq_len(data_dict):
         print((name_i+" %d %d") % data_i.shape )
 
 def multiple_dataset(in_path):
-    names=bottom_files(in_path,False)
+    names=[clean(name_i) for name_i in bottom_files(in_path,False)]
     first=names[0]
     for name_i in names[1:]:
         if(first==name_i):
@@ -101,3 +101,6 @@ def save_feats(feat_dict,out_path):
     file_str = open(out_path,'w')
     file_str.write(text)
     file_str.close()
+
+def clean(name_i):
+    return "_".join([str(int(n_i)) for n_i in re.findall(r'\d+',name_i)])
