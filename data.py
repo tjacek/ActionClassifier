@@ -73,7 +73,10 @@ def show_seq_len(data_dict):
         print((name_i+" %d %d") % data_i.shape )
 
 def multiple_dataset(in_path):
-    names=[clean(name_i) for name_i in bottom_files(in_path,False)]
+    names= bottom_files(in_path,False)
+    if(not names):
+        raise Exception("No data at: "+in_path)
+    names=[clean(name_i) for name_i in names]
     first=names[0]
     for name_i in names[1:]:
         if(first==name_i):
