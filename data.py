@@ -106,4 +106,7 @@ def save_feats(feat_dict,out_path):
     file_str.close()
 
 def clean(name_i):
-    return "_".join([str(int(n_i)) for n_i in re.findall(r'\d+',name_i)])
+    raw=name_i.split('_')
+    ending= raw[3] if(len(raw)>3) else ''
+    name_i=re.sub(r'\D0','',name_i.strip())
+    return "_".join(re.findall(r'\d+',name_i))+'_'+ending
