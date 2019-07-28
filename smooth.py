@@ -14,19 +14,33 @@ class GaussSmooth(object):
     def __call__(self,ts_i):
         return filters.convolve1d(ts_i,self.filtr)
 
-def smooth_curve(in_path,n_epochs=100):
+def smooth_plot(in_path,n_epochs=100):
     data_dict=data.get_dataset(in_path,splited=False)
     loss,acc=[],[]
     sigma=np.arange(1,10)
     for i in sigma:    
+        print("\n \n sigma %d" % i)
         smooth_i=smooth_dataset(data_dict,GaussSmooth(i))
-        loss_i,acc_i=conv_helper(smooth_i,n_epochs)
+        loss_i,acc_i= single_exp(smooth_i,n_epochs) #conv_helper(smooth_i,n_epochs)
+        print("acc %f std %f" %acc_i)
         loss.append(loss_i)
         acc.append(acc_i)
-    plt.plot(sigma,loss)
+    plot_curve(sigma,loss)
+    plot_curve(sigma,acc)
+    
+def plot_curve(x,y):
+    y=np.array(y)
+    print(y[:,0])
+    print(y[:,1])
+    plt.errorbar(x,y[:,0],y[:,1])
     plt.show()
-    plt.plot(sigma,acc)
-    plt.show()
+
+def single_exp(smooth_i,n_epochs):
+    result=[conv_helper(smooth_i,n_epochs) 
+                for i in range(10)]
+    mean_i=np.mean(result,axis=0)
+    std_i=np.std(result,axis=0)
+    return (mean_i[0],std_i[0]),(mean_i[1],std_i[1])
 
 def conv_helper(smooth_data,n_epochs=10):
     train_X,train_y,test_X,test_y,params=convnet.prepare_data(smooth_data)
@@ -45,4 +59,4 @@ def smooth_feature(sample_i,smooth):
     return np.array([ smooth(feat_j)
                 for feat_j in sample_i.T]).T
 
-smooth_curve("mra")
+smooth_plot("mra")
