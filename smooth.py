@@ -14,13 +14,22 @@ class GaussSmooth(object):
     def __call__(self,ts_i):
         return filters.convolve1d(ts_i,self.filtr)
 
+class FourrierSmooth(object):
+    def __init__(self, n=5):
+        self.n=n+2
+
+    def __call__(self,feature_i):
+        rft = np.fft.rfft(feature_i)
+        rft[self.n:] = 0
+        return np.fft.irfft(rft)
+
 def smooth_plot(in_path,n_epochs=100):
     data_dict=data.get_dataset(in_path,splited=False)
     loss,acc=[],[]
     sigma=np.arange(1,10)
     for i in sigma:    
         print("\n \n sigma %d" % i)
-        smooth_i=smooth_dataset(data_dict,GaussSmooth(i))
+        smooth_i=smooth_dataset(data_dict,FourrierSmooth(i))
         loss_i,acc_i= single_exp(smooth_i,n_epochs) #conv_helper(smooth_i,n_epochs)
         print("acc %f std %f" %acc_i)
         loss.append(loss_i)
