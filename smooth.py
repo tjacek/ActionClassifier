@@ -59,4 +59,4 @@ def smooth_feature(sample_i,smooth):
     return np.array([ smooth(feat_j)
                 for feat_j in sample_i.T]).T
 
-smooth_plot("mra")
+smooth_plot("data")
