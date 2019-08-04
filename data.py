@@ -17,7 +17,6 @@ def read_data(in_path):
     if(multiple_dataset(in_path)):
         datasets=[read_single(path_i) for path_i in top_files(in_path)]
         names=datasets[0].keys()
-        print(names)
         def name_helper(name_i):
             values=[dataset_i[name_i] for dataset_i in datasets]
             seq_len= min([value_i.shape[0] for value_i in values])
@@ -31,7 +30,10 @@ def read_data(in_path):
 def read_single(in_path):
     all_paths=bottom_files(in_path)
     postfix=common_endings(all_paths)
-    return dict([read_seq(path_i,postfix) for path_i in all_paths])
+    dict_i=dict([read_seq(path_i,postfix) for path_i in all_paths])
+    if(len(dict_i)==0):
+        raise Exception("No data at:"+in_path)
+    return dict_i
 
 def common_endings(names):
     all_endings=Set()
@@ -41,9 +43,9 @@ def common_endings(names):
             all_endings.update([ending_i])
     return len(all_endings)>1
 
-def read_seq(path_i,postfix=True):
+def read_seq(path_i,postfix=False):
     name_i=path_i.split('/')[-1]
-    name_i=clean(name_i,postfix)#re.sub(r'[a-z]','',name_i.strip())
+    name_i=clean(name_i,postfix)
     data_i=np.loadtxt(path_i,dtype=float,delimiter=",")
     return (name_i,data_i)
 
@@ -91,7 +93,6 @@ def multiple_dataset(in_path):
     if(not names):
         raise Exception("No data at: "+in_path)
     names=[clean(name_i,False) for name_i in names]
-    print(names)
     first=names[0]
     for name_i in names[1:]:
         if(first==name_i):
@@ -120,8 +121,8 @@ def save_feats(feat_dict,out_path):
     file_str.write(text)
     file_str.close()
 
-def clean(name_i,postfix=True):
+def clean(name_i,postfix=False):
     raw=name_i.split('_')
-    ending= raw[3] if(postfix and len(raw)>3) else ''
+    ending= raw[-1] if(postfix and len(raw)>3) else ''
     name_i=re.sub(r'\D0','',name_i.strip())
     return "_".join(re.findall(r'\d+',name_i))+'_'+ending
