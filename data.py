@@ -7,10 +7,15 @@ def get_dataset(in_path,splited=True):
         data_dict=read_data(in_path)
     else:
         data_dict=in_path
-    data_dict=norm_seqs(data_dict)
+    #data_dict=norm_seqs(data_dict)
     if(splited):
         train,test=split(data_dict)
-        return to_array(train),to_array(test)
+        train,test=to_array(train),to_array(test)
+        if(not train[1]):
+            raise Exception("no train data:" +in_path)
+        if(not test[1]):
+            raise Exception("no test data:" +in_path)
+        return train,test
     return data_dict
 
 def read_data(in_path):
@@ -92,12 +97,10 @@ def multiple_dataset(in_path):
     names= bottom_files(in_path,False)
     if(not names):
         raise Exception("No data at: "+in_path)
-    names=[clean(name_i,False) for name_i in names]
-    first=names[0]
-    for name_i in names[1:]:
-        if(first==name_i):
-            return True
-    return False
+    names=[clean(name_i,True) for name_i in names]
+    print(names)
+    set_names=Set(names)
+    return len(names)!=len(set_names)
 
 def norm_seqs(data_dict):
     all_X=np.concatenate(data_dict.values(),axis=0)
