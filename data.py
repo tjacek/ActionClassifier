@@ -110,6 +110,13 @@ def norm_seqs(data_dict):
         data_dict[name_i]=(data_i-all_mean)/all_std
     return data_dict
 
+def norm_local(data_dict):
+    for name_i,data_i in data_dict.items():
+        mean_i=np.mean(data_i,axis=0)
+        std_i=np.std(data_i,axis=0)
+        data_dict[name_i]=(data_i-mean_i)/std_i
+    return data_dict
+
 def make_dir(path):
     if(not os.path.isdir(path)):
         os.mkdir(path)
