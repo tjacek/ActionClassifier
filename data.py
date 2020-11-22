@@ -70,24 +70,6 @@ def to_array(data_dict):
     y=[ int(name_i.split('_')[0])-1 for name_i in names]
     return X,y
 
-def top_files(path):
-    return [ path+'/'+file_i for file_i in os.listdir(path)]
-    	
-def bottom_files(path,full_paths=True):
-    all_paths=[]
-    for root, directories, filenames in os.walk(path):
-        if(not directories):
-            for filename_i in filenames:
-                path_i= root+'/'+filename_i if(full_paths) else filename_i
-                all_paths.append(path_i)
-    all_paths.sort(key=natural_keys)        
-    return all_paths
-
-def natural_keys(text):
-    return [ atoi(c) for c in re.split('(\d+)', text) ]
-
-def atoi(text):
-    return int(text) if text.isdigit() else text
 
 def show_seq_len(data_dict):
     for name_i,data_i in data_dict.items():
@@ -117,10 +99,6 @@ def norm_local(data_dict):
         data_dict[name_i]=(data_i-mean_i)/std_i
     return data_dict
 
-def make_dir(path):
-    if(not os.path.isdir(path)):
-        os.mkdir(path)
-
 def save_feats(feat_dict,out_path):
     text=""
     for name_i,x_i in feat_dict.items():
@@ -130,9 +108,3 @@ def save_feats(feat_dict,out_path):
     file_str = open(out_path,'w')
     file_str.write(text)
     file_str.close()
-
-def clean(name_i,postfix=False):
-    raw=name_i.split('_')
-    ending= raw[-1] if(postfix and len(raw)>3) else ''
-    name_i=re.sub(r'\D0','',name_i.strip())
-    return "_".join(re.findall(r'\d+',name_i))+'_'+ending
