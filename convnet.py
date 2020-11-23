@@ -1,3 +1,4 @@
+import os.path
 import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
 from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
@@ -6,14 +7,27 @@ from keras import regularizers
 from keras.models import load_model
 import files,spline,seqs
 
-def train_nn(in_path,nn_path,out_path,n_epochs=5):
+def train_nn(in_path,nn_path,n_epochs=5):
     dataset=seqs.read_seqs(in_path)
     train,test=dataset.split()
     X,y,params=get_dataset(train)
     model=clf_model(params)
     model.fit(X,y,epochs=n_epochs,batch_size=32)
-    if(out_path):
-        model.save(out_path)
+    if(nn_path):
+        model.save(nn_path)
+
+def extract(in_path,nn_path,out_path):
+    dataset=seqs.read_seqs(in_path)
+    model=load_model(nn_path)
+    extractor=Model(inputs=model.input,
+                outputs=model.get_layer("hidden").output)
+    X,y,params=get_dataset(dataset)
+    new_X=model.predict(X)
+    names=dataset.names()
+    dataset={name_i:X[i] 
+                for i,name_i in enumerate(dataset.names())}
+    dataset=seqs.Seqs(dataset)
+    dataset.save(out_path)
 
 def get_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -44,10 +58,15 @@ def basic_model(params):
     x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
     return x,input_img
 
-def basic_exp(in_path):
-    paths=files.get_paths(in_path,["seqs","spline","nn","feats"])
+def basic_exp(in_path,n_epochs=1000):
+    path,name=os.path.split(in_path)
+    basic_path="%s/basic" % path
+    files.make_dir(basic_path)
+    paths=files.get_paths(basic_path,["spline","nn","feats"])
+    paths["seqs"]=in_path
     spline.upsample(paths['seqs'],paths['spline'],size=64)
-    train_nn(paths["spline"],paths["nn"],paths["feats"])
+    train_nn(paths["spline"],paths["nn"],n_epochs)
+    extract(paths["spline"],paths["nn"],paths["feats"])
 
-basic_exp("Data/MSR/common")
-#clf_model(params)
+if __name__ == "__main__":
+    basic_exp("Data/MSR/common/seqs")

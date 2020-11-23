@@ -23,7 +23,6 @@ def make_path(path):
     paths=path.split("/")
     for i in range(len(paths)):
         path_i="/".join(paths[:i+1])
-        print(path_i)
         make_dir(path_i)
 
 def make_dir(path):
@@ -40,12 +39,19 @@ def clean(name_i):
     name_i=re.sub(r'\D0','',name_i.strip())
     return "_".join(re.findall(r'\d+',name_i))
 
-def recursive_transform(in_path,out_path,name):
+def recursive_transform(in_path,out_path,name,fun):
+    def helper(root):
+        out_i=replace_path(root,out_path)            
+        make_path(out_i)
+        fun(root,out_i)
     for (root,dirs,files) in os.walk(in_path, topdown=True): 
         if(root.split('/')[-1]==name):
-            out_i=replace_path(root,out_path)            
-            make_path(out_i)
-            print("--------------")    
-            print(root)
-            print(dirs)
-            print(out_i)
+            if(dirs):
+                for path_j in dirs:
+                    in_i="%s/%s" % (root,path_j)
+                    helper(in_i)
+            else:
+                helper(root)
+
+def get_paths(dir_path,sufixes):
+    return {sufix_i:"%s/%s"%(dir_path,sufix_i) for sufix_i in sufixes}

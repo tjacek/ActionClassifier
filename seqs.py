@@ -8,6 +8,9 @@ class Seqs(dict):
 	def dim(self):
 		return list(self.values())[0].shape[1]
 
+	def names(self):
+		return sorted(self.keys(),key=files.natural_keys) 
+	
 	def split(self,selector=None):
 		if(not selector):
 			selector=person_selector
@@ -20,7 +23,7 @@ class Seqs(dict):
 		return train,test
 
 	def to_dataset(self):
-		names=sorted(self.keys(),key=files.natural_keys) 
+		names=self.names() 
 		X=np.array([self[name_i] for name_i in names])
 		y=[ int(name_i.split('_')[0])-1 for name_i in names]
 		return X,y
