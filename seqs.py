@@ -2,8 +2,8 @@ import numpy as np
 import files
 
 class Seqs(dict):
-	def __init__(self):
-		super(Seqs, self).__init__()
+	def __init__(self,args=[]):
+		super(Seqs, self).__init__(args)
 
 	def split(self,selector=None):
 		if(not selector):
@@ -22,6 +22,12 @@ class Seqs(dict):
 		y=[ int(name_i.split('_')[0])-1 for name_i in names]
 		return X,y
 
+	def save(self,out_path):
+		files.make_dir(out_path)
+		for name_i,seq_i in self.items():
+			out_i="%s/%s" % (out_path,name_i)
+			np.save(out_i,seq_i)
+
 def person_selector(name_i):
 	person_i=int(name_i.split('_')[1])
 	return person_i%2==1
@@ -36,5 +42,12 @@ def read_seqs(in_path):
 		seq_dict[name_i]=data_i
 	return seq_dict
 
-s=read_seqs("Data/MSR/common/seqs")	
-print(s.to_dataset()[1])
+def rec_split(in_path,out_path):
+	def helper(in_i,out_i):
+		print(in_i)
+		print(out_i)
+		seqs_i=read_seqs(in_i)
+		train,test=seqs_i.split()
+		train.save("%s/train" % out_i)
+		test.save("%s/test" % out_i)
+	files.recursive_transform(in_path,out_path,"seqs",helper)
