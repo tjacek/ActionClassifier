@@ -1,8 +1,10 @@
 import os,re
 
 def top_files(path):
-    return [ path+'/'+file_i for file_i in os.listdir(path)]
-    	
+    paths=[ path+'/'+file_i for file_i in os.listdir(path)]
+    paths=sorted(paths,key=natural_keys)
+    return paths
+
 def bottom_files(path,full_paths=True):
     all_paths=[]
     for root, directories, filenames in os.walk(path):

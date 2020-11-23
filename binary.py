@@ -1,13 +1,17 @@
 import numpy as np
 import os.path
-import seqs,files
+import seqs,files,spline
 import convnet
 
-def unified_exp(in_path, n_epochs=1000):
-    path,name=os.path.split(in_path)
-    paths=files.get_paths(path,["seqs","spline","nn","feats"])
-#    convnet.train_nn(paths["spline"],paths["nn"],n_epochs,
-#                read=read_unified)
+def unified_exp(in_path,n_epochs=3000):
+#    path,name=os.path.split(in_path)
+    united_path="%s/united" % in_path
+    files.make_dir(united_path)
+    paths=files.get_paths(united_path,["spline","nn","feats"])
+    paths["seqs"]="%s/seqs" % in_path
+    spline.ens_upsample(paths["seqs"],paths["spline"],size=64)
+    convnet.train_nn(paths["spline"],paths["nn"],n_epochs,
+                read=read_unified)
     convnet.extract(paths["spline"],paths["nn"],paths["feats"],
                     read=read_unified)
 
@@ -21,4 +25,4 @@ def read_unified(in_path):
         unified[name_i]=np.concatenate(seq_i,axis=1)
     return unified
 
-unified_exp("Data/MSR/spline")
+unified_exp("Data/3DHOI")
