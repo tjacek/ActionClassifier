@@ -1,10 +1,26 @@
-import keras,keras.backend as K
+import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
 from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras import regularizers
 from keras.models import load_model
-import files,spline
+import files,spline,seqs
+
+def train_nn(in_path,nn_path,out_path,n_epochs=5):
+    dataset=seqs.read_seqs(in_path)
+    train,test=dataset.split()
+    X,y,params=get_dataset(train)
+    model=clf_model(params)
+    model.fit(X,y,epochs=n_epochs,batch_size=32)
+    if(out_path):
+        model.save(out_path)
+
+def get_dataset(seqs):
+    X,y=seqs.to_dataset()
+    y=keras.utils.to_categorical(y)
+    params={'ts_len':X.shape[1],'n_feats':X.shape[2],
+                'n_cats':y.shape[1]}
+    return X,y,params
 
 def clf_model(params):
     x,input_img=basic_model(params)
@@ -29,8 +45,9 @@ def basic_model(params):
     return x,input_img
 
 def basic_exp(in_path):
-    paths=files.get_paths(in_path,["seqs","spline"])
+    paths=files.get_paths(in_path,["seqs","spline","nn","feats"])
     spline.upsample(paths['seqs'],paths['spline'],size=64)
+    train_nn(paths["spline"],paths["nn"],paths["feats"])
 
 basic_exp("Data/MSR/common")
 #clf_model(params)
