@@ -23,8 +23,8 @@ class SplineUpsampling(object):
             cs=CubicSpline(old_x,feat_i)
             return cs(old_x)
 
-#def ens_upsample(in_path,out_path,size=64):
-#    ens.transform_template(upsample,in_path,out_path,size)
+def ens_upsample(in_path,out_path,size=64):
+    files.ens_template(in_path,out_path,upsample)
 
 def upsample(in_path,out_path,size=64):
     seq_dict=seqs.read_seqs(in_path)#single.read_frame_feats(in_path)   
@@ -33,3 +33,6 @@ def upsample(in_path,out_path,size=64):
                     if(seq_i.shape[0]>1)}
     seq_dict=seqs.Seqs(seq_dict)
     seq_dict.save(out_path)
+
+if __name__ == "__main__":
+    ens_upsample("Data/MSR/seqs","Data/MSR/spline")
