@@ -5,10 +5,11 @@ from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras import regularizers
 from keras.models import load_model
-import files,spline,seqs
+import files,spline,seqs,data
 
-def train_nn(in_path,nn_path,n_epochs=5):
-    dataset=seqs.read_seqs(in_path)
+def train_nn(in_path,nn_path,n_epochs=5,
+                read=seqs.read_seqs):
+    dataset=read(in_path)
     train,test=dataset.split()
     X,y,params=get_dataset(train)
     model=clf_model(params)
@@ -16,18 +17,20 @@ def train_nn(in_path,nn_path,n_epochs=5):
     if(nn_path):
         model.save(nn_path)
 
-def extract(in_path,nn_path,out_path):
-    dataset=seqs.read_seqs(in_path)
+def extract(in_path,nn_path,out_path,
+            read=seqs.read_seqs):
+    dataset=read(in_path)
     model=load_model(nn_path)
     extractor=Model(inputs=model.input,
                 outputs=model.get_layer("hidden").output)
     X,y,params=get_dataset(dataset)
     new_X=model.predict(X)
     names=dataset.names()
-    dataset={name_i:X[i] 
+    feat_dict={name_i:X[i] 
                 for i,name_i in enumerate(dataset.names())}
-    dataset=seqs.Seqs(dataset)
-    dataset.save(out_path)
+    data.save_feats(feat_dict,out_path)
+#    dataset=seqs.Seqs(dataset)
+#    dataset.save(out_path)
 
 def get_dataset(seqs):
     X,y=seqs.to_dataset()
