@@ -26,11 +26,9 @@ def extract(in_path,nn_path,out_path,
     X,y,params=get_dataset(dataset)
     new_X=model.predict(X)
     names=dataset.names()
-    feat_dict={name_i:X[i] 
+    feat_dict={name_i:new_X[i] 
                 for i,name_i in enumerate(dataset.names())}
     data.save_feats(feat_dict,out_path)
-#    dataset=seqs.Seqs(dataset)
-#    dataset.save(out_path)
 
 def get_dataset(seqs):
     X,y=seqs.to_dataset()
