@@ -1,10 +1,9 @@
 import numpy as np
 import os.path
-import seqs,files,spline
+import seqs,files,spline,data
 import convnet
 
-def unified_exp(in_path,n_epochs=3000):
-#    path,name=os.path.split(in_path)
+def unified_exp(in_path,n_epochs=1000):
     united_path="%s/united" % in_path
     files.make_dir(united_path)
     paths=files.get_paths(united_path,["spline","nn","feats"])
@@ -23,6 +22,8 @@ def read_unified(in_path):
     for name_i in names:
         seq_i=[ dict_j[name_i]  for dict_j in all_seqs]
         unified[name_i]=np.concatenate(seq_i,axis=1)
+#        raise Exception( unified[name_i].shape)
+    unified=data.norm_local(unified)
     return unified
 
 unified_exp("Data/3DHOI")

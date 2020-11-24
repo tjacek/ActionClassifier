@@ -6,7 +6,8 @@ def show_seq_len(data_dict):
         print((name_i+" %d %d") % data_i.shape )
 
 def norm_seqs(data_dict):
-    all_X=np.concatenate(data_dict.values(),axis=0)
+    all_X=np.concatenate(list(data_dict.values()),axis=0)
+#    raise Exception(all_X.shape)
     all_mean=np.mean(all_X,axis=0)
     all_std=np.std(all_X,axis=0)
     for name_i,data_i in data_dict.items():
@@ -17,6 +18,7 @@ def norm_local(data_dict):
     for name_i,data_i in data_dict.items():
         mean_i=np.mean(data_i,axis=0)
         std_i=np.std(data_i,axis=0)
+        std_i[std_i==0]=1
         data_dict[name_i]=(data_i-mean_i)/std_i
     return data_dict
 
