@@ -1,29 +1,21 @@
-import numpy as np
-import os.path
-import seqs,files,spline,data
-import convnet
+import files,spline,convnet
 
-def unified_exp(in_path,n_epochs=1000):
-    united_path="%s/united" % in_path
-    files.make_dir(united_path)
-    paths=files.get_paths(united_path,["spline","nn","feats"])
-    paths["seqs"]="%s/seqs" % in_path
-    spline.ens_upsample(paths["seqs"],paths["spline"],size=64)
-    convnet.train_nn(paths["spline"],paths["nn"],n_epochs,
-                read=read_unified)
-    convnet.extract(paths["spline"],paths["nn"],paths["feats"],
-                    read=read_unified)
+def binary_exp(in_path,n_epochs=1000):
+	binary_path="%s/binary" % in_path
+	files.make_dir(binary_path)
+	input_paths=files.top_files("%s/seqs" % in_path)
+	binary(input_paths,binary_path)
 
-def read_unified(in_path):
-    all_seqs=[seqs.read_seqs(path_i) 
-        for path_i in files.top_files(in_path)]
-    names=all_seqs[0].names()
-    unified=seqs.Seqs()
-    for name_i in names:
-        seq_i=[ dict_j[name_i]  for dict_j in all_seqs]
-        unified[name_i]=np.concatenate(seq_i,axis=1)
-#        raise Exception( unified[name_i].shape)
-    unified=data.norm_local(unified)
-    return unified
+def binary(input_paths,out_path,n_epochs=1000):
+	dirs=files.get_paths(out_path,["spline","nn","feats"])
+	for dir_i in dirs.values():
+		files.make_dir(dir_i)
+	for path_i in input_paths:
+		name_i=path_i.split('/')[-1]
+		out_i={ key_i:"%s/%s" % (path_i,name_i) 
+				for key_i,path_i in dirs.items()}
+		spline.upsample(path_i,out_i["spline"],size=96)
+		convnet.train_nn(out_i["spline"],out_i["nn"],n_epochs)
+		convnet.extract(out_i["spline"],out_i["nn"],out_i["feats"])
 
-unified_exp("Data/3DHOI")
+binary_exp("Data/MSR")
