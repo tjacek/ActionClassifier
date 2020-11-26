@@ -1,3 +1,4 @@
+import numpy as np
 import os.path
 import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
@@ -21,8 +22,9 @@ class TrainNN(object):
         if(nn_path):
             model.save(nn_path)
 
-def get_train():
-    return TrainNN(seqs.read_seqs,clf_model)
+def get_train(nn_type="wide"):
+    make_model=make_narrow1D if(nn_type=="narrow") else clf_model
+    return TrainNN(narrow_read,make_model)
 
 def extract(in_path,nn_path,out_path,
             read=seqs.read_seqs):
@@ -65,6 +67,51 @@ def basic_model(params):
     x=Flatten()(x)
     x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
     return x,input_img
+
+def make_narrow1D(params):
+    input_img=Input(shape=(params['ts_len'], params['n_feats'],1))
+    x=Conv2D(8,kernel_size=(8, 1),activation='relu')(input_img)
+    x=MaxPooling2D(pool_size=(4, 1))(x)
+    x=Conv2D(8, kernel_size=(8, 1),activation='relu')(x)
+    x=MaxPooling2D(pool_size=(4, 1))(x)
+    x=Flatten()(x)
+    x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
+    x=Dense(units=params['n_cats'],activation='softmax')(x)
+    model = Model(input_img, x)
+    model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
+    model.summary()
+    return model
+
+def narrow_read(in_path):
+    seq_dict=seqs.read_seqs(in_path)
+    seq_dict={name_i:np.expand_dims(seq_i,axis=-1)
+        for name_i,seq_i in seq_dict.items()}
+#        seq_i=np.expand_dims(seq_i,axis=-1)
+#        raise Exception(seq_i.shape)
+    return seqs.Seqs(seq_dict)
+
+def make_narrow1D_(params):
+    raise Exception("Wrong")
+    model = Sequential()
+    model.add(Conv2D(8, kernel_size=(8, 1),
+                 activation='relu',
+                 input_shape=(None,params['ts_len'],params['n_feats'])))
+    model.add(MaxPooling2D(pool_size=(4, 1)))
+    model.add(Conv2D(8, kernel_size=(8, 1),
+                 activation='relu',
+                 input_shape=(params['ts_len'],params['n_feats'])))
+    model.add(MaxPooling2D(pool_size=(4, 1)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu',name="hidden"))
+    model.add(Dropout(0.5))
+    model.add(Dense(units=params['n_cats'], activation='softmax'))
+    model.compile(loss=keras.losses.categorical_crossentropy,
+              #optimizer=keras.optimizers.Adadelta(),
+              optimizer=keras.optimizers.SGD(lr=0.01,  momentum=0.9, nesterov=True))
+    #          metrics=['accuracy'])
+    return model
 
 def basic_exp(in_path,n_epochs=1000):
     path,name=os.path.split(in_path)

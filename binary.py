@@ -21,11 +21,11 @@ class EnsTransform(object):
 							for name_k in arg_names]
 				fun(*fun_args)
 
-def binary_exp(in_path,n_epochs=1000):
-	binary_path="%s/binary" % in_path
+def binary_exp(in_path,n_epochs=1000,dir_name="narrow"):
+	binary_path="%s/%s" % (in_path,dir_name)
 	files.make_dir(binary_path)
 	input_paths=files.top_files("%s/seqs" % in_path)
-	train=convnet.get_train()
+	train=convnet.get_train("narrow")
 	ensemble1D(input_paths,binary_path,train)
 #	binary(input_paths,binary_path)
 
@@ -38,4 +38,4 @@ def ensemble1D(input_paths,out_path,train,n_epochs=1000,size=64):
 	arg_dict={'size':size,'n_epochs':n_epochs}
 	ens(input_paths,out_path, arg_dict)
 
-binary_exp("Data/3DHOI")
+binary_exp("Data/MSR")
