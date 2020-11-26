@@ -1,6 +1,6 @@
 import files,spline,convnet
 
-class SeqEnsemble(object):
+class EnsTransform(object):
 	def __init__(self,funcs,dir_names):
 		self.funcs=funcs
 		self.dir_names=dir_names
@@ -25,16 +25,17 @@ def binary_exp(in_path,n_epochs=1000):
 	binary_path="%s/binary" % in_path
 	files.make_dir(binary_path)
 	input_paths=files.top_files("%s/seqs" % in_path)
-	ensemble1D(input_paths,binary_path)
+	train=convnet.get_train()
+	ensemble1D(input_paths,binary_path,train)
 #	binary(input_paths,binary_path)
 
-def ensemble1D(input_paths,out_path,n_epochs=1000,size=96):
+def ensemble1D(input_paths,out_path,train,n_epochs=1000,size=64):
 	funcs=[ [spline.upsample,["seqs","spline","size"]],
-			[convnet.train_nn,["spline","nn","n_epochs"]],
+			[train,["spline","nn","n_epochs"]],
 			[convnet.extract,["spline","nn","feats"]]]
 	dir_names=["spline","nn","feats"]
-	ens=SeqEnsemble(funcs,dir_names)
-	arg_dict={'size':96,'n_epochs':n_epochs}
+	ens=EnsTransform(funcs,dir_names)
+	arg_dict={'size':size,'n_epochs':n_epochs}
 	ens(input_paths,out_path, arg_dict)
 
 binary_exp("Data/3DHOI")

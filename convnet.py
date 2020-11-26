@@ -7,15 +7,22 @@ from keras import regularizers
 from keras.models import load_model
 import files,spline,seqs,data
 
-def train_nn(in_path,nn_path,n_epochs=5,
-                read=seqs.read_seqs):
-    dataset=read(in_path)
-    train,test=dataset.split()
-    X,y,params=get_dataset(train)
-    model=clf_model(params)
-    model.fit(X,y,epochs=n_epochs,batch_size=32)
-    if(nn_path):
-        model.save(nn_path)
+class TrainNN(object):
+    def __init__(self,read,make_model):
+        self.read=read
+        self.make_model=make_model
+
+    def __call__(self,in_path,nn_path,n_epochs=5):
+        dataset=self.read(in_path)
+        train,test=dataset.split()
+        X,y,params=get_dataset(train)
+        model=self.make_model(params)
+        model.fit(X,y,epochs=n_epochs,batch_size=32)
+        if(nn_path):
+            model.save(nn_path)
+
+def get_train():
+    return TrainNN(seqs.read_seqs,clf_model)
 
 def extract(in_path,nn_path,out_path,
             read=seqs.read_seqs):
@@ -65,6 +72,7 @@ def basic_exp(in_path,n_epochs=1000):
     files.make_dir(basic_path)
     paths=files.get_paths(basic_path,["spline","nn","feats"])
     paths["seqs"]=in_path
+    train_nn=TrainNN()
     spline.upsample(paths['seqs'],paths['spline'],size=64)
     train_nn(paths["spline"],paths["nn"],n_epochs)
     extract(paths["spline"],paths["nn"],paths["feats"])
