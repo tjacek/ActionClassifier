@@ -22,22 +22,28 @@ class TrainNN(object):
         if(nn_path):
             model.save(nn_path)
 
-def get_train(nn_type="wide"):
-    make_model=make_narrow1D if(nn_type=="narrow") else clf_model
-    return TrainNN(narrow_read,make_model)
-
-def extract(in_path,nn_path,out_path,
-            read=seqs.read_seqs):
-    dataset=read(in_path)
-    model=load_model(nn_path)
-    extractor=Model(inputs=model.input,
+class Extract(object):
+    def __init__(self,read):
+        self.read=read
+        
+    def __call__(self,in_path,nn_path,out_path):
+        dataset=self.read(in_path)
+        model=load_model(nn_path)
+        extractor=Model(inputs=model.input,
                 outputs=model.get_layer("hidden").output)
-    X,y,params=get_dataset(dataset)
-    new_X=model.predict(X)
-    names=dataset.names()
-    feat_dict={name_i:new_X[i] 
+        X,y,params=get_dataset(dataset)
+        new_X=model.predict(X)
+        names=dataset.names()
+        feat_dict={name_i:new_X[i] 
                 for i,name_i in enumerate(dataset.names())}
-    data.save_feats(feat_dict,out_path)
+        data.save_feats(feat_dict,out_path)
+
+def get_train(nn_type="wide"):
+    if(nn_type=="narrow"):
+        read=narrow_read
+        return TrainNN(read,make_narrow1D),Extract(read)
+    read=seqs.read_seqs
+    return TrainNN(read,basic_model),Extract(read)
 
 def get_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -70,9 +76,9 @@ def basic_model(params):
 
 def make_narrow1D(params):
     input_img=Input(shape=(params['ts_len'], params['n_feats'],1))
-    x=Conv2D(8,kernel_size=(8, 1),activation='relu')(input_img)
+    x=Conv2D(32,kernel_size=(8, 1),activation='relu')(input_img)
     x=MaxPooling2D(pool_size=(4, 1))(x)
-    x=Conv2D(8, kernel_size=(8, 1),activation='relu')(x)
+    x=Conv2D(32, kernel_size=(8, 1),activation='relu')(x)
     x=MaxPooling2D(pool_size=(4, 1))(x)
     x=Flatten()(x)
     x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
@@ -87,31 +93,7 @@ def narrow_read(in_path):
     seq_dict=seqs.read_seqs(in_path)
     seq_dict={name_i:np.expand_dims(seq_i,axis=-1)
         for name_i,seq_i in seq_dict.items()}
-#        seq_i=np.expand_dims(seq_i,axis=-1)
-#        raise Exception(seq_i.shape)
     return seqs.Seqs(seq_dict)
-
-def make_narrow1D_(params):
-    raise Exception("Wrong")
-    model = Sequential()
-    model.add(Conv2D(8, kernel_size=(8, 1),
-                 activation='relu',
-                 input_shape=(None,params['ts_len'],params['n_feats'])))
-    model.add(MaxPooling2D(pool_size=(4, 1)))
-    model.add(Conv2D(8, kernel_size=(8, 1),
-                 activation='relu',
-                 input_shape=(params['ts_len'],params['n_feats'])))
-    model.add(MaxPooling2D(pool_size=(4, 1)))
-    model.add(Dropout(0.25))
-    model.add(Flatten())
-    model.add(Dense(100, activation='relu',name="hidden"))
-    model.add(Dropout(0.5))
-    model.add(Dense(units=params['n_cats'], activation='softmax'))
-    model.compile(loss=keras.losses.categorical_crossentropy,
-              #optimizer=keras.optimizers.Adadelta(),
-              optimizer=keras.optimizers.SGD(lr=0.01,  momentum=0.9, nesterov=True))
-    #          metrics=['accuracy'])
-    return model
 
 def basic_exp(in_path,n_epochs=1000):
     path,name=os.path.split(in_path)
