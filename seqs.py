@@ -11,16 +11,9 @@ class Seqs(dict):
 	def names(self):
 		return sorted(self.keys(),key=files.natural_keys) 
 	
-	def split(self,selector=None):
-		if(not selector):
-			selector=person_selector
-		train,test=Seqs(),Seqs()
-		for name_i in self.keys():
-			if(selector(name_i)):
-				train[name_i]=self[name_i]
-			else:
-				test[name_i]=self[name_i]
-		return train,test
+    def split(self,selector=None):
+        train,test=files.split(self,selector)
+        return Seqs(train),Seqs(test)
 
 	def to_dataset(self):
 		names=self.names() 
@@ -33,10 +26,6 @@ class Seqs(dict):
 		for name_i,seq_i in self.items():
 			out_i="%s/%s" % (out_path,name_i)
 			np.save(out_i,seq_i)
-
-def person_selector(name_i):
-	person_i=int(name_i.split('_')[1])
-	return person_i%2==1
 
 def read_seqs(in_path):
 	paths=files.top_files(in_path)

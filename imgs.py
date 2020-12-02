@@ -21,6 +21,10 @@ class FrameSeqs(dict):
     def dim(self):
         return list(self.values())[0][0].shape
 
+    def split(self,selector=None):
+        train,test=files.split(self,selector)
+        return FrameSeqs(train),FrameSeqs(test)
+
 def read_frame_seqs(in_path):
     frame_seqs=FrameSeqs()
     for path_i in files.top_files(in_path):
@@ -64,12 +68,6 @@ def train_binary_model(in_path,out_path,n_epochs=10):
         out_i=out_path+'/nn'+str(cat_i)
         model.save(out_i)
 
-def train_model(in_path,out_path,n_epochs=10):
-    train_X,train_y=read_imgs(in_path)
-    model=make_conv(train_y.shape[1])
-    model.summary()
-    model.fit(train_X,train_y,epochs=n_epochs,batch_size=32)
-    model.save(out_path)
 
 def read_imgs(in_path,n_split=4):
     action_dirs=data.top_files(in_path)
@@ -84,12 +82,6 @@ def read_imgs(in_path,n_split=4):
                 X.append(read_frame(frame_ij_path))                
                 y.append( person_i/2)
     return np.array(X),keras.utils.to_categorical(y)
-
-
-def get_person(action_i):
-    name_i=action_i.split("/")[-1]
-    name_i=re.sub('[a-z]','',name_i)
-    return int(name_i.split('_')[1])
 
 def make_conv(n_cats):
     model = Sequential()
@@ -110,4 +102,4 @@ def make_conv(n_cats):
     return model
 
 frames=read_frame_seqs("full")
-print(frames.dim())
+print( len(frames.split()[0]))

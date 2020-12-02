@@ -21,6 +21,26 @@ def natural_keys(text):
 def atoi(text):
     return int(text) if text.isdigit() else text
 
+def clean(name_i):
+    raw=name_i.split('_')
+    name_i=re.sub(r'\D0','',name_i.strip())
+    return "_".join(re.findall(r'\d+',name_i))
+
+def split(dict,selector=None):
+    if(not selector):
+        selector=person_selector
+    train,test=[],[]
+    for name_i in dict.keys():
+        if(selector(name_i)):
+            train.append((name_i,dict[name_i]))
+        else:
+            test.append((name_i,dict[name_i]))
+    return train,test
+
+def person_selector(name_i):
+    person_i=int(name_i.split('_')[1])
+    return person_i%2==1
+
 def make_path(path):
     paths=path.split("/")
     for i in range(len(paths)):
@@ -35,11 +55,6 @@ def replace_path(in_path,out_path):
     paths=in_path.split('/')[1:]
     paths=[out_path]+paths
     return "/".join(paths)
-
-def clean(name_i):
-    raw=name_i.split('_')
-    name_i=re.sub(r'\D0','',name_i.strip())
-    return "_".join(re.findall(r'\d+',name_i))
 
 def recursive_transform(in_path,out_path,name,fun):
     def helper(root):
