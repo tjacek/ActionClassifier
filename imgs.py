@@ -1,16 +1,38 @@
-import keras,keras.utils
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.models import load_model
+#import keras,keras.utils
+#from keras.models import Sequential
+#from keras.layers import Dense, Dropout, Flatten
+#from keras.layers import Conv2D, MaxPooling2D
+#from keras.models import load_model
+#import re
+#import data,binary
+#from keras import backend as K
+#import os
+#import importlib
+#import random
+#from keras import regularizers
 import numpy as np
-import re,cv2
-import data,binary
-from keras import backend as K
-import os
-import importlib
-import random
-from keras import regularizers
+import cv2
+import files
+
+class FrameSeqs(dict):
+    def __init__(self, args=[]):
+        super(FrameSeqs, self).__init__(args)
+
+    def dim(self):
+        return list(self.values())[0][0].shape
+
+def read_frame_seqs(in_path):
+    frame_seqs=FrameSeqs()
+    for path_i in files.top_files(in_path):
+        name_i=files.clean(path_i.split('/')[-1])
+        frames=[ read_frame(path_j,n_split=3) 
+                for path_j in files.top_files(path_i)]
+        frame_seqs[name_i]=frames
+    return frame_seqs
+
+def read_frame(in_path,n_split=3):
+    frame_ij=cv2.imread(in_path,cv2.IMREAD_GRAYSCALE)
+    return np.array(np.vsplit(frame_ij,n_split)).T
 
 def extract_frame_feats(in_path,nn_path,out_path):
     model=load_model(nn_path)
@@ -51,7 +73,6 @@ def train_model(in_path,out_path,n_epochs=10):
 
 def read_imgs(in_path,n_split=4):
     action_dirs=data.top_files(in_path)
-    #action_dirs.sort(key=data.natural_keys)
     random.shuffle(action_dirs)
     X,y=[],[]
     for action_i in action_dirs:
@@ -64,9 +85,6 @@ def read_imgs(in_path,n_split=4):
                 y.append( person_i/2)
     return np.array(X),keras.utils.to_categorical(y)
 
-def read_frame(frame_ij_path,n_split=4):
-    frame_ij=cv2.imread(frame_ij_path,0)
-    return np.array(np.vsplit(frame_ij,n_split)).T
 
 def get_person(action_i):
     name_i=action_i.split("/")[-1]
@@ -91,15 +109,5 @@ def make_conv(n_cats):
               optimizer=keras.optimizers.Adadelta())
     return model
 
-def set_keras_backend(backend):
-
-    if K.backend() != backend:
-        os.environ['KERAS_BACKEND'] = backend
-        importlib.reload(K)
-        assert K.backend() == backend
-
-set_keras_backend("theano")
-
-#train_model("frames","persons",n_epochs=100)
-train_binary_model("frames","binary_persons",n_epochs=100)
-#extract_frame_feats("mra","persons","person_feats")
+frames=read_frame_seqs("full")
+print(frames.dim())
