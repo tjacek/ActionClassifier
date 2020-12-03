@@ -17,8 +17,19 @@ def train_model(in_path,nn_path="agum_nn",n_epochs=1000):
     if(nn_path):
         model.save(nn_path)
 
-def filtr_seqs(in_path,out_path):
+def filtr_seqs(in_path,nn_path,out_path):
     frame_seqs=imgs.read_frame_seqs(in_path)
+    model=load_model(nn_path)
+    def helper(seq_i):
+        result_i=model.predict(np.array(seq_i))
+        no_action=np.argmax(result_i,axis=1)
+        seq_i=[frame_j 
+                for j,frame_j in enumerate(seq_i)
+                    if(no_action[j]==1)]
+        return seq_i
+    frame_seqs={name_i:helper(seq_i) 
+            for name_i,seq_i in frame_seqs.items()}
+    frame_seqs=imgs.FrameSeqs(frame_seqs)
     frame_seqs.save(out_path)
 
 def get_dataset(frame_seqs):
@@ -50,4 +61,4 @@ def make_conv(params):
     model.summary()
     return model
 
-filtr_seqs("full","test2")
+filtr_seqs("full","agum_nn","test2")

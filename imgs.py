@@ -17,6 +17,8 @@ class FrameSeqs(dict):
         files.make_dir(out_path)
         for name_i,seq_i in self.items():
             out_i="%s/%s" % (out_path,name_i)
+            seq_i=[np.concatenate(frame_j.T,axis=0) 
+                    for frame_j in seq_i]
             save_frames(out_i,seq_i)
 
 def read_frame_seqs(in_path):
