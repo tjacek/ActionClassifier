@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
-import files
+from keras.models import load_model
+import files,seqs
 
 class FrameSeqs(dict):
     def __init__(self, args=[]):
@@ -39,6 +40,14 @@ def save_frames(in_path,frames):
     for i,frame_i in enumerate(frames):
         out_i="%s/%d.png" % (in_path,i)
         cv2.imwrite(out_i, frame_i)
+
+def extract_features(in_path,nn_path,out_path):
+    frame_seqs=read_frame_seqs(in_path)
+    model=load_model(nn_path)   
+    feat_seqs=seqs.Seqs()
+    for name_i,seq_i in frame_seqs.items():
+        feat_seqs[name_i]=model.predict(np.array(seq_i))
+    feat_seqs.save(out_path)
 #def extract_frame_feats(in_path,nn_path,out_path):
 #    model=load_model(nn_path)
 #    action_dirs=data.top_files(in_path)

@@ -11,9 +11,9 @@ class Seqs(dict):
 	def names(self):
 		return sorted(self.keys(),key=files.natural_keys) 
 	
-    def split(self,selector=None):
-        train,test=files.split(self,selector)
-        return Seqs(train),Seqs(test)
+	def split(self,selector=None):
+		train,test=files.split(self,selector)
+		return Seqs(train),Seqs(test)
 
 	def to_dataset(self):
 		names=self.names() 
