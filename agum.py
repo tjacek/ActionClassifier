@@ -61,4 +61,5 @@ def make_conv(params):
     model.summary()
     return model
 
-filtr_seqs("full","agum_nn","test2")
+#filtr_seqs("full","agum_nn","test2")
+imgs.extract_features("test2","short/ae","ae_feats")
