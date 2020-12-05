@@ -5,7 +5,7 @@ import keras.utils
 from keras import regularizers
 from keras.models import load_model
 import numpy as np
-import imgs
+import imgs,files,shutil
 
 def train_model(in_path,nn_path="agum_nn",n_epochs=1000):
     frame_seqs=imgs.read_frame_seqs(in_path)
@@ -44,11 +44,11 @@ def get_dataset(frame_seqs):
 
 def make_conv(params):
     model = Sequential()
-    model.add(Conv2D(16, kernel_size=(5, 5),
+    model.add(Conv2D(64, kernel_size=(5, 5),
                  activation='relu',
                  input_shape=params['dims']))
     model.add(MaxPooling2D(pool_size=(4, 4)))
-    model.add(Conv2D(16, kernel_size=(5, 5),
+    model.add(Conv2D(32, kernel_size=(5, 5),
                  activation='relu'))#,input_shape=(64,64,4)))
     model.add(MaxPooling2D(pool_size=(4, 4)))
     model.add(Flatten())
@@ -61,5 +61,17 @@ def make_conv(params):
     model.summary()
     return model
 
-#filtr_seqs("full","agum_nn","test2")
-imgs.extract_features("test2","short/ae","ae_feats")
+def one_dict(paths,out_path=None):
+    files.make_dir(out_path)
+    for i,path_i in enumerate(paths):
+        for sample_j in files.top_files(path_i):
+            name_j=sample_j.split('/')[-1]
+            name_j,postfix=name_j.split('.')
+            name_j=files.clean(name_j)
+            out_i="%s/%s_%d.%s" % (out_path,name_j,i,postfix)
+            shutil.move(sample_j,out_i)
+            
+#train_model("agum/full","agum/filtr_nn",n_epochs=1000)
+#filtr_seqs("agum/full","agum/filtr_nn","agum/frames")
+#imgs.extract_features("agum/frames","short/ae","agum/feats")
+one_dict(["agum/seqs","../MSR_seqs/common"],"agum/single/seqs")
