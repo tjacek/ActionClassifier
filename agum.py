@@ -64,14 +64,19 @@ def make_conv(params):
 def one_dict(paths,out_path=None):
     files.make_dir(out_path)
     for i,path_i in enumerate(paths):
-        for sample_j in files.top_files(path_i):
+        print(path_i)
+        for sample_j in files.top_files(path_i):           
             name_j=sample_j.split('/')[-1]
             name_j,postfix=name_j.split('.')
             name_j=files.clean(name_j)
-            out_i="%s/%s_%d.%s" % (out_path,name_j,i,postfix)
-            shutil.move(sample_j,out_i)
-            
+            if(i==0 or files.person_selector(name_j)):
+                if(i==0):
+                    out_i="%s/%s.%s" % (out_path,name_j,postfix)
+                else:
+                    out_i="%s/%s_%d.%s" % (out_path,name_j,i,postfix)
+                shutil.copy(sample_j,out_i)
+
 #train_model("agum/full","agum/filtr_nn",n_epochs=1000)
 #filtr_seqs("agum/full","agum/filtr_nn","agum/frames")
-#imgs.extract_features("agum/frames","short/ae","agum/feats")
+#imgs.extract_features("agum/frames","agum/ae","agum/seqs")
 one_dict(["agum/seqs","../MSR_seqs/common"],"agum/single/seqs")
