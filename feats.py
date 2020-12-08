@@ -6,7 +6,10 @@ import files
 class Feats(dict):
 	def __init__(self, arg=[]):
 		super(Feats, self).__init__(arg)
-	
+
+	def dim(self):
+		return list(self.values())[0].shape[0]
+
 	def names(self):
 		return sorted(self.keys(),key=files.natural_keys) 
 	
@@ -48,5 +51,6 @@ def read_feats(in_path):
             feat_dict[info_i]=np.fromstring(data_i,sep=',')
     return feat_dict
 
-d=read_feats("dtw/maxz/feats")
-train_model(d)
+if __name__ == "__main__":
+	d=read_feats("dtw/maxz/feats")
+	train_model(d)
