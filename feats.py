@@ -1,11 +1,20 @@
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
 import files
 
 class Feats(dict):
 	def __init__(self, arg=[]):
 		super(Feats, self).__init__(arg)
+
+	def __add__(self,feat_i):
+		names=common_names(self.keys(),feat_i.keys())
+		new_feats=Feats()
+		for name_i in names:
+			x_i=np.concatenate([self[name_i],feat_i[name_i]],axis=0)
+			new_feats[name_i]=x_i
+		return new_feats
 
 	def dim(self):
 		return list(self.values())[0].shape[0]
@@ -30,8 +39,11 @@ class Feats(dict):
 
 	def norm(self):
 		X,y=self.to_dataset()
+#		X[np.isnan(X)]=0
 		mean=np.mean(X,axis=0)
 		std=np.std(X,axis=0)
+		std[np.isnan(std)]=1
+		std[std==0]=1
 		for name_i,feat_i in self.items():
 			self[name_i]=(feat_i-mean)/std
 
@@ -55,8 +67,12 @@ def train_model(feats):
 	X_test,y_test=test.to_dataset()
 	y_pred=model.predict(X_test)
 	print(classification_report(y_test, y_pred,digits=4))
+	print(accuracy_score(y_test,y_pred))
 
 def read_feats(in_path):
+    if(type(in_path)==list):
+        all_feats=[read_feats(path_i) for path_i in in_path]
+        return concat_feats(all_feats)
     lines=open(in_path,'r').readlines()
     feat_dict=Feats()
     for line_i in lines:
@@ -67,6 +83,15 @@ def read_feats(in_path):
             feat_dict[info_i]=np.fromstring(data_i,sep=',')
     return feat_dict
 
+def concat_feats(all_feats):
+	first=all_feats[0]
+	for feat_i in all_feats[1:]:
+		first+=feat_i
+	return first
+
+def common_names(names1,names2):
+	return list(set(names1).intersection(set(names2)))
+
 if __name__ == "__main__":
-#	d=read_feats("dtw/maxz/feats")
-	train_model("sim_feats")
+	d=read_feats(["dtw/maxz/feats","dtw/corl/feats"])
+	train_model(d)#"sim_feats")
