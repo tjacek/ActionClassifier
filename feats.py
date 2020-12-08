@@ -20,7 +20,15 @@ class Feats(dict):
 		y=[ int(name_i.split('_')[0])-1 for name_i in names]
 		return X,y
 
+	def norm(self):
+		X,y=self.to_dataset()
+		mean=np.mean(X,axis=0)
+		std=np.std(X,axis=0)
+		for name_i,feat_i in self.items():
+			self[name_i]=(feat_i-mean)/std
+
 def train_model(feats):
+	feats.norm()
 	train,test=feats.split()
 	model=LogisticRegression(solver='liblinear')
 	X_train,y_train=train.to_dataset()
