@@ -2,16 +2,28 @@ import keras,keras.backend as K
 from keras.models import Model,Sequential
 from keras.layers import Input,Dense, Dropout, Flatten,Lambda#GlobalAveragePooling1D
 from keras import regularizers
+from keras.models import load_model
 import numpy as np
 import feats
 
-def dtw_one_shot(in_path,n_epochs=5):
+def dtw_one_shot(in_path,out_path=None,n_epochs=5):
     dtw_feats=feats.read_feats(in_path)
     train,test=dtw_feats.split()
     X,y=to_sim_dataset(train)
     params={'input_shape':(dtw_feats.dim(),)}
     siamese_net,extractor=build_siamese(params,dtw_model)
     siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
+    if(out_path):
+        extractor.save(out_path)
+
+def dtw_extract(in_path,nn_path,out_path):
+    dtw_feats=feats.read_feats(in_path)
+    extractor=load_model(nn_path)
+    def helper(x_i):
+        x_i=np.expand_dims(x_i,0)
+        return extractor.predict(x_i)
+    dtw_feats=dtw_feats.transform(helper)
+    dtw_feats.save(out_path)
 
 def to_sim_dataset(dtw_feats):
     pairs=all_pairs(dtw_feats.names())
@@ -76,4 +88,5 @@ def eucl_dist_output_shape(shapes):
     shape1, shape2 = shapes
     return (shape1[0], 1)
 
-dtw_one_shot("dtw/maxz/feats")
+#dtw_one_shot("dtw/maxz/feats","dtw_nn")
+dtw_extract("dtw/maxz/feats","dtw_nn","sim_feats")

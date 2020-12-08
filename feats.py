@@ -23,6 +23,11 @@ class Feats(dict):
 		y=[ int(name_i.split('_')[0])-1 for name_i in names]
 		return X,y
 
+	def transform(self,extractor):
+		feat_dict={	name_i: extractor(feat_i)
+				for name_i,feat_i in self.items()}
+		return Feats(feat_dict)
+
 	def norm(self):
 		X,y=self.to_dataset()
 		mean=np.mean(X,axis=0)
@@ -30,7 +35,18 @@ class Feats(dict):
 		for name_i,feat_i in self.items():
 			self[name_i]=(feat_i-mean)/std
 
+	def save(self,out_path):
+		lines=[ "%s#%s" % (np.array2string(feat_i,separator=","),name_i) 
+				for name_i,feat_i in self.items()]
+		feat_txt='\n'.join(lines)
+		feat_txt=feat_txt.replace('[','').replace(']','')
+		file_str = open(out_path,'w')
+		file_str.write(feat_txt)
+		file_str.close()
+
 def train_model(feats):
+	if(type(feats)==str):
+		feats=read_feats(feats)
 	feats.norm()
 	train,test=feats.split()
 	model=LogisticRegression(solver='liblinear')
@@ -45,12 +61,12 @@ def read_feats(in_path):
     feat_dict=Feats()
     for line_i in lines:
         raw=line_i.split('#')
-        if(len(raw)):
+        if(len(raw)>1):
             data_i,info_i=raw[0],raw[-1]
             info_i= files.clean(info_i)
             feat_dict[info_i]=np.fromstring(data_i,sep=',')
     return feat_dict
 
 if __name__ == "__main__":
-	d=read_feats("dtw/maxz/feats")
-	train_model(d)
+#	d=read_feats("dtw/maxz/feats")
+	train_model("sim_feats")
