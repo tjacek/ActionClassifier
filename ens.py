@@ -1,3 +1,5 @@
+import files
+
 class EnsTransform(object):
 	def __init__(self,funcs,dir_names,input_dir="seqs"):
 		self.funcs=funcs
