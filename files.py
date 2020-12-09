@@ -72,9 +72,3 @@ def recursive_transform(in_path,out_path,name,fun):
 
 def get_paths(dir_path,sufixes):
     return {sufix_i:"%s/%s"%(dir_path,sufix_i) for sufix_i in sufixes}
-
-def ens_template(in_path,out_path,fun):
-    make_dir(out_path)
-    for in_i in top_files(in_path):
-        out_i="%s/%s" % (out_path,in_i.split('/')[-1])
-        fun(in_i,out_i)

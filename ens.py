@@ -21,3 +21,9 @@ class EnsTransform(object):
 				fun_args=[args_i[name_k]  
 							for name_k in arg_names]
 				fun(*fun_args)
+
+def ens_template(in_path,out_path,fun):
+    files.make_dir(out_path)
+    for in_i in files.top_files(in_path):
+        out_i="%s/%s" % (out_path,in_i.split('/')[-1])
+        fun(in_i,out_i)
