@@ -8,10 +8,10 @@ import numpy as np
 import imgs,files,shutil
 
 def train_model(in_path,nn_path="agum_nn",n_epochs=1000):
-    frame_seqs=imgs.read_frame_seqs(in_path)
+    frame_seqs=imgs.read_frame_seqs(in_path,n_split=1)
+    frame_seqs.scale()
     train,test=frame_seqs.split()
     X,y,params=get_dataset(train)
-    print(params)
     model=make_conv(params)
     model.fit(X,y,epochs=n_epochs,batch_size=32)
     if(nn_path):
@@ -39,7 +39,7 @@ def get_dataset(frame_seqs):
         X+=[seq_i[0], seq_i[-1],seq_i[middle]]
         y+=[0,0,1]
     X,y=np.array(X),keras.utils.to_categorical(y)
-    params={'dims':X.shape[1:],'n_cats':y.shape[1]}
+    params={'dims': frame_seqs.dims(),'n_cats':y.shape[1]}
     return X,y,params
 
 def make_conv(params):
@@ -76,7 +76,9 @@ def one_dict(paths,out_path=None):
                     out_i="%s/%s_%d.%s" % (out_path,name_j,i,postfix)
                 shutil.copy(sample_j,out_i)
 
-#train_model("agum/full","agum/filtr_nn",n_epochs=1000)
+#def train_exp()
+
+train_model("../agum/box","../agum/filtr_nn",n_epochs=1000)
 #filtr_seqs("agum/full","agum/filtr_nn","agum/frames")
 #imgs.extract_features("agum/frames","agum/ae","agum/seqs")
-one_dict(["agum/seqs","../MSR_seqs/common"],"agum/single/seqs")
+#one_dict(["agum/seqs","../MSR_seqs/common"],"agum/single/seqs")

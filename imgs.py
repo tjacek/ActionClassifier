@@ -14,6 +14,17 @@ class FrameSeqs(dict):
         train,test=files.split(self,selector)
         return FrameSeqs(train),FrameSeqs(test)
 
+    def scale(self,dims=(64,64)):
+        def helper(img_j):
+            img_j=cv2.resize(img_j,dsize=dims,interpolation=cv2.INTER_CUBIC)
+            return np.expand_dims(img_j,axis=-1)
+        self.transform(helper)
+
+    def transform(self,fun):
+        for name_i,seq_i in self.items():
+            self[name_i]=[fun(img_j)
+                            for img_j in seq_i]
+
     def save(self,out_path):
         files.make_dir(out_path)
         for name_i,seq_i in self.items():
@@ -22,19 +33,22 @@ class FrameSeqs(dict):
                     for frame_j in seq_i]
             save_frames(out_i,seq_i)
 
-def read_frame_seqs(in_path):
+def read_frame_seqs(in_path,n_split=3):
     frame_seqs=FrameSeqs()
     for path_i in files.top_files(in_path):
         name_i=files.clean(path_i.split('/')[-1])
-        frames=[ read_frame(path_j,n_split=2) 
+        frames=[ read_frame(path_j,n_split) 
                 for path_j in files.top_files(path_i)]
         frame_seqs[name_i]=frames
     return frame_seqs
 
 def read_frame(in_path,n_split=3):
     frame_ij=cv2.imread(in_path,cv2.IMREAD_GRAYSCALE)
-#    return np.array(np.vsplit(frame_ij,n_split)).T
-    return np.array(np.vsplit(frame_ij,n_split)[0]).T
+    if(n_split==1):
+        return frame_ij
+    return np.array(np.vsplit(frame_ij,n_split)).T
+#    return np.array(np.vsplit(frame_ij,n_split)[0]).T
+
 def save_frames(in_path,frames):
     files.make_dir(in_path)
     for i,frame_i in enumerate(frames):
