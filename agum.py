@@ -18,16 +18,18 @@ def train_model(in_path,nn_path="agum_nn",n_epochs=1000):
         model.save(nn_path)
 
 def filtr_seqs(in_path,nn_path,out_path):
-    frame_seqs=imgs.read_frame_seqs(in_path)
+    frame_seqs=imgs.read_frame_seqs(in_path,n_split=1)
+    scaled_seqs=frame_seqs.scale( new=True)
     model=load_model(nn_path)
-    def helper(seq_i):
+    def helper(name_i):
+        seq_i=scaled_seqs[name_i]
         result_i=model.predict(np.array(seq_i))
         no_action=np.argmax(result_i,axis=1)
         seq_i=[frame_j 
-                for j,frame_j in enumerate(seq_i)
+                for j,frame_j in enumerate(frame_seqs[name_i])
                     if(no_action[j]==1)]
         return seq_i
-    frame_seqs={name_i:helper(seq_i) 
+    frame_seqs={name_i:helper(name_i) 
             for name_i,seq_i in frame_seqs.items()}
     frame_seqs=imgs.FrameSeqs(frame_seqs)
     frame_seqs.save(out_path)
@@ -76,9 +78,7 @@ def one_dict(paths,out_path=None):
                     out_i="%s/%s_%d.%s" % (out_path,name_j,i,postfix)
                 shutil.copy(sample_j,out_i)
 
-#def train_exp()
-
 train_model("../agum/box","../agum/filtr_nn",n_epochs=1000)
-#filtr_seqs("agum/full","agum/filtr_nn","agum/frames")
+filtr_seqs("../agum/box","../agum/filtr_nn","../agum/frames")
 #imgs.extract_features("agum/frames","agum/ae","agum/seqs")
 #one_dict(["agum/seqs","../MSR_seqs/common"],"agum/single/seqs")

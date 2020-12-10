@@ -7,30 +7,33 @@ class FrameSeqs(dict):
     def __init__(self, args=[]):
         super(FrameSeqs, self).__init__(args)
 
-    def dim(self):
+    def dims(self):
         return list(self.values())[0][0].shape
 
     def split(self,selector=None):
         train,test=files.split(self,selector)
         return FrameSeqs(train),FrameSeqs(test)
 
-    def scale(self,dims=(64,64)):
+    def scale(self,dims=(64,64),new=False):
         def helper(img_j):
             img_j=cv2.resize(img_j,dsize=dims,interpolation=cv2.INTER_CUBIC)
             return np.expand_dims(img_j,axis=-1)
-        self.transform(helper)
+        return self.transform(helper,new)
 
-    def transform(self,fun):
+    def transform(self,fun,new=False):
+        frame_dict= FrameSeqs() if(new) else self
         for name_i,seq_i in self.items():
-            self[name_i]=[fun(img_j)
+            frame_dict[name_i]=[fun(img_j)
                             for img_j in seq_i]
+        return frame_dict
 
     def save(self,out_path):
         files.make_dir(out_path)
         for name_i,seq_i in self.items():
             out_i="%s/%s" % (out_path,name_i)
-            seq_i=[np.concatenate(frame_j.T,axis=0) 
-                    for frame_j in seq_i]
+            if( len(self.dims())==3):
+                seq_i=[np.concatenate(frame_j.T,axis=0) 
+                        for frame_j in seq_i]
             save_frames(out_i,seq_i)
 
 def read_frame_seqs(in_path,n_split=3):
