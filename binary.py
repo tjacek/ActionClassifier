@@ -3,7 +3,7 @@ import files,ens,feats,one_shot
 
 def binary_one_shot(in_path,ens_path,n_epochs=100):
     files.make_dir(ens_path)
-    binary_sim(in_path,ens_path,n_epochs=n_epochs)
+#    binary_sim(in_path,ens_path,n_epochs=n_epochs)
     funcs=[[one_shot.dtw_extract,["in_path","nn","feats"]]]
     dir_names=["feats"]
     ensemble=ens.EnsTransform(funcs,dir_names,"nn")

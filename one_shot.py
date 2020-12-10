@@ -35,7 +35,9 @@ def dtw_extract(in_path,nn_path,out_path):
     extractor=load_model(nn_path)
     def helper(x_i):
         x_i=np.expand_dims(x_i,0)
-        return extractor.predict(x_i)
+        result_i= extractor.predict(x_i)
+#        raise Exception(result_i.shape)
+        return result_i
     dtw_feats=dtw_feats.transform(helper)
     dtw_feats.save(out_path)
 

@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np,re
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
@@ -16,6 +16,9 @@ class Feats(dict):
 			new_feats[name_i]=x_i
 		return new_feats
 
+	def n_cats(self):
+		return max(self.get_cats())+1
+
 	def dim(self):
 		return list(self.values())[0].shape[0]
 
@@ -27,11 +30,15 @@ class Feats(dict):
 		return Feats(train),Feats(test)
 
 	def to_dataset(self):
-		names=self.names() 
+		names=self.names()
+		for name_i in names:
+			print( self[name_i].shape)
 		X=np.array([self[name_i] for name_i in names])
-		y=[ int(name_i.split('_')[0])-1 for name_i in names]
-		return X,y
+		return X,self.get_cats()
 
+	def get_cats(self):
+	    return [ int(name_i.split('_')[0])-1 for name_i in self.names()]
+	
 	def transform(self,extractor):
 		feat_dict={	name_i: extractor(feat_i)
 				for name_i,feat_i in self.items()}
@@ -39,7 +46,6 @@ class Feats(dict):
 
 	def norm(self):
 		X,y=self.to_dataset()
-#		X[np.isnan(X)]=0
 		mean=np.mean(X,axis=0)
 		std=np.std(X,axis=0)
 		std[np.isnan(std)]=1
@@ -48,10 +54,14 @@ class Feats(dict):
 			self[name_i]=(feat_i-mean)/std
 
 	def save(self,out_path):
-		lines=[ "%s#%s" % (np.array2string(feat_i,separator=","),name_i) 
-				for name_i,feat_i in self.items()]
+		lines=[]
+		for name_i,feat_i in self.items():
+			txt_i=np.array2string(feat_i,separator=",")
+			txt_i=txt_i.replace("\n","")
+			lines.append("%s#%s" % (txt_i,name_i))
 		feat_txt='\n'.join(lines)
 		feat_txt=feat_txt.replace('[','').replace(']','')
+		feat_txt = feat_txt.replace(' ','')
 		file_str = open(out_path,'w')
 		file_str.write(feat_txt)
 		file_str.close()
@@ -92,6 +102,12 @@ def concat_feats(all_feats):
 def common_names(names1,names2):
 	return list(set(names1).intersection(set(names2)))
 
+def unified_exp(in_path):
+	all_feats=read_feats(files.top_files(in_path))
+#	raise Exception(all_feats.dim())
+	train_model(all_feats)
+
 if __name__ == "__main__":
-	d=read_feats(["dtw/maxz/feats","dtw/corl/feats"])
-	train_model(d)#"sim_feats")
+#	d=read_feats(["dtw/maxz/feats","dtw/corl/feats","dtw/skew/feats"])
+#	train_model("ens/feats/3")#"max_corl/sim_feats")
+	unified_exp("ens/feats")
