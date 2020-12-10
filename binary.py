@@ -1,9 +1,9 @@
 import numpy as np
-import files,ens,feats,one_shot
+import files,ens,feats,one_shot,sim
 
 def binary_one_shot(in_path,ens_path,n_epochs=100):
     files.make_dir(ens_path)
-#    binary_sim(in_path,ens_path,n_epochs=n_epochs)
+    binary_sim(in_path,ens_path,n_epochs=n_epochs)
     funcs=[[one_shot.dtw_extract,["in_path","nn","feats"]]]
     dir_names=["feats"]
     ensemble=ens.EnsTransform(funcs,dir_names,"nn")
@@ -20,7 +20,7 @@ def binary_sim(in_path,nn_path,n_epochs=5):
 		nn_i="%s/%d" % (nn_path,i)
 		X,y=binary_data(train,i)
 		params={'input_shape':(train.dim(),)}
-		siamese_net,extractor=one_shot.build_siamese(params,one_shot.DtwModel())
+		siamese_net,extractor=sim.build_siamese(params,one_shot.DtwModel())
 		siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
 		extractor.save(nn_i)
 
@@ -45,4 +45,4 @@ def binary_data(train,cat):
 #	input_paths=files.top_files(nn_path)
 #	ens(input_paths,out_path, arg_dict)
 
-binary_one_shot(["dtw/corl/feats","dtw/maxz/feats"],"ens",n_epochs=100)
+binary_one_shot(["dtw/corl/feats","dtw/maxz/feats"],"ens",n_epochs=300)
