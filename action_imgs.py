@@ -21,9 +21,17 @@ def get_actions(in_path,fun,out_path=None):
 		actions.save(out_path)
 	return actions
 
+def diff_action(in_path,out_path):
+	def helper(frames):
+		size=len(frames)-1
+		diff=[ np.abs(frames[i]-frames[i+1]) 
+				for i in range(size)]
+		return np.mean(diff,axis=0)
+	get_actions(in_path,helper,out_path)
+
 def mean_action(in_path,out_path):
 	def helper(frames):
 		return np.mean(frames,axis=0)
 	get_actions(in_path,helper,out_path)
 
-mean_action("../agum/box","../action/mean")
+diff_action("../agum/box","../action/diff")
