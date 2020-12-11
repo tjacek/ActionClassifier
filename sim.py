@@ -1,6 +1,34 @@
+import numpy as np
 import keras,keras.backend as K
 from keras.models import Model,Sequential
 from keras.layers import Input,Lambda
+
+class SimTrain(object):
+    def __init__(self,get_model,get_cat,read=None):
+        self.get_model=get_model
+        self.get_cat=get_cat
+        self.read=read
+
+    def __call__(self,data_dict,out_path=None,n_epochs=5):
+        if(type(data_dict)==str):
+            data_dict=self.read(data_dict)
+        train,test=data_dict.split()
+        X,y=pairs_dataset(train,self.get_cat)
+        params={'input_shape':(data_dict.dim(),)}
+        siamese_net,extractor=build_siamese(params,self.get_model)
+        siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
+        if(out_path):
+            extractor.save(out_path)
+
+def pairs_dataset(data_dict,get_cat):
+    pairs=all_pairs(data_dict.names())
+    X,y=[],[]
+    for name_i,name_j in pairs:
+        X.append((data_dict[name_i],data_dict[name_j]))
+        y.append( get_cat(name_i,name_j) )
+    X=np.array(X)
+    X=[X[:,0],X[:,1]]
+    return X,y
 
 def all_pairs(names):
     pairs=[]

@@ -25,40 +25,38 @@ def get_basic_model():
 def get_large_model():
     return DtwModel([128,96,64])
 
+def early_drop(model):
+    model.add(Dropout(0.75))
+    model.add(Dense(196, activation='relu'))
+#    model.add(Dense(100, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(64, activation='relu',name='hidden',
+            kernel_regularizer=regularizers.l1(0.01)))
+    return model
+
 def dtw_one_shot(in_path,out_path=None,n_epochs=5):
     dtw_feats=feats.read_feats(in_path)
-    train,test=dtw_feats.split()
-    X,y=to_sim_dataset(train)
-    params={'input_shape':(dtw_feats.dim(),)}
-    siamese_net,extractor=sim.build_siamese(params,get_large_model())
-    siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
-    if(out_path):
-        extractor.save(out_path)
+    dtw_feats.norm()
+    def all_cat(name_i,name_j):
+        return int(name_i.split('_')[0]==name_j.split('_')[0])
+    make_model=get_basic_model()
+    sim_train=sim.SimTrain(make_model,all_cat)
+    sim_train(dtw_feats,out_path,n_epochs)
 
 def dtw_extract(in_path,nn_path,out_path):
     dtw_feats=feats.read_feats(in_path)
     dtw_feats.norm()
     extractor=load_model(nn_path)
     def helper(x_i):
-        x_i=np.expand_dims(x_i,0)
+        x_i=np.expand_dims(x_i,0)   
         result_i= extractor.predict(x_i)
         return result_i
     dtw_feats=dtw_feats.transform(helper)
     dtw_feats.save(out_path)
 
-def to_sim_dataset(dtw_feats):
-    dtw_feats.norm()
-    pairs=sim.all_pairs(dtw_feats.names())
-    X,y=[],[]
-    for name_i,name_j in pairs:
-        X.append((dtw_feats[name_i],dtw_feats[name_j]))
-        y.append(int(name_i.split('_')[0]==name_j.split('_')[0]))
-    X=np.array(X)
-    X=[X[:,0],X[:,1]]
-#    y=keras.utils.to_categorical(y)
-    return X,y
-
 if __name__ == "__main__":
-    in_path=["dtw/maxz/feats","dtw/corl/feats"]
+#    in_path=["dtw/maxz/feats","dtw/corl/feats"]
+    in_path=['../agum/max_z/dtw','../agum/corl/dtw','../agum/skew/dtw']
+    in_path=['../agum/max_z/person','../agum/corl/person','../agum/skew/person']
     dtw_one_shot(in_path,"dtw_nn",300)
     dtw_extract(in_path,"dtw_nn","sim_feats")
