@@ -16,6 +16,9 @@ class ActionImgs(dict):
 							interpolation=cv2.INTER_CUBIC)
 		self.transform(helper)
 
+	def add_dim(self):
+		self.transform(lambda img_i: np.expand_dims(img_i,axis=-1))
+	
 	def transform(self,fun):
 		for name_i,img_i in self.items():
 			self[name_i]=fun(img_i)
@@ -74,7 +77,7 @@ def action_one_shot(in_path,out_path=None,n_epochs=5):
     sim_train(dtw_feats,out_path,n_epochs,params)
 
 from keras.models import load_model
-
+import binary,ens
 
 def extract(in_path,nn_path,out_path):
     action_feats=read_actions(in_path)
@@ -88,6 +91,22 @@ def extract(in_path,nn_path,out_path):
     	new_feats[name_i]=extractor.predict(img_i)
     new_feats.save(out_path)
 
+def binary_one_shot(in_path,out_path,n_epochs=5):
+	n_cats=20
+	dataset=read_actions(in_path)
+	dataset.add_dim()
+	get_cat=binary.BinaryCat()
+	sim_nn=sim.SimTrain(sim.imgs.make_conv,get_cat)
+	def binary_gen(nn_path,i):
+		get_cat.cat=i
+		sim_nn(dataset,nn_path,n_epochs)
+	funcs=[[extract,["in_path","nn","feats"]]]
+	dir_names=["feats"]
+	arg_dict={'in_path':in_path}		
+	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
+	binary_ens(out_path,n_cats,arg_dict)
+
 #mean_action("../agum/box","../action/mean")
-#action_one_shot("../action/mean","../action/nn")
-extract("../action/mean","../action/nn","../action/feats")
+#action_one_shot("../action/mean","../action/nn",350)
+#extract("../action/mean","../action/nn","../action/feats")
+binary_one_shot("../action/mean","../action/ens",n_epochs=5)

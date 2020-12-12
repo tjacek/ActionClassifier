@@ -23,18 +23,23 @@ class EnsTransform(object):
 				fun(*fun_args)
 
 class BinaryEns(object):
-	def __init__(self,binary_gen,funcs,dir_names):
+	def __init__(self,binary_gen,funcs=None,dir_names=None):
 		self.binary_gen=binary_gen
-		self.ens=EnsTransform(funcs,dir_names,input_dir="nn")
-
-	def __call__(self,ens_path,n_cats,arg_dict):
+		self.nn="nn"
+		if(funcs and dir_names):
+			self.ens=EnsTransform(funcs,dir_names,self.nn)
+		else:
+			self.ens=None
+			
+	def __call__(self,ens_path,n_cats,arg_dict=None):
 		files.make_dir(ens_path)
-		nn_path="%s/%s" % (ens_path ,self.ens.input_dir)
+		nn_path="%s/%s" % (ens_path ,self.nn)
 		files.make_dir(nn_path)
 		paths=[ "%s/%d" % (nn_path,i)  for i in range(n_cats)]
 		for i,path_i in enumerate(paths):
 			self.binary_gen(path_i,i)
-		self.ens(paths,ens_path, arg_dict)
+		if(self.ens):
+			self.ens(paths,ens_path, arg_dict)
 
 def ens_template(in_path,out_path,fun):
     files.make_dir(out_path)
