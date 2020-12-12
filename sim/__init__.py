@@ -14,6 +14,7 @@ class SimTrain(object):
             data_dict=self.read(data_dict)
         train,test=data_dict.split()
         X,y=pairs_dataset(train,self.get_cat)
+#        raise Exception(X[0].shape)
         params={'input_shape':(data_dict.dim(),)}
         siamese_net,extractor=build_siamese(params,self.get_model)
         siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
