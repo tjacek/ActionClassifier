@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import imgs,files
+import imgs,files,feats
 import sim.imgs
 
 class ActionImgs(dict):
@@ -8,12 +8,17 @@ class ActionImgs(dict):
 		super(ActionImgs, self).__init__(arg)
 
 	def dim(self):
-		return list(self.values())[0].shape[1]
+		return list(self.values())[0].shape
     
 	def scale(self,dims=(64,64)):
-		for name_i,img_i in self.items():
-			self[name_i]=cv2.resize(img_i,dsize=dims,
+		def helper(img_i):
+			return cv2.resize(img_i,dsize=dims,
 							interpolation=cv2.INTER_CUBIC)
+		self.transform(helper)
+
+	def transform(self,fun):
+		for name_i,img_i in self.items():
+			self[name_i]=fun(img_i)
 
 	def names(self):
 		return sorted(self.keys(),key=files.natural_keys) 
@@ -60,11 +65,29 @@ def mean_action(in_path,out_path):
 
 def action_one_shot(in_path,out_path=None,n_epochs=5):
     dtw_feats=read_actions(in_path)
+    dtw_feats.transform(lambda img_i: np.expand_dims(img_i,axis=-1))
     def all_cat(name_i,name_j):
         return int(name_i.split('_')[0]==name_j.split('_')[0])
     make_model=sim.imgs.make_conv
     sim_train=sim.SimTrain(make_model,all_cat)
-    sim_train(dtw_feats,out_path,n_epochs)
+    params={'input_shape':(64,64,1)}
+    sim_train(dtw_feats,out_path,n_epochs,params)
+
+from keras.models import load_model
+
+
+def extract(in_path,nn_path,out_path):
+    action_feats=read_actions(in_path)
+    def helper(img_i):
+    	img_i=np.expand_dims(img_i,axis=-1)
+    	return np.expand_dims(img_i,axis=0)
+    action_feats.transform(helper)
+    extractor=load_model(nn_path)
+    new_feats=feats.Feats()
+    for name_i,img_i in action_feats.items():
+    	new_feats[name_i]=extractor.predict(img_i)
+    new_feats.save(out_path)
 
 #mean_action("../agum/box","../action/mean")
-action_one_shot("../action/mean","../action/nn")
+#action_one_shot("../action/mean","../action/nn")
+extract("../action/mean","../action/nn","../action/feats")

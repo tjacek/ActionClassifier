@@ -9,13 +9,13 @@ class SimTrain(object):
         self.get_cat=get_cat
         self.read=read
 
-    def __call__(self,data_dict,out_path=None,n_epochs=5):
+    def __call__(self,data_dict,out_path=None,n_epochs=5,params=None):
         if(type(data_dict)==str):
             data_dict=self.read(data_dict)
         train,test=data_dict.split()
         X,y=pairs_dataset(train,self.get_cat)
-#        raise Exception(X[0].shape)
-        params={'input_shape':(data_dict.dim(),)}
+        if(not params):
+            params={'input_shape':(data_dict.dim(),)}
         siamese_net,extractor=build_siamese(params,self.get_model)
         siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
         if(out_path):
