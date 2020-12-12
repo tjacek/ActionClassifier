@@ -24,8 +24,10 @@ def pairs_dataset(data_dict,get_cat):
     pairs=all_pairs(data_dict.names())
     X,y=[],[]
     for name_i,name_j in pairs:
-        X.append((data_dict[name_i],data_dict[name_j]))
-        y.append( get_cat(name_i,name_j) )
+        cat_i=get_cat(name_i,name_j)
+        if(not (cat_i is None)):
+            X.append((data_dict[name_i],data_dict[name_j]))
+            y.append(cat_i  )
     X=np.array(X)
     X=[X[:,0],X[:,1]]
     return X,y
