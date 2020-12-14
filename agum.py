@@ -78,7 +78,9 @@ def one_dict(paths,out_path=None):
                     out_i="%s/%s_%d.%s" % (out_path,name_j,i,postfix)
                 shutil.copy(sample_j,out_i)
 
-train_model("../agum/box","../agum/filtr_nn",n_epochs=1000)
-filtr_seqs("../agum/box","../agum/filtr_nn","../agum/frames")
-#imgs.extract_features("agum/frames","agum/ae","agum/seqs")
-#one_dict(["agum/seqs","../MSR_seqs/common"],"agum/single/seqs")
+def agum_exp(in_path,n_epochs=1000):
+    paths=files.get_paths(in_path,['box','filtr_nn','frames'])
+    train_model(paths["box"],paths["filtr_nn"],n_epochs)
+    filtr_seqs(paths["box"],paths["filtr_nn"],paths["frames"])
+
+agum_exp("../MHAD")
