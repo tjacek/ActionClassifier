@@ -92,7 +92,7 @@ def extract(in_path,nn_path,out_path):
     new_feats.save(out_path)
 
 def binary_one_shot(in_path,out_path,n_epochs=5):
-	n_cats=20
+	n_cats=27
 	dataset=read_actions(in_path)
 	dataset.add_dim()
 	get_cat=binary.BinaryCat()
@@ -106,7 +106,9 @@ def binary_one_shot(in_path,out_path,n_epochs=5):
 	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
 	binary_ens(out_path,n_cats,arg_dict)
 
-#mean_action("../agum/box","../action/mean")
-#action_one_shot("../action/mean","../action/nn",350)
-#extract("../action/mean","../action/nn","../action/feats")
-binary_one_shot("../action/mean","../action/ens",n_epochs=5)
+def action_img_exp(in_path,n_epochs=100):
+	paths=files.get_paths(in_path,['frames','mean',"ens"])
+	mean_action(paths["frames"],paths["mean"])
+	binary_one_shot(paths["mean"],paths["ens"],n_epochs)
+
+action_img_exp("../3DHOI",100)
