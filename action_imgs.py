@@ -19,9 +19,11 @@ class ActionImgs(dict):
 	def add_dim(self):
 		self.transform(lambda img_i: np.expand_dims(img_i,axis=-1))
 	
-	def transform(self,fun):
+	def transform(self,fun,copy=False):
+		data_dict=ActionImgs() if(copy) else self
 		for name_i,img_i in self.items():
-			self[name_i]=fun(img_i)
+			data_dict[name_i]=fun(img_i)
+		return data_dict
 
 	def names(self):
 		return sorted(self.keys(),key=files.natural_keys) 
@@ -111,4 +113,5 @@ def action_img_exp(in_path,n_epochs=100):
 	mean_action(paths["frames"],paths["mean"])
 	binary_one_shot(paths["mean"],paths["ens"],n_epochs)
 
-action_img_exp("../3DHOI",100)
+if __name__ == "__main__":
+	action_img_exp("../3DHOI",100)
