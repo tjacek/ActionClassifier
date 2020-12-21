@@ -31,8 +31,6 @@ class Feats(dict):
 
 	def to_dataset(self):
 		names=self.names()
-		for name_i in names:
-			print( self[name_i].shape)
 		X=np.array([self[name_i] for name_i in names])
 		return X,self.get_cats()
 
@@ -109,5 +107,8 @@ def unified_exp(in_path):
 
 if __name__ == "__main__":
 #	d=read_feats(["dtw/maxz/feats","dtw/corl/feats","dtw/skew/feats"])
-#	train_model("ens/feats/3")#"max_corl/sim_feats")
-	unified_exp("ens/feats")
+#	d=read_feats(['../agum/max_z/dtw','../agum/corl/dtw','../agum/skew/dtw'])
+#	d=read_feats(['../agum/max_z/person','../agum/corl/person','../agum/skew/person'])
+	d=read_feats(['../agum/max_z/cat','../agum/corl/cat','../agum/skew/cat'])
+	train_model(d)#"sim_feats")
+#	unified_exp("../agum/ens/feats")

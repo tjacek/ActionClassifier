@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from keras.models import load_model
-import files,seqs
+import files,data.seqs
 
 class FrameSeqs(dict):
     def __init__(self, args=[]):

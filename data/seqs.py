@@ -1,5 +1,5 @@
 import numpy as np
-import files
+import files,data.imgs
 
 class Seqs(dict):
 	def __init__(self,args=[]):
