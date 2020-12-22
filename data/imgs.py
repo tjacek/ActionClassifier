@@ -36,10 +36,14 @@ class FrameSeqs(dict):
                         for frame_j in seq_i]
             save_frames(out_i,seq_i)
 
+    def min_len(self):
+        return min([len(seq_i) for seq_i in self.values()])
+
 def read_frame_seqs(in_path,n_split=3):
     frame_seqs=FrameSeqs()
     for path_i in files.top_files(in_path):
-        name_i=files.clean(path_i.split('/')[-1])
+#        name_i=files.clean(path_i.split('/')[-1])
+        name_i=files.Name(path_i.split('/')[-1]).clean()
         frames=[ read_frame(path_j,n_split) 
                 for path_j in files.top_files(path_i)]
         frame_seqs[name_i]=frames

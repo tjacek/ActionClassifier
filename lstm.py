@@ -7,11 +7,22 @@ from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
 import data.imgs
 
+class MinLength(object):
+	def __init__(self,size):
+		self.size = size
+
+	def __call__(self,frames):
+		n_frames=len(frames)
+		indexes=np.random.randint(n_frames,size=self.size)
+		indexes=np.sort(indexes)
+		return [frames[i] for i in indexes]
+
 def train_lstm(in_path):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+	frames.transform(MinLength(frames.min_len()))
 	frames.scale()
-	print(frames.dims())
-	make_lstm()
+	print(frames.min_len())
+#	make_lstm()
 
 def make_lstm():
 	n_cats=20
@@ -36,4 +47,4 @@ def make_lstm():
 	return model
 
 if __name__ == "__main__":
-	train_lstm('../3DHOI/frames')
+	train_lstm('../3DHOI/box')
