@@ -19,9 +19,10 @@ class MinLength(object):
 
 def train_lstm(in_path):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
-	frames.transform(MinLength(frames.min_len()))
+	frames.transform(MinLength(10),single=False)#frames.min_len()))
 	frames.scale()
-	print(frames.min_len())
+	X,y=frames.to_dataset()
+#	print(frames.min_len())
 #	make_lstm()
 
 def make_lstm():
@@ -47,4 +48,4 @@ def make_lstm():
 	return model
 
 if __name__ == "__main__":
-	train_lstm('../3DHOI/box')
+	train_lstm('../agum/box')

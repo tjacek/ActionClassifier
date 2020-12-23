@@ -18,14 +18,23 @@ class FrameSeqs(dict):
         def helper(img_j):
             img_j=cv2.resize(img_j,dsize=dims,interpolation=cv2.INTER_CUBIC)
             return np.expand_dims(img_j,axis=-1)
-        return self.transform(helper,new)
+        return self.transform(helper,new,single=True)
 
-    def transform(self,fun,new=False):
+    def transform(self,fun,new=False,single=True):
         frame_dict= FrameSeqs() if(new) else self
         for name_i,seq_i in self.items():
-            frame_dict[name_i]=[fun(img_j)
+            if(single):
+                frame_dict[name_i]=[fun(img_j)
                             for img_j in seq_i]
+            else:
+                frame_dict[name_i]=fun(seq_i)
         return frame_dict
+
+    def to_dataset(self):
+        names=sorted(self.keys(),key=files.natural_keys) 
+        X=[self[name_i] for name_i in names]
+        y=[name_i.get_cat() for name_i in names]
+        return X,y
 
     def save(self,out_path):
         files.make_dir(out_path)
