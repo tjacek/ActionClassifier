@@ -5,6 +5,7 @@ from keras.layers.core import Dense, Dropout, Flatten, Activation
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
+import keras.utils
 import data.imgs
 
 class MinLength(object):
@@ -19,11 +20,14 @@ class MinLength(object):
 
 def train_lstm(in_path):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
-	frames.transform(MinLength(10),single=False)#frames.min_len()))
-	frames.scale()
-	X,y=frames.to_dataset()
-#	print(frames.min_len())
-#	make_lstm()
+	train,test=frames.split()
+	train.transform(MinLength(10),single=False)#frames.min_len()))
+	train.scale()
+	X,y=train.to_dataset()
+	y=keras.utils.to_categorical(y)
+	model=make_lstm()
+#	print(model.get_input_shape_at(0))
+	model.fit(np.array(X),y,epochs=5)
 
 def make_lstm():
 	n_cats=20
@@ -43,7 +47,9 @@ def make_lstm():
 
 	model.add(TimeDistributed(Dense(n_cats), name="time_distr_dense_one"))
 	model.add(GlobalAveragePooling1D(name="global_avg"))
-
+    
+	model.compile(loss='categorical_crossentropy',
+		optimizer='rmsprop')
 	model.summary()
 	return model
 
