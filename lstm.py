@@ -6,7 +6,7 @@ from keras.layers.wrappers import TimeDistributed
 from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
 import keras.utils,keras.optimizers
-import data.imgs
+import data.imgs,utils
 
 class MinLength(object):
 	def __init__(self,size):
@@ -22,13 +22,13 @@ def train_lstm(in_path,out_path=None,n_epochs=200):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
 	train,test=frames.split()
 	train.transform(MinLength(30),single=False)#frames.min_len()))
-	train.save("lstm/test")
 	train.scale()
 	X,y=train.to_dataset()
 	y=keras.utils.to_categorical(y)
 	model=make_lstm()
 	model.fit(np.array(X),y,epochs=n_epochs)
-
+	if(out_path):
+		model.save(out_path)
 
 def make_lstm():
 	n_cats=20
@@ -57,5 +57,15 @@ def make_lstm():
 	model.summary()
 	return model
 
+def extract(in_path,nn_path,out_path):
+	read=data.imgs.read_frame_seqs
+#	fun=MinLength(30)
+	def preproc(dataset):
+		dataset.transform(MinLength(30),single=False)
+		dataset.scale()
+	fun=utils.Extract(read,name="global_avg",preproc=preproc)
+	fun(in_path,nn_path,out_path)
+
 if __name__ == "__main__":
-	train_lstm('../agum/frames','lstm/nn')
+#	train_lstm('../agum/frames','lstm/nn')
+	extract('../agum/frames','lstm/nn','lstm/feats')

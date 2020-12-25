@@ -7,6 +7,9 @@ class FrameSeqs(dict):
     def __init__(self, args=[]):
         super(FrameSeqs, self).__init__(args)
 
+    def names(self):
+        return sorted(self.keys(),key=files.natural_keys) 
+
     def dims(self):
         return list(self.values())[0][0].shape
 
@@ -31,7 +34,7 @@ class FrameSeqs(dict):
         return frame_dict
 
     def to_dataset(self):
-        names=sorted(self.keys(),key=files.natural_keys) 
+        names=self.names()#sorted(self.keys(),key=files.natural_keys) 
         X=[ np.array(self[name_i]) for name_i in names]
         y=[name_i.get_cat() for name_i in names]
         return np.array(X),y
@@ -48,7 +51,7 @@ class FrameSeqs(dict):
     def min_len(self):
         return min([len(seq_i) for seq_i in self.values()])
 
-def read_frame_seqs(in_path,n_split=3):
+def read_frame_seqs(in_path,n_split=1):
     frame_seqs=FrameSeqs()
     for path_i in files.top_files(in_path):
         name_i=files.Name(path_i.split('/')[-1]).clean()
@@ -57,7 +60,7 @@ def read_frame_seqs(in_path,n_split=3):
         frame_seqs[name_i]=frames
     return frame_seqs
 
-def read_frame(in_path,n_split=3):
+def read_frame(in_path,n_split=1):
     frame_ij=cv2.imread(in_path,cv2.IMREAD_GRAYSCALE)
     if(n_split==1):
         return frame_ij

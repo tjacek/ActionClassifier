@@ -1,4 +1,6 @@
 from keras.models import load_model
+from keras.models import Model
+import data.feats
 
 class TrainNN(object):
     def __init__(self,read,make_model):
@@ -15,21 +17,30 @@ class TrainNN(object):
             model.save(nn_path)
 
 class Extract(object):
-    def __init__(self,read):
+    def __init__(self,read,name="hidden",preproc=None):
         self.read=read
+        self.name=name
+        self.preproc=preproc
         
     def __call__(self,in_path,nn_path,out_path):
         dataset=self.read(in_path)
+        if(self.preproc):
+            self.preproc(dataset)
         model=load_model(nn_path)
         extractor=Model(inputs=model.input,
-                outputs=model.get_layer("hidden").output)
-        X,y,params=get_dataset(dataset)
+                outputs=model.get_layer(self.name).output)
+        extractor.summary()
+        X,y=dataset.to_dataset()
         new_X=model.predict(X)
         names=dataset.names()
-        feat_dict={name_i:new_X[i] 
-                for i,name_i in enumerate(dataset.names())}
-        data.save_feats(feat_dict,out_path)
+        feat_dict=data.feats.Feats()
+        for i,name_i in enumerate(dataset.names()):
+            feat_dict[name_i]=new_X[i] 
+        feat_dict.save(out_path)
 
 def check_model(nn_path):
     model=load_model(nn_path)
     model.summary()
+
+if __name__=="__main__":
+    check_model("../action/ens/nn/0")
