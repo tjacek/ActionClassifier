@@ -7,6 +7,10 @@ class FrameSeqs(dict):
     def __init__(self, args=[]):
         super(FrameSeqs, self).__init__(args)
 
+    def n_cats(self):
+        cats=[ name_i.get_cat() for name_i in self.keys()]
+        return max(cats)+1
+
     def names(self):
         return sorted(self.keys(),key=files.natural_keys) 
 
