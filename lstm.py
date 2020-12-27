@@ -9,6 +9,25 @@ from keras import regularizers
 import keras.utils,keras.optimizers
 import data.imgs,utils
 
+class SeqGenerator(keras.utils.Sequence):
+	def __init__(self,dataset,size=30,batch_size=32):
+		self.dataset=dataset
+		self.n_cats=self.dataset.n_cats()
+		self.agum=MinLength(size)
+		self.batch_size=batch_size
+
+	def __len__(self):
+		return int(len(self.dataset)/self.batch_size)+1
+
+	def __getitem__(self, i):
+		names=self.dataset.names()
+		names_i=names[i*self.batch_size:(i+1)*self.batch_size]
+		X=[ self.agum(self.dataset[name_j])  
+				for name_j in names_i]
+		y=[name_j.get_cat() for name_j in names_i ]
+		y=utils.to_one_hot(y,self.n_cats)
+		return np.array(X),y
+
 class MinLength(object):
 	def __init__(self,size):
 		self.size = size
@@ -22,18 +41,19 @@ class MinLength(object):
 def train_lstm(in_path,out_path=None,n_epochs=200):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
 	train,test=frames.split()
-	train.transform(MinLength(30),single=False)#frames.min_len()))
+#	train.transform(MinLength(30),single=False)#frames.min_len()))
 	train.scale()
-	X,y=train.to_dataset()
-	y=keras.utils.to_categorical(y)
+#	X,y=train.to_dataset()
+#	y=keras.utils.to_categorical(y)
 	params={'n_cats':frames.n_cats()}
 	model=make_lstm(params)
-	model.fit(np.array(X),y,epochs=n_epochs)
+#	model.fit(np.array(X),y,epochs=n_epochs)
+	gen=SeqGenerator(train)
+	model.fit_generator(gen,epochs=n_epochs)
 	if(out_path):
 		model.save(out_path)
 
 def make_lstm(params):
-#	n_cats=20
 	model=Sequential()
 	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=(30, 64, 64, 1)))
 	model.add(TimeDistributed(Activation('relu')))
@@ -66,5 +86,5 @@ def extract(in_path,nn_path,out_path):
 	fun(in_path,nn_path,out_path)
 
 if __name__ == "__main__":
-	train_lstm('../agum/frames','lstm/nn')
+#	train_lstm('../agum/frames','lstm/nn')
 	extract('../agum/frames','lstm/nn','lstm/feats')

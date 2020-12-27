@@ -1,3 +1,4 @@
+import numpy as np
 from keras.models import load_model
 from keras.models import Model
 import data.feats
@@ -41,6 +42,12 @@ class Extract(object):
 def check_model(nn_path):
     model=load_model(nn_path)
     model.summary()
+
+def to_one_hot(y,n_cats=20):
+    one_hot=np.zeros((len(y),n_cats))
+    for i,y_i in enumerate(y):
+        one_hot[i,y_i]=1
+    return one_hot
 
 if __name__=="__main__":
     check_model("../action/ens/nn/0")
