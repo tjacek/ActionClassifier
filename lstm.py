@@ -15,18 +15,22 @@ class SeqGenerator(keras.utils.Sequence):
 		self.n_cats=self.dataset.n_cats()
 		self.agum=MinLength(size)
 		self.batch_size=batch_size
+		self.names=self.dataset.names()
 
 	def __len__(self):
 		return int(len(self.dataset)/self.batch_size)+1
 
 	def __getitem__(self, i):
-		names=self.dataset.names()
-		names_i=names[i*self.batch_size:(i+1)*self.batch_size]
+#		names=self.dataset.names()
+		names_i=self.names[i*self.batch_size:(i+1)*self.batch_size]
 		X=[ self.agum(self.dataset[name_j])  
 				for name_j in names_i]
 		y=[name_j.get_cat() for name_j in names_i ]
 		y=utils.to_one_hot(y,self.n_cats)
 		return np.array(X),y
+
+	def on_epoch_end(self):
+		np.random.shuffle(self.names)
 
 class MinLength(object):
 	def __init__(self,size):
@@ -62,7 +66,7 @@ def make_lstm(params):
 	model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
 	model.add(TimeDistributed(Flatten()))
 	model.add(TimeDistributed(Dense(256)))
-	model.add(TimeDistributed(Dropout(0.25)))	
+#	model.add(TimeDistributed(Dropout(0.25)))	
 	model.add(TimeDistributed(Dense(128, name="first_dense",
 	 kernel_regularizer=regularizers.l1(0.01))))
 
@@ -86,5 +90,5 @@ def extract(in_path,nn_path,out_path):
 	fun(in_path,nn_path,out_path)
 
 if __name__ == "__main__":
-#	train_lstm('../agum/frames','lstm/nn')
+	train_lstm('../agum/frames','lstm/nn')
 	extract('../agum/frames','lstm/nn','lstm/feats')
