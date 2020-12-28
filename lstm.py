@@ -11,7 +11,7 @@ from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
 from keras import regularizers
 import keras.utils,keras.optimizers
-import data.imgs,utils,gen
+import data.imgs,utils,gen,ens
 
 class MinLength(object):
 	def __init__(self,size):
@@ -26,13 +26,22 @@ class MinLength(object):
 def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
 	train,test=frames.split()
-#	train.transform(MinLength(30),single=False)#frames.min_len()))
+	train.transform(MinLength(seq_len),single=False)#frames.min_len()))
 	train.scale()
-#	X,y=train.to_dataset()
-#	y=keras.utils.to_categorical(y)
+	X,y=train.to_dataset()
+	y=keras.utils.to_categorical(y)
 	params={'n_cats':frames.n_cats(),"seq_len":seq_len}
 	model=make_lstm(params)
-#	model.fit(np.array(X),y,epochs=n_epochs)
+	model.fit(X,y,epochs=n_epochs,batch_size=8)
+	if(out_path):
+		model.save(out_path)
+
+def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
+	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+	train,test=frames.split()
+	train.scale()
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len}
+	model=make_lstm(params)
 	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']))
 	model.fit_generator(seq_gen,epochs=n_epochs)
 	if(out_path):
@@ -71,6 +80,18 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 	fun=utils.Extract(read,name="global_avg",preproc=preproc)
 	fun(in_path,nn_path,out_path)
 
+def binary_one_shot(in_path,out_path,n_epochs=5):
+	n_cats=20
+	dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+	def binary_gen(nn_path,i):
+		get_cat.cat=i
+		sim_nn(dataset,nn_path,n_epochs)
+	funcs=[[extract,["in_path","nn","feats"]]]
+	dir_names=["feats"]
+	arg_dict={'in_path':in_path}		
+	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
+	binary_ens(out_path,n_cats,arg_dict)
+
 if __name__ == "__main__":
-#	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
+	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
 	extract('../MSR/frames','../MSR/nn','../MSR/feats',seq_len=20)
