@@ -1,3 +1,7 @@
+import tensorflow as tf
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+print("physical_devices-------------", len(physical_devices))
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
@@ -19,24 +23,25 @@ class MinLength(object):
 		indexes=np.sort(indexes)
 		return [frames[i] for i in indexes]
 
-def train_lstm(in_path,out_path=None,n_epochs=200):
+def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
 	train,test=frames.split()
 #	train.transform(MinLength(30),single=False)#frames.min_len()))
 	train.scale()
 #	X,y=train.to_dataset()
 #	y=keras.utils.to_categorical(y)
-	params={'n_cats':frames.n_cats()}
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len}
 	model=make_lstm(params)
 #	model.fit(np.array(X),y,epochs=n_epochs)
-	seq_gen=gen.SeqGenerator(train,MinLength(30))
+	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']))
 	model.fit_generator(seq_gen,epochs=n_epochs)
 	if(out_path):
 		model.save(out_path)
 
 def make_lstm(params):
+	input_shape=(params['seq_len'], 64, 64, 1)
 	model=Sequential()
-	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=(30, 64, 64, 1)))
+	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
 	model.add(TimeDistributed(Activation('relu')))
 	model.add(TimeDistributed(Conv2D(32, (5, 5))))
 	model.add(TimeDistributed(Activation('relu')))
@@ -58,14 +63,14 @@ def make_lstm(params):
 	model.summary()
 	return model
 
-def extract(in_path,nn_path,out_path):
+def extract(in_path,nn_path,out_path,seq_len=20):
 	read=data.imgs.read_frame_seqs
 	def preproc(dataset):
-		dataset.transform(MinLength(30),single=False)
+		dataset.transform(MinLength(seq_len),single=False)
 		dataset.scale()
 	fun=utils.Extract(read,name="global_avg",preproc=preproc)
 	fun(in_path,nn_path,out_path)
 
 if __name__ == "__main__":
-	train_lstm('../agum/frames','lstm/nn')
-	extract('../agum/frames','lstm/nn','lstm/feats')
+#	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
+	extract('../MSR/frames','../MSR/nn','../MSR/feats',seq_len=20)
