@@ -1,5 +1,17 @@
 import os,re
 
+class Name(str):
+    def __new__(cls, p_string):
+        return str.__new__(cls, p_string)
+
+    def clean(self):
+        digits=[ str(int(digit_i)) 
+                for digit_i in re.findall(r'\d+',self)]
+        return Name("_".join(digits))
+
+    def get_cat(self):
+        return int(self.split('_')[0])-1
+
 def top_files(path):
     paths=[ path+'/'+file_i for file_i in os.listdir(path)]
     paths=sorted(paths,key=natural_keys)
@@ -21,10 +33,10 @@ def natural_keys(text):
 def atoi(text):
     return int(text) if text.isdigit() else text
 
-def clean(name_i):
-    raw=name_i.split('_')
-    name_i=re.sub(r'\D0','',name_i.strip())
-    return "_".join(re.findall(r'\d+',name_i))
+#def clean(name_i):
+#    raw=name_i.split('_')
+#    name_i=re.sub(r'\D0','',name_i.strip())
+#    return "_".join(re.findall(r'\d+',name_i))
 
 def split(dict,selector=None):
     if(not selector):
