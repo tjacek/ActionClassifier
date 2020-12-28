@@ -7,32 +7,7 @@ from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
 from keras import regularizers
 import keras.utils,keras.optimizers
-import data.imgs,utils
-
-class SeqGenerator(keras.utils.Sequence):
-	def __init__(self,dataset,size=30,batch_size=16,n_agum=2):
-		self.dataset=dataset
-		self.n_cats=self.dataset.n_cats()
-		self.agum=MinLength(size)
-		self.batch_size=batch_size
-		self.names=self.dataset.names()
-		self.n_agum=n_agum
-
-	def __len__(self):
-		return int(len(self.dataset)/self.batch_size)+1
-
-	def __getitem__(self, i):
-		names_i=self.names[i*self.batch_size:(i+1)*self.batch_size]
-		X,y=[],[]
-		for name_j in names_i:
-			for k in range(self.n_agum):
-				X.append(self.agum(self.dataset[name_j]))
-				y.append(name_j.get_cat())
-		y=utils.to_one_hot(y,self.n_cats)
-		return np.array(X),y
-
-	def on_epoch_end(self):
-		np.random.shuffle(self.names)
+import data.imgs,utils,gen
 
 class MinLength(object):
 	def __init__(self,size):
@@ -54,8 +29,8 @@ def train_lstm(in_path,out_path=None,n_epochs=200):
 	params={'n_cats':frames.n_cats()}
 	model=make_lstm(params)
 #	model.fit(np.array(X),y,epochs=n_epochs)
-	gen=SeqGenerator(train)
-	model.fit_generator(gen,epochs=n_epochs)
+	seq_gen=gen.SeqGenerator(train,MinLength(30))
+	model.fit_generator(seq_gen,epochs=n_epochs)
 	if(out_path):
 		model.save(out_path)
 
