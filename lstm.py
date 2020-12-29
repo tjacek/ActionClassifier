@@ -80,12 +80,19 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 	fun=utils.Extract(read,name="global_avg",preproc=preproc)
 	fun(in_path,nn_path,out_path)
 
-def binary_one_shot(in_path,out_path,n_epochs=5):
+def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	n_cats=20
 	dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+	train,test=dataset.split()
+	train.transform(MinLength(seq_len),single=False)
+	train.scale()
+	params={'n_cats':2,"seq_len":seq_len}
+	X,y=train.to_dataset()
 	def binary_gen(nn_path,i):
-		get_cat.cat=i
-		sim_nn(dataset,nn_path,n_epochs)
+		y_i=ens.binarize(y,i)	
+		model=make_lstm(params)
+		model.fit(X,y_i,epochs=n_epochs,batch_size=8)
+		model.save(nn_path)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
 	arg_dict={'in_path':in_path}		
@@ -93,5 +100,6 @@ def binary_one_shot(in_path,out_path,n_epochs=5):
 	binary_ens(out_path,n_cats,arg_dict)
 
 if __name__ == "__main__":
-	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
-	extract('../MSR/frames','../MSR/nn','../MSR/feats',seq_len=20)
+#	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
+#	extract('../MSR/frames','../MSR/nn','../MSR/feats',seq_len=20)
+	binary_lstm("../MSR/frames","../MSR/ens",n_epochs=5,seq_len=20)

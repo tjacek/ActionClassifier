@@ -1,4 +1,4 @@
-import files
+import files,utils
 
 class EnsTransform(object):
 	def __init__(self,funcs,dir_names,input_dir="seqs"):
@@ -46,3 +46,7 @@ def ens_template(in_path,out_path,fun):
     for in_i in files.top_files(in_path):
         out_i="%s/%s" % (out_path,in_i.split('/')[-1])
         fun(in_i,out_i)
+
+def binarize(y,i):
+	y_i=[ int(y_j==i) for y_j in y]
+	return utils.to_one_hot(y_i,n_cats=2)
