@@ -26,7 +26,7 @@ class MinLength(object):
 def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
 	train,test=frames.split()
-	train.transform(MinLength(seq_len),single=False)#frames.min_len()))
+	train.transform(MinLength(seq_len),single=False)
 	train.scale()
 	X,y=train.to_dataset()
 	y=keras.utils.to_categorical(y)
@@ -57,7 +57,8 @@ def make_lstm(params):
 	model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
 	model.add(TimeDistributed(Flatten()))
 	model.add(TimeDistributed(Dense(256)))
-#	model.add(TimeDistributed(Dropout(0.25)))	
+	if(params['drop']):
+		model.add(TimeDistributed(Dropout(0.5)))	
 	model.add(TimeDistributed(Dense(128, name="first_dense",
 	 kernel_regularizer=regularizers.l1(0.01))))
 
@@ -82,24 +83,41 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	n_cats=20
-	dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
-	train,test=dataset.split()
-	train.transform(MinLength(seq_len),single=False)
-	train.scale()
-	params={'n_cats':2,"seq_len":seq_len}
-	X,y=train.to_dataset()
-	def binary_gen(nn_path,i):
-		y_i=ens.binarize(y,i)	
-		model=make_lstm(params)
-		model.fit(X,y_i,epochs=n_epochs,batch_size=8)
-		model.save(nn_path)
+	binary_gen=dynamic_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
 	arg_dict={'in_path':in_path}		
 	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
 	binary_ens(out_path,n_cats,arg_dict)
 
+def static_binary(in_path,n_epochs=5,seq_len=20):
+	dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+	train,test=dataset.split()
+	train.transform(MinLength(seq_len),single=False)
+	train.scale()
+	params={'n_cats':2,"seq_len":seq_len,"drop":True}
+	X,y=train.to_dataset()
+	def binary_train(nn_path,i):
+		y_i=ens.binarize(y,i)	
+		model=make_lstm(params)
+		model.fit(X,y_i,epochs=n_epochs,batch_size=8)
+		model.save(nn_path)
+	return binary_train		
+
+def dynamic_binary(in_path,n_epochs=5,seq_len=20):
+	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+	train,test=frames.split()
+	train.scale()
+	params={'n_cats':2,"seq_len":seq_len,"drop":True}
+	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),binary=0)
+	def binary_train(nn_path,i):
+		seq_gen.binary=i
+		model=make_lstm(params)
+		model.fit_generator(seq_gen,epochs=n_epochs)
+		model.save(nn_path)
+	return binary_train
+
 if __name__ == "__main__":
 #	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
 #	extract('../MSR/frames','../MSR/nn','../MSR/feats',seq_len=20)
-	binary_lstm("../MSR/frames","../MSR/ens",n_epochs=5,seq_len=20)
+	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
