@@ -1,7 +1,7 @@
 import numpy as np
 from keras.models import load_model
 from keras.models import Model
-import data.feats
+import data.feats,data.imgs
 
 class TrainNN(object):
     def __init__(self,read,make_model):
@@ -49,5 +49,11 @@ def to_one_hot(y,n_cats=20):
         one_hot[i,y_i]=1
     return one_hot
 
+def seq_stats(in_path):
+    frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+    seqs_len=frames.seqs_len()
+    print("%s,%s,%s" % (sum(seqs_len),min(seqs_len),max(seqs_len)))
+
 if __name__=="__main__":
-    check_model("../action/ens/nn/0")
+#    check_model("../action/ens/nn/0")
+    seq_stats('../3DHOI/frames')
