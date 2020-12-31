@@ -13,7 +13,7 @@ from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
 from keras import regularizers
 import keras.utils,keras.optimizers
-import data.imgs,utils,gen,ens
+import data.imgs,utils,gen,ens,files
 
 class MinLength(object):
 	def __init__(self,size):
@@ -123,7 +123,14 @@ def dynamic_binary(in_path,n_epochs=5,seq_len=20):
 		model.save(nn_path)
 	return binary_train
 
+def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20):
+	files.make_dir(out_path)
+	paths=files.get_paths(out_path,["nn","feats"])
+	train_gen_lstm(in_path,paths['nn'],n_epochs,seq_len)
+	extract(in_path,paths['nn'],paths['feats'],seq_len)
+
 if __name__ == "__main__":
-	train_gen_lstm('../agum/frames','lstm4/nn',n_epochs=200,seq_len=20)
-	extract('../agum/frames','lstm4/nn','lstm4/feats',seq_len=20)
+	lstm_exp('../3DHOI/frames','../3DHOI/lstm_gen')
+#	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
+#	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
