@@ -3,6 +3,8 @@ physical_devices = tf.config.experimental.list_physical_devices('GPU')
 print("physical_devices-------------", len(physical_devices))
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
+import os.path
+from keras.models import load_model
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.layers.core import Dense, Dropout, Flatten, Activation
@@ -30,8 +32,9 @@ def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	train.scale()
 	X,y=train.to_dataset()
 	y=keras.utils.to_categorical(y)
-	params={'n_cats':frames.n_cats(),"seq_len":seq_len}
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True}
 	model=make_lstm(params)
+#	raise Exception(params)
 	model.fit(X,y,epochs=n_epochs,batch_size=8)
 	if(out_path):
 		model.save(out_path)
@@ -40,8 +43,11 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
 	train,test=frames.split()
 	train.scale()
-	params={'n_cats':frames.n_cats(),"seq_len":seq_len}
-	model=make_lstm(params)
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True}
+	if(os.path.isfile(out_path)):
+		model=load_model(out_path)
+	else:
+		model=make_lstm(params)
 	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']))
 	model.fit_generator(seq_gen,epochs=n_epochs)
 	if(out_path):
@@ -118,6 +124,6 @@ def dynamic_binary(in_path,n_epochs=5,seq_len=20):
 	return binary_train
 
 if __name__ == "__main__":
-#	train_lstm('../MSR/frames','../MSR/nn',seq_len=20)
-#	extract('../MSR/frames','../MSR/nn','../MSR/feats',seq_len=20)
-	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
+	train_gen_lstm('../agum/frames','lstm4/nn',n_epochs=200,seq_len=20)
+	extract('../agum/frames','lstm4/nn','lstm4/feats',seq_len=20)
+#	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)

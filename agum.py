@@ -21,4 +21,4 @@ def agum_template(in_path,nn_path,out_path,seq_len=30,n_iters=10):
 		agum_feats[name_i]=prepare_seq(seq_i)	
 	agum_feats.save(out_path)
 
-agum_template('../agum/frames','lstm2/nn','lstm2/agum_feats',seq_len=30)
+agum_template('../agum/frames','lstm4/nn','lstm4/agum_feats',seq_len=20)
