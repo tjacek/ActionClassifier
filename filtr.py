@@ -1,3 +1,7 @@
+import tensorflow as tf
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+print("physical_devices-------------", len(physical_devices))
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
@@ -5,20 +9,20 @@ import keras.utils
 from keras import regularizers
 from keras.models import load_model
 import numpy as np
-import imgs,files,shutil
+import data.imgs,files,shutil
 
 def train_model(in_path,nn_path="agum_nn",n_epochs=1000):
-    frame_seqs=imgs.read_frame_seqs(in_path,n_split=1)
+    frame_seqs=data.imgs.read_frame_seqs(in_path,n_split=1)
     frame_seqs.scale()
     train,test=frame_seqs.split()
-    X,y,params=get_dataset(train)
+    X,y,params=get_dataset(frame_seqs)
     model=make_conv(params)
     model.fit(X,y,epochs=n_epochs,batch_size=32)
     if(nn_path):
         model.save(nn_path)
 
 def filtr_seqs(in_path,nn_path,out_path):
-    frame_seqs=imgs.read_frame_seqs(in_path,n_split=1)
+    frame_seqs=data.imgs.read_frame_seqs(in_path,n_split=1)
     scaled_seqs=frame_seqs.scale( new=True)
     model=load_model(nn_path)
     def helper(name_i):
@@ -31,7 +35,7 @@ def filtr_seqs(in_path,nn_path,out_path):
         return seq_i
     frame_seqs={name_i:helper(name_i) 
             for name_i,seq_i in frame_seqs.items()}
-    frame_seqs=imgs.FrameSeqs(frame_seqs)
+    frame_seqs=data.imgs.FrameSeqs(frame_seqs)
     frame_seqs.save(out_path)
 
 def get_dataset(frame_seqs):
