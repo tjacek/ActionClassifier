@@ -21,4 +21,14 @@ def agum_template(in_path,nn_path,out_path,seq_len=30,n_iters=10):
 		agum_feats[name_i]=prepare_seq(seq_i)	
 	agum_feats.save(out_path)
 
-agum_template('../agum/frames','lstm4/nn','lstm4/agum_feats',seq_len=20)
+def flip_agum(in_path,out_path):
+	dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+	train,test=dataset.split()
+	for name_i,seq_i in train.items():
+		new_name_i="%s_1" % name_i
+		seq_i=[np.fliplr(frame_j) for frame_j in seq_i]
+		dataset[new_name_i]=seq_i
+	dataset.save(out_path)
+
+#agum_template('../agum/frames','lstm4/nn','lstm4/agum_feats',seq_len=20)
+flip_agum('../agum/frames',"test_agum")
