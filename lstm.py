@@ -34,7 +34,6 @@ def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	y=keras.utils.to_categorical(y)
 	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True}
 	model=make_lstm(params)
-#	raise Exception(params)
 	model.fit(X,y,epochs=n_epochs,batch_size=8)
 	if(out_path):
 		model.save(out_path)
@@ -88,7 +87,7 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 	fun(in_path,nn_path,out_path)
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
-	n_cats=20
+	n_cats=12
 	binary_gen=dynamic_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
@@ -130,7 +129,5 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	lstm_exp('../3DHOI/frames','../3DHOI/lstm_gen')
-#	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
-#	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
-#	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
+#	lstm_exp('../3DHOI/agum/frames','../3DHOI/agum/lstm_gen')
+	binary_lstm("../3DHOI/frames","../3DHOI/ens2",n_epochs=250,seq_len=20)

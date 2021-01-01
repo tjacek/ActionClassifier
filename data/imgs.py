@@ -41,8 +41,6 @@ class FrameSeqs(dict):
         names=self.names()#sorted(self.keys(),key=files.natural_keys) 
         X=[ np.array(self[name_i]) for name_i in names]
         y=[name_i.get_cat() for name_i in names]
-        for x_i in X:
-            print(x_i.shape)
         return np.array(X),y
 
     def save(self,out_path):

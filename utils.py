@@ -32,7 +32,7 @@ class Extract(object):
                 outputs=model.get_layer(self.name).output)
         extractor.summary()
         X,y=dataset.to_dataset()
-        new_X=model.predict(X)
+        new_X=extractor.predict(X)
         names=dataset.names()
         feat_dict=data.feats.Feats()
         for i,name_i in enumerate(dataset.names()):
