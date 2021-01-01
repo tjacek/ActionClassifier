@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import files
+import files,data.imgs
 
 class ActionImgs(dict):
 	def __init__(self, arg=[]):
@@ -40,12 +40,12 @@ class ActionImgs(dict):
 def read_actions(in_path):
 	actions=ActionImgs()
 	for path_i in files.top_files(in_path):
-		name_i=files.clean(path_i.split('/')[-1])
+		name_i=files.Name(path_i.split('/')[-1])
 		actions[name_i]=cv2.imread(path_i,cv2.IMREAD_GRAYSCALE)
 	return actions
 
 def get_actions(in_path,fun,out_path=None):
-	frame_seqs=imgs.read_frame_seqs(in_path,n_split=1)
+	frame_seqs=data.imgs.read_frame_seqs(in_path,n_split=1)
 	actions=ActionImgs()
 	for name_i,seq_i in frame_seqs.items():
 		actions[name_i]=fun(seq_i)
