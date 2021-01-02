@@ -8,7 +8,13 @@ from keras.models import Model,Sequential
 from keras.layers import Input, Dense,Conv2D,Reshape,Conv2DTranspose
 from keras.layers import Flatten,MaxPooling2D,UpSampling2D
 from keras import regularizers
-import data.imgs
+import data.imgs,utils,files
+
+def ae_exp(in_path,out_path,n_epochs=5):
+	files.make_dir(out_path)
+	paths=files.get_paths(out_path,["ae","feats"])
+	train_ae(in_path,paths['ae'],n_epochs)
+	extract(in_path,paths['ae'],paths['feats'])
 
 def train_ae(in_path,out_path,n_epochs=5):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
@@ -26,6 +32,12 @@ def to_dataset(data_dict):
 	for name_i,seq_i in data_dict.items():
 		X+=seq_i
 	return np.array(X)
+
+def extract(in_path,nn_path,out_path):
+	def preproc(dataset):
+		dataset.scale()
+	fun=utils.ExtractSeqs(name="hidden",preproc=preproc)
+	fun(in_path,nn_path,out_path)
 
 def make_autoencoder(params):
     scale = params["scale"] if("scale" in params) else (2,2)
@@ -54,4 +66,6 @@ def make_autoencoder(params):
                       loss='mean_squared_error')#CustomLoss(autoencoder)
     return autoencoder,recon
 
-train_ae("../3DHOI/box","test")
+ae_exp("../3DHOI/box","../3DHOI/ae",n_epochs=5)
+#train_ae("../3DHOI/box","test")
+#extract("../3DHOI/box","test","ae_feats")

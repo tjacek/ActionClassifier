@@ -1,7 +1,7 @@
 import numpy as np
 from keras.models import load_model
 from keras.models import Model
-import data.feats,data.imgs
+import data.feats,data.imgs,data.seqs
 
 class TrainNN(object):
     def __init__(self,read,make_model):
@@ -38,6 +38,26 @@ class Extract(object):
         for i,name_i in enumerate(dataset.names()):
             feat_dict[name_i]=new_X[i] 
         feat_dict.save(out_path)
+
+class ExtractSeqs(object):
+    def __init__(self,name="hidden",preproc=None):
+        self.name=name
+        self.preproc=preproc
+        
+    def __call__(self,in_path,nn_path,out_path):
+        dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+        if(self.preproc):
+            self.preproc(dataset)
+        model=load_model(nn_path)
+        extractor=Model(inputs=model.input,
+                outputs=model.get_layer(self.name).output)
+        extractor.summary()
+        names=dataset.names()
+        feat_seqs=data.seqs.Seqs()
+        for i,name_i in enumerate(dataset.names()):
+            x_i=np.array(dataset[name_i])
+            feat_seqs[name_i]= extractor.predict(x_i)
+        feat_seqs.save(out_path)
 
 def check_model(nn_path):
     model=load_model(nn_path)
