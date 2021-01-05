@@ -1,6 +1,8 @@
 import numpy as np
 from keras.models import load_model
 from keras.models import Model
+from keras import backend as K
+import gc
 import data.feats,data.imgs,data.seqs
 
 class TrainNN(object):
@@ -24,6 +26,8 @@ class Extract(object):
         self.preproc=preproc
         
     def __call__(self,in_path,nn_path,out_path):
+        K.clear_session()
+        gc.collect()
         dataset=self.read(in_path)
         if(self.preproc):
             self.preproc(dataset)
@@ -32,11 +36,13 @@ class Extract(object):
                 outputs=model.get_layer(self.name).output)
         extractor.summary()
         X,y=dataset.to_dataset()
-        new_X=extractor.predict(X)
+#        new_X=extractor.predict(X)
         names=dataset.names()
         feat_dict=data.feats.Feats()
         for i,name_i in enumerate(dataset.names()):
-            feat_dict[name_i]=new_X[i] 
+            x_i=np.expand_dims(X[i],axis=0)#extractor.predict(X[i])
+#            raise Exception(x_i.shape)
+            feat_dict[name_i]=extractor.predict(x_i)
         feat_dict.save(out_path)
 
 class ExtractSeqs(object):
@@ -45,6 +51,7 @@ class ExtractSeqs(object):
         self.preproc=preproc
         
     def __call__(self,in_path,nn_path,out_path):
+        gc.collect()
         dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
         if(self.preproc):
             self.preproc(dataset)
