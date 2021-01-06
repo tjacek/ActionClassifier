@@ -31,13 +31,14 @@ class BinaryEns(object):
 		else:
 			self.ens=None
 			
-	def __call__(self,ens_path,n_cats,arg_dict=None):
+	def __call__(self,ens_path,n_cats,arg_dict=None,use_binary=True):
 		files.make_dir(ens_path)
 		nn_path="%s/%s" % (ens_path ,self.nn)
-		files.make_dir(nn_path)
 		paths=[ "%s/%d" % (nn_path,i)  for i in range(n_cats)]
-		for i,path_i in enumerate(paths):
-			self.binary_gen(path_i,i)
+		if(use_binary):
+			files.make_dir(nn_path)
+			for i,path_i in enumerate(paths):
+				self.binary_gen(path_i,i)
 		if(self.ens):
 			self.ens(paths,ens_path, arg_dict)
 
