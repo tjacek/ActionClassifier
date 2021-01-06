@@ -122,12 +122,17 @@ def dynamic_binary(in_path,n_epochs=5,seq_len=20):
 		model.save(nn_path)
 	return binary_train
 
-def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20):
+def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	files.make_dir(out_path)
 	paths=files.get_paths(out_path,["nn","feats"])
-	train_gen_lstm(in_path,paths['nn'],n_epochs,seq_len)
+	if(gen):
+		train_gen_lstm(in_path,paths['nn'],n_epochs,seq_len)
+	else:
+		train_lstm(in_path,paths['nn'],n_epochs,seq_len)
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-#	lstm_exp('../3DHOI/agum/frames','../3DHOI/agum/lstm_gen')
-	binary_lstm("../3DHOI/frames","../3DHOI/ens2",n_epochs=250,seq_len=20)
+	lstm_exp('../ICSS_exp/MSR/frames','../ICSS_exp/MSR/lstm')
+#	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
+#	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
+#	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
