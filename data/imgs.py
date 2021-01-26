@@ -11,6 +11,12 @@ class FrameSeqs(dict):
         cats=[ name_i.get_cat() for name_i in self.keys()]
         return max(cats)+1
 
+    def n_frames(self):
+        n=0
+        for seq_i in self.values():
+            n+=len(seq_i)
+        return n
+
     def names(self):
         return sorted(self.keys(),key=files.natural_keys) 
 
