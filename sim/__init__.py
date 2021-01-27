@@ -34,6 +34,7 @@ def pairs_dataset(data_dict,get_cat):
     return X,y
 
 def all_pairs(names):
+    names=list(names)
     pairs=[]
     for i,name_i in enumerate(names):
         for name_j in names[i+1:]:
