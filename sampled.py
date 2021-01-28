@@ -1,5 +1,5 @@
 import numpy as np
-import data.imgs,sim,sim.dist
+import data.imgs,sim,sim.dist,sim.imgs
 
 def train(in_path,n_samples=3):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
@@ -9,7 +9,8 @@ def train(in_path,n_samples=3):
 		return [seq_i[i] for i in sample(n_samples)]
 	train.transform(helper,single=False)
 	X,y=pairs_dataset(train)
-	print(len(X))
+	params={ 'input_shape':(*train.dims(),1),"n_hidden":20}
+	model=sim.build_siamese(params,sim.imgs.make_conv)
 
 def pairs_dataset(train):
 	X,y=[],[]
@@ -19,14 +20,5 @@ def pairs_dataset(train):
 			X.append((x_i,x_j))
 			y.append(cat_ij)
 	return X,y
-
-#def to_dataset(data_dict,n_sampled):
-#	X,y=[],[]
-#	for name_i,name_j in all_pairs(data_dict.keys()):
-#		y.append(int(name_i.get_cat()==name_j.get_cat()))
-#	return X,y
-
-
-
 
 train("../ICSS_exp/MSR/frames")
