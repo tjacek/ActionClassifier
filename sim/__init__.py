@@ -47,7 +47,7 @@ def build_siamese(params,make_model):
     right_input = Input(input_shape)
 
     model = Sequential()
-    make_model(model)
+    make_model(model,params)
 
     encoded_l = model(left_input)
     encoded_r = model(right_input)
@@ -79,3 +79,7 @@ def euclidean_distance(vects):
 def eucl_dist_output_shape(shapes):
     shape1, shape2 = shapes
     return (shape1[0], 1)
+
+def subsample(pairs,k=3):
+    return [pair_i for i,pair_i in enumerate(pairs)
+                if(i%k==0)]
