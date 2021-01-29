@@ -1,5 +1,6 @@
 import numpy as np
-import data.imgs,sim,sim.dist,sim.imgs
+import sim,sim.dist,sim.imgs
+import utils,data.imgs
 
 def train(in_path,out_path=None,n_samples=3,n_epochs=5):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
@@ -29,4 +30,11 @@ def pairs_dataset(train,k=5):
 	X=[X[:,0],X[:,1]]
 	return X,y
 
-train("../ICSS_exp/MSR/frames","test")
+def extract(in_path,nn_path,out_path):
+	def preproc(dataset):
+		dataset.scale()
+	fun=utils.ExtractSeqs("hidden",preproc)
+	fun(in_path,nn_path,out_path)
+
+#train("../ICSS_exp/MSR/frames","test")
+extract("../ICSS_exp/MSR/frames","test","test2")
