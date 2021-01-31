@@ -59,6 +59,23 @@ def make_narrow1D(params):
     model.summary()
     return model
 
+def old_cnn(params):
+    input_img=Input(shape=(64,64,1))
+    x=Conv2D(32,kernel_size=(3,3),activation='relu')(input_img)
+    x=MaxPooling2D(pool_size=(2,2))(x)
+    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
+    x=MaxPooling2D(pool_size=(2, 2))(x)
+    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
+    x=MaxPooling2D(pool_size=(2, 2))(x)
+    x=Flatten()(x)
+    x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
+    x=Dropout(0.5)(x)
+    x=Dense(units=params['n_cats'],activation='softmax')(x)
+    model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
+    model.summary()
+    return model
+    
 def narrow_read(in_path):
     seq_dict=seqs.read_seqs(in_path)
     seq_dict={name_i:np.expand_dims(seq_i,axis=-1)
