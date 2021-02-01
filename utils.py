@@ -48,13 +48,16 @@ class Extract(object):
         feat_dict.save(out_path)
 
 class ExtractSeqs(object):
-    def __init__(self,name="hidden",preproc=None):
+    def __init__(self,read=None,name="hidden",preproc=None):
+        if(read is None):
+            read=data.imgs.read_frame_seqs
+        self.read=read
         self.name=name
         self.preproc=preproc
         
     def __call__(self,in_path,nn_path,out_path):
         gc.collect()
-        dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+        dataset=self.read(in_path)#,n_split=1)
         if(self.preproc):
             self.preproc(dataset)
         model=load_model(nn_path)

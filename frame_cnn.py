@@ -4,12 +4,16 @@ from keras.models import Model,Sequential
 from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras import regularizers
-from keras.models import load_model
+#from keras.models import load_model
 import utils,data.imgs
 
 def train(in_path,nn_path,n_epochs=5):
     train_model=utils.TrainNN(read_proj,old_cnn,to_dataset)
     train_model(in_path,nn_path,n_epochs)
+
+def extract(in_path,nn_path,out_path):
+    extract=utils.ExtractSeqs(read_proj)
+    extract(in_path,nn_path,out_path)
 
 def read_proj(in_path):
     dataset=data.imgs.read_frame_seqs(in_path)
@@ -47,4 +51,5 @@ def old_cnn(params):
     model.summary()
     return model
 
-train("../3DHOI","../nn_test",n_epochs=5)
+#train("../3DHOI","../nn_test",n_epochs=5)
+extract("../3DHOI","../nn_test","../nn_seqs")
