@@ -3,7 +3,7 @@ from keras.models import load_model
 from keras.models import Model
 from keras import backend as K
 import gc
-import data.feats,data.imgs,data.seqs
+import data.feats,data.imgs,data.seqs,utils
 
 class TrainNN(object):
     def __init__(self,read,make_model,to_dataset=None,preproc=None):
@@ -18,6 +18,7 @@ class TrainNN(object):
             X,y,params=train.to_dataset()
         else:
             X,y,params=self.to_dataset(train)
+        y=utils.to_one_hot(y,params["n_cats"])
         model=self.make_model(params)
         model.fit(X,y,epochs=n_epochs,batch_size=32)
         if(nn_path):
