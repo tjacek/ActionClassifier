@@ -6,14 +6,18 @@ import gc
 import data.feats,data.imgs,data.seqs
 
 class TrainNN(object):
-    def __init__(self,read,make_model):
-        self.read=read
+    def __init__(self,read,make_model,to_dataset=None,preproc=None):
+        self.read=read      
         self.make_model=make_model
+        self.to_dataset=to_dataset
 
     def __call__(self,in_path,nn_path,n_epochs=5):
         dataset=self.read(in_path)
         train,test=dataset.split()
-        X,y,params=get_dataset(train)
+        if(self.to_dataset is None):
+            X,y,params=train.to_dataset()
+        else:
+            X,y,params=self.to_dataset(train)
         model=self.make_model(params)
         model.fit(X,y,epochs=n_epochs,batch_size=32)
         if(nn_path):
@@ -36,12 +40,10 @@ class Extract(object):
                 outputs=model.get_layer(self.name).output)
         extractor.summary()
         X,y=dataset.to_dataset()
-#        new_X=extractor.predict(X)
         names=dataset.names()
         feat_dict=data.feats.Feats()
         for i,name_i in enumerate(dataset.names()):
             x_i=np.expand_dims(X[i],axis=0)#extractor.predict(X[i])
-#            raise Exception(x_i.shape)
             feat_dict[name_i]=extractor.predict(x_i)
         feat_dict.save(out_path)
 

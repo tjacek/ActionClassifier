@@ -44,7 +44,7 @@ class FrameSeqs(dict):
         return frame_dict
 
     def to_dataset(self):
-        names=self.names()#sorted(self.keys(),key=files.natural_keys) 
+        names=self.names()
         X=[ np.array(self[name_i]) for name_i in names]
         y=[name_i.get_cat() for name_i in names]
         return np.array(X),y
