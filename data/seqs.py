@@ -1,5 +1,5 @@
 import numpy as np
-import files,data.imgs
+import files,data.feats
 
 class Seqs(dict):
 	def __init__(self,args=[]):
@@ -29,6 +29,12 @@ class Seqs(dict):
 			X=np.array(X)
 		y=[name_i.get_cat() for name_i in names]#int(name_i.split('_')[0])-1 for name_i in names]
 		return X,y
+
+	def to_feats(self,fun):
+		feat_dict=data.feats.Feats()
+		for name_i,seq_i in self.items():
+			feat_dict[name_i]=fun(seq_i)
+		return feat_dict
 
 	def save(self,out_path):
 		files.make_dir(out_path)
