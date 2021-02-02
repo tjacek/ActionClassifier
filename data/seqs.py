@@ -5,6 +5,13 @@ class Seqs(dict):
 	def __init__(self,args=[]):
 		super(Seqs, self).__init__(args)
 
+	def seq_len(self):
+		return [ len(seq_i) for seq_i in self.values()]
+
+	def equal_seqs(self):
+		lengths=self.seq_len()
+		return all(l_i==lengths[0] for l_i in lengths)
+
 	def dim(self):
 		return list(self.values())[0].shape[1]
 
@@ -17,8 +24,10 @@ class Seqs(dict):
 
 	def to_dataset(self):
 		names=self.names() 
-		X=np.array([self[name_i] for name_i in names])
-		y=[ int(name_i.split('_')[0])-1 for name_i in names]
+		X=[self[name_i] for name_i in names]
+		if(self.equal_seqs()):
+			X=np.array(X)
+		y=[name_i.get_cat() for name_i in names]#int(name_i.split('_')[0])-1 for name_i in names]
 		return X,y
 
 	def save(self,out_path):
@@ -33,7 +42,7 @@ def read_seqs(in_path):
 	for path_i in paths:
 		data_i=np.load(path_i)
 		name_i=path_i.split('/')[-1]
-		name_i=files.clean(name_i)
+		name_i=files.Name(name_i)#clean(name_i)
 		seq_dict[name_i]=data_i
 	return seq_dict
 
