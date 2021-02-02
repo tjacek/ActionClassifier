@@ -1,3 +1,7 @@
+import tensorflow as tf
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+print("physical_devices-------------", len(physical_devices))
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
@@ -65,10 +69,10 @@ def binary_gen(in_path,n_epochs=5):
     def binary_train(nn_path,i):
         y_i=ens.binarize(y,i)
         model=old_cnn(params)
-        model.fit(X,y_i,epochs=n_epochs)
+        model.fit(X,y_i,epochs=n_epochs,batch_size=32)
         model.save(nn_path)
     return binary_train
 
 #train("../3DHOI","../nn_test",n_epochs=5)
 #extract("../3DHOI","../nn_test","../nn_seqs")
-ens_exp("../3DHOI","../ens",n_epochs=5,n_cats=12)
+ens_exp("../3DHOI","../ens",n_epochs=200,n_cats=12)
