@@ -44,12 +44,13 @@ def read_actions(in_path):
 		actions[name_i]=cv2.imread(path_i,cv2.IMREAD_GRAYSCALE)
 	return actions
 
-def get_actions(in_path,fun,out_path=None):
+def get_actions(in_path,fun,out_path=None,dims=(64,64)):
 	frame_seqs=data.imgs.read_frame_seqs(in_path,n_split=1)
 	actions=ActionImgs()
 	for name_i,seq_i in frame_seqs.items():
 		actions[name_i]=fun(seq_i)
-	actions.scale()
+	if(dims):
+		actions.scale(dims)
 	if(out_path):
 		actions.save(out_path)
 	return actions

@@ -15,10 +15,10 @@ def diff_action(in_path,out_path):
 		return np.mean(diff,axis=0)
 	get_actions(in_path,helper,out_path)
 
-def mean_action(in_path,out_path):
+def mean_action(in_path,out_path,dims=(64,64)):
 	def helper(frames):
 		return np.mean(frames,axis=0)
-	data.actions.get_actions(in_path,helper,out_path)
+	data.actions.get_actions(in_path,helper,out_path,dims=dims)
 
 def action_one_shot(in_path,out_path=None,n_epochs=5):
     dtw_feats=data.actions.read_actions(in_path)
@@ -68,6 +68,6 @@ def action_img_exp(in_path,n_epochs=100):
 
 if __name__ == "__main__":
 #	action_img_exp("../3DHOI/agum",100)
-#	mean_action("../3DHOI/box","../3DHOI/mean")
+	mean_action("../clean/scaled","../clean/mean",dims=None)
 #	action_one_shot("../3DHOI/actions/mean",out_path="../3DHOI/actions/nn",n_epochs=200)
-	extract("../3DHOI/actions/mean","../3DHOI/actions/nn","../3DHOI/actions/feats")
+#	extract("../3DHOI/actions/mean","../3DHOI/actions/nn","../3DHOI/actions/feats")
