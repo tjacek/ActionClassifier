@@ -53,9 +53,9 @@ class FrameSeqs(dict):
         files.make_dir(out_path)
         for name_i,seq_i in self.items():
             out_i="%s/%s" % (out_path,name_i)
-            if( len(self.dims())==3):
+            if( len(self.dims())==3 and self.dims()[-1]!=1):
                 seq_i=[np.concatenate(frame_j.T,axis=0) 
-                        for frame_j in seq_i]
+                            for frame_j in seq_i]
             save_frames(out_i,seq_i)
 
     def seqs_len(self):
@@ -78,7 +78,6 @@ def read_frame(in_path,n_split=1):
     if(n_split==1):
         return frame_ij
     return np.array(np.vsplit(frame_ij,n_split)).T
-#    return np.array(np.vsplit(frame_ij,n_split)[0]).T
 
 def save_frames(in_path,frames):
     files.make_dir(in_path)
@@ -93,3 +92,8 @@ def extract_features(in_path,nn_path,out_path):
     for name_i,seq_i in frame_seqs.items():
         feat_seqs[name_i]=model.predict(np.array(seq_i))
     feat_seqs.save(out_path)
+
+def rescale_seqs(in_path,out_path,dims=(64,64),n_split=1):
+    frame_seqs=read_frame_seqs(in_path,n_split=n_split)
+    frame_seqs.scale(dims,new=False)
+    frame_seqs.save(out_path)
