@@ -71,7 +71,8 @@ class ComboBoxDemo(QtWidgets.QWidget):
 #        out_path="%s/%s" % (os.path.dirname(in_path),"cut")
 #        dataset.cut_template(in_path,out_path,self.state.cut)
 
-app = QtWidgets.QApplication(sys.argv)
-demo=ComboBoxDemo()
-demo.show()
-sys.exit(app.exec_())
+def gui_exp(state=None):
+	app = QtWidgets.QApplication(sys.argv)
+	demo=ComboBoxDemo(state)
+	demo.show()
+	sys.exit(app.exec_())
