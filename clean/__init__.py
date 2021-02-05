@@ -35,7 +35,7 @@ class ActionState(object):
 		img_i=self.actions[name_i]
 		position=literal_eval(text_i)
 		self.dataset[name_i]=position
-		img_i=cut(img_i,position)
+		img_i=self.cut(img_i,position)
 		cv2.imshow(name_i,img_i)
 
 	def keys(self):
@@ -45,14 +45,7 @@ class ActionState(object):
 		print("save at %s " % path_i)
 		self.dataset.save(path_i)
 
-def cut(img_i,position):
-	position=int(position[0])
-	new_img=img_i.copy()
-	position=img_i.shape[0]-position
-	new_img[position:,:]=0
-	return new_img
-
-def make_dataset(in_path,out_path):
+def make_dataset_template(in_path,out_path,cut):
 	action_imgs=data.actions.read_actions(in_path)
 	if(out_path and os.path.isfile(out_path)):
 		train_dataset=read(out_path)
@@ -62,16 +55,11 @@ def make_dataset(in_path,out_path):
 	state=ActionState(action_imgs,train_dataset,cut,out_path)
 	gui.gui_exp(state)
 
-def show_dataset(frame_path,dataset_path,out_path):
-	actions=data.actions.read_actions(in_path)
+def show_dataset_template(frame_path,dataset_path,out_path,cut):
+	actions=data.actions.read_actions(frame_path)
 	train_dataset=read(dataset_path)
 	new_actions=data.actions.ActionImgs()
 	for name_i,img_i in actions.items():
 		position_i=train_dataset[name_i]
 		new_actions[name_i]=cut(img_i,position_i)
 	new_actions.save(out_path)
-
-in_path="../../clean/mean"
-out_path="train_dataset"
-#make_dataset(in_path,out_path)
-show_dataset(in_path,out_path,"test")
