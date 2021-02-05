@@ -2,8 +2,9 @@ import sys
 sys.path.append("..")
 import numpy as np
 import cv2,pickle,os.path
-from ast import literal_eval 
-import data.actions,gui
+from ast import literal_eval
+from keras.models import load_model
+import data.actions,data.imgs,gui
 
 class TrainDataset(dict):
     def __init__(self, arg=[]):
@@ -73,3 +74,16 @@ def get_dataset(frame_path,dataset_path):
 		X.append( actions[name_i])
 		y.append(train_dataset[name_i][0])
 	return np.array(X),y
+
+def apply_model(frame_path,nn_path,out_path,cut):
+	model=load_model(nn_path)
+	frame_seqs=data.imgs.read_frame_seqs(frame_path,n_split=1)
+	frame_seqs.scale((128,128))
+	def helper(img_i):
+		img_i=np.expand_dims(img_i,axis=0)
+		position_i=model.predict(img_i)
+		img_i=np.squeeze(img_i)
+		img_i=cut(img_i,position_i)
+		return img_i
+	frame_seqs.transform(helper,new=False,single=True)
+	frame_seqs.save(out_path)

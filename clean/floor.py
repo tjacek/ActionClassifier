@@ -5,6 +5,7 @@ import clean,cnn
 
 def cut_floor(img_i,position):
 	position=int(position[0])
+	print(position)
 	new_img=img_i.copy()
 	position=img_i.shape[0]-position
 	new_img[position:,:]=0
@@ -24,9 +25,13 @@ def train(frame_path,dataset_path,model_path,n_epochs=500):
 	model.fit(X,y,epochs=n_epochs)
 	model.save(model_path)
 
+def apply_model(frame_path,nn_path,out_path):
+	clean.apply_model(frame_path,nn_path,out_path,cut_floor)
+
 frame_path="../../clean/mean"
 dataset_path="train_dataset"
 model_path="cnn"
 #make_dataset(frame_path,dataset_path)
 #show_dataset(frame_path,dataset_path,"test")
-train(frame_path,dataset_path,model_path)
+#train(frame_path,dataset_path,model_path)
+apply_model("../../clean/frames",model_path,"../../clean/clean_frames")
