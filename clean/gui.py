@@ -67,9 +67,6 @@ class ComboBoxDemo(QtWidgets.QWidget):
 
     def closeEvent(self, event):
         self.save()
-#       in_path,fun=self.state.path,self.state.cut
-#        out_path="%s/%s" % (os.path.dirname(in_path),"cut")
-#        dataset.cut_template(in_path,out_path,self.state.cut)
 
 def gui_exp(state=None):
 	app = QtWidgets.QApplication(sys.argv)

@@ -1,6 +1,7 @@
 import sys
 sys.path.append("..")
-import clean
+import numpy as np
+import clean,cnn
 
 def cut_floor(img_i,position):
 	position=int(position[0])
@@ -15,7 +16,17 @@ def make_dataset(in_path,out_path):
 def show_dataset(frame_path,dataset_path,out_path):
 	clean.show_dataset_template(frame_path,dataset_path,out_path,cut_floor)
 
-in_path="../../clean/mean"
-out_path="train_dataset"
-#make_dataset(in_path,out_path)
-show_dataset(in_path,out_path,"test")
+def train(frame_path,dataset_path,model_path,n_epochs=500):
+	X,y=clean.get_dataset(frame_path,dataset_path)
+	X=np.expand_dims(X,axis=-1)
+	img_shape=X.shape[1:]#(*X.shape[1:],1)
+	model=cnn.make_model(img_shape=img_shape,n_dense=1)
+	model.fit(X,y,epochs=n_epochs)
+	model.save(model_path)
+
+frame_path="../../clean/mean"
+dataset_path="train_dataset"
+model_path="cnn"
+#make_dataset(frame_path,dataset_path)
+#show_dataset(frame_path,dataset_path,"test")
+train(frame_path,dataset_path,model_path)

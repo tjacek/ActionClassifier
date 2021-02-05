@@ -1,5 +1,6 @@
 import sys
 sys.path.append("..")
+import numpy as np
 import cv2,pickle,os.path
 from ast import literal_eval 
 import data.actions,gui
@@ -63,3 +64,12 @@ def show_dataset_template(frame_path,dataset_path,out_path,cut):
 		position_i=train_dataset[name_i]
 		new_actions[name_i]=cut(img_i,position_i)
 	new_actions.save(out_path)
+
+def get_dataset(frame_path,dataset_path):
+	actions=data.actions.read_actions(frame_path)
+	train_dataset=read(dataset_path)
+	X,y=[],[]
+	for name_i in actions.keys():
+		X.append( actions[name_i])
+		y.append(train_dataset[name_i][0])
+	return np.array(X),y
