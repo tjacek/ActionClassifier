@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-import cv2,pickle
+import cv2,pickle,os.path
 from ast import literal_eval 
 import data.actions,gui
 
@@ -10,17 +10,22 @@ class TrainDataset(dict):
 
     def init(self,data_dict):
         for name_i in data_dict.keys():
-            self[name_i]=[0]
+            self[name_i]=[30]
 
     def save(self,out_path):
         with open(out_path, 'wb') as out_file:
             pickle.dump(self, out_file)
 
+def read(in_path):
+    with open(in_path, 'rb') as handle:
+        return pickle.load(handle)
+
 class ActionState(object):
-	def __init__(self, actions,dataset,path="train_dataset"):
+	def __init__(self, actions,dataset,cut,path="train_dataset"):
 		self.actions=actions
 		self.path=path
 		self.dataset=dataset
+		self.cut=cut
 
 	def __getitem__(self,frame_i):
 		value_i=self.dataset[frame_i]
@@ -47,14 +52,26 @@ def cut(img_i,position):
 	new_img[position:,:]=0
 	return new_img
 
-def make_dataset(in_path):
+def make_dataset(in_path,out_path):
 	action_imgs=data.actions.read_actions(in_path)
-	train_dataset=TrainDataset()
-	train_dataset.init(action_imgs)
-	state=ActionState(action_imgs,train_dataset)
+	if(out_path and os.path.isfile(out_path)):
+		train_dataset=read(out_path)
+	else:
+		train_dataset=TrainDataset()
+		train_dataset.init(action_imgs)
+	state=ActionState(action_imgs,train_dataset,cut,out_path)
 	gui.gui_exp(state)
-#	print(len(action_imgs))
+
+def show_dataset(frame_path,dataset_path,out_path):
+	actions=data.actions.read_actions(in_path)
+	train_dataset=read(dataset_path)
+	new_actions=data.actions.ActionImgs()
+	for name_i,img_i in actions.items():
+		position_i=train_dataset[name_i]
+		new_actions[name_i]=cut(img_i,position_i)
+	new_actions.save(out_path)
 
 in_path="../../clean/mean"
-make_dataset(in_path)
-#data.imgs.rescale_seqs("../../clean/frames","../../clean/scaled",dims=(128,128))
+out_path="train_dataset"
+#make_dataset(in_path,out_path)
+show_dataset(in_path,out_path,"test")
