@@ -54,3 +54,8 @@ def get_actions(in_path,fun,out_path=None,dims=(64,64)):
 	if(out_path):
 		actions.save(out_path)
 	return actions
+
+def tranform_actions(in_path,out_path,fun):
+	actions=read_actions(in_path)
+	actions.transform(fun)
+	actions.save(out_path)
