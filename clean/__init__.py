@@ -10,9 +10,9 @@ class TrainDataset(dict):
     def __init__(self, arg=[]):
         super(TrainDataset, self).__init__(arg)
 
-    def init(self,data_dict):
+    def init(self,data_dict,value):
         for name_i in data_dict.keys():
-            self[name_i]=[30]
+            self[name_i]=value#[30]
 
     def save(self,out_path):
         with open(out_path, 'wb') as out_file:
@@ -47,13 +47,13 @@ class ActionState(object):
 		print("save at %s " % path_i)
 		self.dataset.save(path_i)
 
-def make_dataset_template(in_path,out_path,cut):
+def make_dataset_template(in_path,out_path,cut,value):
 	action_imgs=data.actions.read_actions(in_path)
 	if(out_path and os.path.isfile(out_path)):
 		train_dataset=read(out_path)
 	else:
 		train_dataset=TrainDataset()
-		train_dataset.init(action_imgs)
+		train_dataset.init(action_imgs,value)
 	state=ActionState(action_imgs,train_dataset,cut,out_path)
 	gui.gui_exp(state)
 
@@ -78,12 +78,16 @@ def get_dataset(frame_path,dataset_path):
 def apply_model(frame_path,nn_path,out_path,cut):
 	model=load_model(nn_path)
 	frame_seqs=data.imgs.read_frame_seqs(frame_path,n_split=1)
-	frame_seqs.scale((128,128))
+#	frame_seqs.scale((128,128))
 	def helper(img_i):
 		img_i=np.expand_dims(img_i,axis=0)
+		img_i=np.expand_dims(img_i,axis=-1)
 		position_i=model.predict(img_i)
 		img_i=np.squeeze(img_i)
 		img_i=cut(img_i,position_i)
 		return img_i
 	frame_seqs.transform(helper,new=False,single=True)
+#	def helper(frames):
+#		raise Exception(type(frames))
+#	frame_seqs.transform(helper,new=False,single=False)
 	frame_seqs.save(out_path)
