@@ -5,8 +5,9 @@ class Name(str):
         return str.__new__(cls, p_string)
 
     def clean(self):
+        raw=self.split(".")[0]
         digits=[ str(int(digit_i)) 
-                for digit_i in re.findall(r'\d+',self)]
+                for digit_i in re.findall(r'\d+',raw)]
         return Name("_".join(digits))
 
     def get_cat(self):
