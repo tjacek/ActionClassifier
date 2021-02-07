@@ -41,6 +41,7 @@ def read_actions(in_path):
 	actions=ActionImgs()
 	for path_i in files.top_files(in_path):
 		name_i=files.Name(path_i.split('/')[-1])
+		name_i=name_i.clean()
 		actions[name_i]=cv2.imread(path_i,cv2.IMREAD_GRAYSCALE)
 	return actions
 

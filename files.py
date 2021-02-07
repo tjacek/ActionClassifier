@@ -5,9 +5,8 @@ class Name(str):
         return str.__new__(cls, p_string)
 
     def clean(self):
-        raw=self.split(".")[0]
         digits=[ str(int(digit_i)) 
-                for digit_i in re.findall(r'\d+',raw)]
+                for digit_i in re.findall(r'\d+',self)]
         return Name("_".join(digits))
 
     def get_cat(self):
@@ -33,11 +32,6 @@ def natural_keys(text):
 
 def atoi(text):
     return int(text) if text.isdigit() else text
-
-#def clean(name_i):
-#    raw=name_i.split('_')
-#    name_i=re.sub(r'\D0','',name_i.strip())
-#    return "_".join(re.findall(r'\d+',name_i))
 
 def split(dict,selector=None):
     if(not selector):
