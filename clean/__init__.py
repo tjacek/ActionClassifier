@@ -77,19 +77,17 @@ def get_dataset(frame_path,dataset_path):
 		y.append(train_dataset[name_i])
 	return np.array(X),np.array(y)
 
-def apply_model(frame_path,nn_path,out_path,cut):
+def apply_model(frame_path,nn_path,out_path,cut,t=0):
 	model=load_model(nn_path)
 	frame_seqs=data.imgs.read_frame_seqs(frame_path,n_split=1)
-	def helper(img_i):
-		img_i=np.expand_dims(img_i,axis=0)
-		img_i=np.expand_dims(img_i,axis=-1)
-		position_i=model.predict(img_i)
-		img_i=np.squeeze(img_i)
-		position_i=np.squeeze(img_i)
-		img_i=cut(img_i,position_i)
-		return img_i
-	frame_seqs.transform(helper,new=False,single=True)
-#	def helper(frames):
-#		raise Exception(type(frames))
-#	frame_seqs.transform(helper,new=False,single=False)
+	def helper(frames):
+		print(len(frames))
+		frames=np.array(frames)
+		frames=np.expand_dims(frames,axis=-1)
+		position_i=model.predict(frames)
+		position_i= [np.squeeze(pos_j) for pos_j in position_i]
+		new_frames=[ cut(frame_j,pos_j) 
+				for frame_j,pos_j in zip(frames,position_i)]
+		return new_frames
+	frame_seqs.transform(helper,new=False,single=False)
 	frame_seqs.save(out_path)
