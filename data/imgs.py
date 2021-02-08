@@ -11,6 +11,10 @@ class FrameSeqs(dict):
         cats=[ name_i.get_cat() for name_i in self.keys()]
         return max(cats)+1
 
+    def n_persons(self):
+        persons=set([ name_i.get_person() for name_i in self.keys()])
+        return len(persons)
+
     def n_frames(self):
         n=0
         for seq_i in self.values():
@@ -97,3 +101,8 @@ def rescale_seqs(in_path,out_path,dims=(64,64),n_split=1):
     frame_seqs=read_frame_seqs(in_path,n_split=n_split)
     frame_seqs.scale(dims,new=False)
     frame_seqs.save(out_path)
+
+def tranform_frames(in_path,out_path,fun):
+    frames=read_frame_seqs(in_path,n_split=1)
+    frames.transform(fun)
+    frames.save(out_path)

@@ -85,8 +85,11 @@ def to_one_hot(y,n_cats=20):
 def seq_stats(in_path):
     frames=data.imgs.read_frame_seqs(in_path,n_split=1)
     seqs_len=frames.seqs_len()
-    print("%s,%s,%s" % (sum(seqs_len),min(seqs_len),max(seqs_len)))
+    stats=(sum(seqs_len),min(seqs_len),max(seqs_len))
+    print("n_frames:%s\nmin_len:%s\nmax_len:%s\n" % stats)
+    stats=(len(seqs_len),frames.n_persons())
+    print("n_seqs:%s\nn_persons:%s\n" % stats)
 
 if __name__=="__main__":
 #    check_model("../action/ens/nn/0")
-    seq_stats('../3DHOI/frames')
+    seq_stats('../3DHOI')
