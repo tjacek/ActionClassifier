@@ -15,8 +15,10 @@ def rect_exp(action_path,frame_path,dataset_path,
 def cut_rect(img_i,position):
 	if(np.product(position)==0):
 		return img_i
+	position=np.array(position)
 	if(type(position)==np.ndarray):
 		position=position.astype(int)
+	position[position<0]=0
 	x0,y0=position[0],position[1]
 	x1,y1=x0+position[2],y0+position[3]
 	img_i=img_i.copy()
@@ -54,14 +56,10 @@ def dataset_cut(dataset_path,frame_path,out_path):
 						for frame_j in seq_i]
 	new_seqs.save(out_path)
 
-in_dir="rect2"
-out_dir="rect3"
-action_path="../../clean/%s/actions" % in_dir
-dataset_path="../../clean/%s/dataset" % out_dir
-frame_path="../../clean/%s/frames" % in_dir
-action_path="../../clean/%s/actions" % in_dir
-out_path="../../clean/%s/frames" % out_dir
+action_path="../../clean2/actions"
+frame_path="../../clean2/frames"
+dataset_path="../../clean2/dataset"
 #make_dataset(action_path,dataset_path)
 #show_dataset(action_path,dataset_path,action_path)
 #rect_exp(action_path,frame_path,dataset_path,out_path)
-dataset_cut(dataset_path,frame_path,"frames")
+dataset_cut(dataset_path,frame_path,"../../clean3/frames")
