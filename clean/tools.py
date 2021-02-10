@@ -1,13 +1,25 @@
 import sys
 sys.path.append("..")
 import numpy as np
+import cv2
 import clean,data.actions,data.imgs
 
 def cut_actions(in_path,out_path,scale=None):
 	data.actions.tranform_actions(in_path,out_path,cut_box,scale)
 
-#def cut_imgs(in_path,out_path):
-#	data.imgs.tranform_actions(in_path,out_path,cut_box)
+def cut_imgs(in_path,out_path):
+	data.imgs.tranform_frames(in_path,out_path,cut_box)
+
+def prepare_data(in_path,out_path):
+	def helper(img_i):
+		img_i=cut_box(img_i)
+		if(img_i.shape[0]==0):
+			return None
+		print(img_i.shape)
+		img_i=cv2.resize(img_i,dsize=(64,64),interpolation=cv2.INTER_CUBIC)
+		print(img_i.shape)
+		return img_i
+	data.imgs.tranform_frames(in_path,out_path,helper)
 
 def cut_box(img_i):
 #	img_i[img_i!=0]=200
@@ -33,5 +45,6 @@ def clean_names(in_path,out_path):
 	dataset=clean.TrainDataset(dataset)
 	dataset.save(out_path)
 
-cut_actions("../../clean3/actions","../../clean3/final",(64,64))
+prepare_data("../../clean2/frames","../../clean2/base")
+#cut_actions("../../clean3/actions","../../clean3/final",(64,64))
 #clean_names("../../clean/rect/dataset","../../clean/rect/new_dataset")

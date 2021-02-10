@@ -40,6 +40,7 @@ class FrameSeqs(dict):
     def transform(self,fun,new=False,single=True):
         frame_dict= FrameSeqs() if(new) else self
         for name_i,seq_i in self.items():
+            print(name_i)
             if(single):
                 frame_dict[name_i]=[fun(img_j)
                             for img_j in seq_i]
