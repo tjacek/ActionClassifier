@@ -4,7 +4,22 @@ import numpy as np
 import cv2
 import clean,data.actions,data.imgs
 
-def cut_actions(in_path,out_path,scale=None):
+class CutBox(object):
+	def __init__(self,binary):
+		self.binary=binary
+
+	def __call__(self,img_i):
+		if(self.binary):
+			img_i[img_i!=0]=200
+		bound_i=frame_bounds(img_i)
+		if(not bound_i is None):
+			x0,x1=bound_i[2],bound_i[0]
+			y0,y1=bound_i[3],bound_i[1]
+			return img_i[x0:x1,y0:y1]
+		return bound_i
+
+def cut_actions(in_path,out_path,scale=None,binary=False):
+	cut_box=CutBox(binary)
 	data.actions.tranform_actions(in_path,out_path,cut_box,scale)
 
 def cut_imgs(in_path,out_path):
@@ -21,15 +36,6 @@ def prepare_data(in_path,out_path):
 		return img_i
 	data.imgs.tranform_frames(in_path,out_path,helper)
 
-def cut_box(img_i):
-#	img_i[img_i!=0]=200
-	bound_i=frame_bounds(img_i)
-	if(not bound_i is None):
-		x0,x1=bound_i[2],bound_i[0]
-		y0,y1=bound_i[3],bound_i[1]
-		return img_i[x0:x1,y0:y1]
-	return bound_i
-
 def frame_bounds(frame_i):
     nonzero_i=np.array(np.nonzero(frame_i))
     if(nonzero_i.shape[1]==0):
@@ -45,6 +51,6 @@ def clean_names(in_path,out_path):
 	dataset=clean.TrainDataset(dataset)
 	dataset.save(out_path)
 
-prepare_data("../../clean2/frames","../../clean2/base")
+#prepare_data("../../clean2/frames","../../clean2/base")
 #cut_actions("../../clean3/actions","../../clean3/final",(64,64))
 #clean_names("../../clean/rect/dataset","../../clean/rect/new_dataset")
