@@ -1,7 +1,6 @@
 import sys
 sys.path.append("..")
 import numpy as np
-import cv2
 import clean,data.actions,data.imgs
 
 class CutBox(object):
@@ -26,15 +25,11 @@ def cut_imgs(in_path,out_path):
 	data.imgs.tranform_frames(in_path,out_path,cut_box)
 
 def prepare_data(in_path,out_path):
-	def helper(img_i):
-		img_i=cut_box(img_i)
-		if(img_i.shape[0]==0):
-			return None
-		print(img_i.shape)
-		img_i=cv2.resize(img_i,dsize=(64,64),interpolation=cv2.INTER_CUBIC)
-		print(img_i.shape)
-		return img_i
-	data.imgs.tranform_frames(in_path,out_path,helper)
+	cut_box= CutBox(False)
+	def helper(dataset):
+		dataset.transform(cut_box,new=False,single=True)
+		dataset.scale(dims=(64,64),new=False)
+	data.imgs.tranform_frames(in_path,out_path,helper,whole=True)
 
 def frame_bounds(frame_i):
     nonzero_i=np.array(np.nonzero(frame_i))
@@ -51,6 +46,6 @@ def clean_names(in_path,out_path):
 	dataset=clean.TrainDataset(dataset)
 	dataset.save(out_path)
 
-#prepare_data("../../clean2/frames","../../clean2/base")
-#cut_actions("../../clean3/actions","../../clean3/final",(64,64))
-#clean_names("../../clean/rect/dataset","../../clean/rect/new_dataset")
+in_path="../../clean/exp3/frames"
+out_path="../../clean/exp3/final"
+prepare_data(in_path,out_path)

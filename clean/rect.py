@@ -31,19 +31,11 @@ def make_dataset(in_path,out_path):
 	value=[0,0,0,0]
 	clean.make_dataset_template(in_path,out_path,cut_rect,value)
 
-def show_dataset(action_path,dataset_path,out_path):
-	clean.show_dataset_template(action_path,dataset_path,out_path,cut_rect)
+#def show_dataset(action_path,dataset_path,out_path):
+#	clean.show_dataset_template(action_path,dataset_path,out_path,cut_rect)
 
-def train(frame_path,dataset_path,model_path,n_epochs=500):
-	X,y=clean.get_dataset(frame_path,dataset_path)
-	X=np.expand_dims(X,axis=-1)
-	img_shape=X.shape[1:]
-	model=cnn.make_model(img_shape=img_shape,n_dense=4)
-	model.fit(X,y,epochs=n_epochs,batch_size=16)
-	model.save(model_path)
-
-def apply_model(frame_path,nn_path,out_path):
-	clean.apply_model(frame_path,nn_path,out_path,cut_rect)
+#def apply_model(frame_path,nn_path,out_path):
+#	clean.apply_model(frame_path,nn_path,out_path,cut_rect)
 
 def dataset_cut(dataset_path,frame_path,out_path):
 	dataset=clean.read(dataset_path)
@@ -56,10 +48,7 @@ def dataset_cut(dataset_path,frame_path,out_path):
 						for frame_j in seq_i]
 	new_seqs.save(out_path)
 
-action_path="../../clean2/actions"
-frame_path="../../clean2/frames"
-dataset_path="../../clean2/dataset"
-#make_dataset(action_path,dataset_path)
-#show_dataset(action_path,dataset_path,action_path)
-#rect_exp(action_path,frame_path,dataset_path,out_path)
-dataset_cut(dataset_path,frame_path,"../../clean3/frames")
+if __name__ == "__main__":
+	action_path="../../clean/exp2/actions"
+	dataset_path="../../clean/exp2/dataset"
+	make_dataset(action_path,dataset_path)
