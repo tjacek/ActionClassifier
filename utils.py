@@ -6,7 +6,7 @@ import gc
 import data.feats,data.imgs,data.seqs,utils
 
 class TrainNN(object):
-    def __init__(self,read,make_model,to_dataset=None,preproc=None):
+    def __init__(self,read,make_model,to_dataset):
         self.read=read      
         self.make_model=make_model
         self.to_dataset=to_dataset
@@ -14,10 +14,10 @@ class TrainNN(object):
     def __call__(self,in_path,nn_path,n_epochs=5):
         dataset=self.read(in_path)
         train,test=dataset.split()
-        if(self.to_dataset is None):
-            X,y,params=train.to_dataset()
-        else:
-            X,y,params=self.to_dataset(train)
+#        if(self.to_dataset is None):
+#            X,y,params=train.to_dataset()
+#        else:
+        X,y,params=self.to_dataset(train)
         y=utils.to_one_hot(y,params["n_cats"])
         model=self.make_model(params)
         model.fit(X,y,epochs=n_epochs,batch_size=32)

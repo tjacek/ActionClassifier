@@ -1,3 +1,7 @@
+import tensorflow as tf
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+print("physical_devices-------------", len(physical_devices))
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import os.path
 import keras,keras.backend as K,keras.utils
@@ -6,23 +10,23 @@ from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras import regularizers
 from keras.models import load_model
-import files,spline,seqs,data
+import files,spline,data.seqs,utils
 
 def get_train(nn_type="wide"):
     if(nn_type=="narrow"):
+        raise Exception("Narrow")
         read=narrow_read
-        return TrainNN(read,make_narrow1D),Extract(read)
+        return utils.TrainNN(read,make_narrow1D),Extract(read)
     read=seqs.read_seqs
-    return TrainNN(read,basic_model),Extract(read)
+    return utils.TrainNN(read,basic_model),Extract(read)
 
-def get_dataset(seqs):
+def to_dataset(seqs):
     X,y=seqs.to_dataset()
-    y=keras.utils.to_categorical(y)
-    params={'ts_len':X.shape[1],'n_feats':X.shape[2],
-                'n_cats':y.shape[1]}
+    n_cats=max(y)+1
+    params={'ts_len':X.shape[1],'n_feats':X.shape[2],'n_cats':n_cats}
     return X,y,params
 
-def clf_model(params):
+def make_wide1D(params):
     x,input_img=basic_model(params)
     x=Dropout(0.5)(x)
     x=Dense(units=params['n_cats'],activation='softmax')(x)
@@ -71,7 +75,9 @@ def basic_exp(in_path,n_epochs=1000):
     files.make_dir(basic_path)
     paths=files.get_paths(basic_path,["spline","nn","feats"])
     paths["seqs"]=in_path
-    train_nn=TrainNN()
+    print(paths)
+    train_nn=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
+    extract=utils.Extract(data.seqs.read_seqs)
     spline.upsample(paths['seqs'],paths['spline'],size=64)
     train_nn(paths["spline"],paths["nn"],n_epochs)
     extract(paths["spline"],paths["nn"],paths["feats"])
@@ -94,4 +100,4 @@ def ensemble1D(input_paths,out_path,train,extract,n_epochs=1000,size=64):
     ens(input_paths,out_path, arg_dict)
 
 if __name__ == "__main__":
-    basic_exp("Data/MSR/common/seqs")
+    basic_exp("../clean3/agum/ens/seqs/0")
