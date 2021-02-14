@@ -14,9 +14,6 @@ class TrainNN(object):
     def __call__(self,in_path,nn_path,n_epochs=5):
         dataset=self.read(in_path)
         train,test=dataset.split()
-#        if(self.to_dataset is None):
-#            X,y,params=train.to_dataset()
-#        else:
         X,y,params=self.to_dataset(train)
         y=utils.to_one_hot(y,params["n_cats"])
         model=self.make_model(params)

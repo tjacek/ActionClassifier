@@ -10,7 +10,7 @@ from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras import regularizers
 from keras.models import load_model
-import files,spline,data.seqs,utils
+import files,spline,data.seqs,utils,ens
 
 def get_train(nn_type="wide"):
     if(nn_type=="narrow"):
@@ -90,14 +90,17 @@ def binary_exp(in_path,n_epochs=1000,dir_name="narrow"):
     ensemble1D(input_paths,binary_path,train,extract)
 #   binary(input_paths,binary_path)
 
-def ensemble1D(input_paths,out_path,train,extract,n_epochs=1000,size=64):
+def ensemble1D(in_path,out_path,n_epochs=1000,size=64):
+    train=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
+    extract=utils.Extract(data.seqs.read_seqs)
     funcs=[ [spline.upsample,["seqs","spline","size"]],
             [train,["spline","nn","n_epochs"]],
             [extract,["spline","nn","feats"]]]
     dir_names=["spline","nn","feats"]
-    ens=EnsTransform(funcs,dir_names)
+    input_paths=files.top_files(in_path)
+    ensemble=ens.EnsTransform(funcs,dir_names)
     arg_dict={'size':size,'n_epochs':n_epochs}
-    ens(input_paths,out_path, arg_dict)
+    ensemble(input_paths,out_path, arg_dict)
 
 if __name__ == "__main__":
-    basic_exp("../clean3/agum/ens/seqs/0")
+    ensemble1D("../clean3/agum/ens/seqs","../clean3/agum/ens/basic")

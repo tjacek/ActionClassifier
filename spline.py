@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.signal
 from scipy.interpolate import CubicSpline
-import files,seqs
+import files,data.seqs
 
 class SplineUpsampling(object):
     def __init__(self,new_size=128):
@@ -27,11 +27,12 @@ def ens_upsample(in_path,out_path,size=64):
     files.ens_template(in_path,out_path,upsample)
 
 def upsample(in_path,out_path,size=64):
-    seq_dict=seqs.read_seqs(in_path)#single.read_frame_feats(in_path)   
+    print(in_path)
+    seq_dict=data.seqs.read_seqs(in_path)
     spline=SplineUpsampling(size)
     seq_dict={ name_i:spline(seq_i) for name_i,seq_i in seq_dict.items()
                     if(seq_i.shape[0]>1)}
-    seq_dict=seqs.Seqs(seq_dict)
+    seq_dict=data.seqs.Seqs(seq_dict)
     seq_dict.save(out_path)
 
 if __name__ == "__main__":
