@@ -14,12 +14,10 @@ def show_frames(frame_path,dir_path):
 	action_imgs.mean_action(frame_path,paths["actions"],dims=None)
 	tools.cut_actions(paths["actions"],paths["bounds"],scale=None,binary=True)
 
-frame_path="../../clean/frames"
-dir_path="../../clean"
-action_path="../../clean/actions"
-dataset_path="../../clean/dataset"
-exp_path=dir_path+"/exp1"
+frame_path="../../clean/exp2/frames"
+dataset_path="../../clean/exp2/dataset"
+exp_path="../../clean/exp3"
 
 #bound_exp(frame_path,dir_path)
-rect.make_dataset(action_path,dataset_path)
-#gen_frames(frame_path,dataset_path,exp_path)
+#rect.make_dataset(action_path,dataset_path)
+gen_frames(frame_path,dataset_path,exp_path)

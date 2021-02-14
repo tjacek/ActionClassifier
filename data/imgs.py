@@ -103,7 +103,10 @@ def rescale_seqs(in_path,out_path,dims=(64,64),n_split=1):
     frame_seqs.scale(dims,new=False)
     frame_seqs.save(out_path)
 
-def tranform_frames(in_path,out_path,fun):
+def tranform_frames(in_path,out_path,fun,whole=False):
     frames=read_frame_seqs(in_path,n_split=1)
-    frames.transform(fun)
+    if(whole):
+        fun(frames)   
+    else:
+        frames.transform(fun)
     frames.save(out_path)
