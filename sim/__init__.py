@@ -1,19 +1,20 @@
-import numpy as np
+import numpy as np,random
 import keras,keras.backend as K
 from keras.models import Model,Sequential
 from keras.layers import Input,Lambda
 
 class SimTrain(object):
-    def __init__(self,get_model,get_cat,read=None):
+    def __init__(self,get_model,get_cat,read=None,n_sample=None):
         self.get_model=get_model
         self.get_cat=get_cat
         self.read=read
+        self.n_sample=n_sample
 
     def __call__(self,data_dict,out_path=None,n_epochs=5,params=None):
         if(type(data_dict)==str):
             data_dict=self.read(data_dict)
         train,test=data_dict.split()
-        X,y=pairs_dataset(train,self.get_cat)
+        X,y=pairs_dataset(train,self.get_cat,self.n_sample)
         if(not params):
             params={'input_shape':(data_dict.dim(),)}
         siamese_net,extractor=build_siamese(params,self.get_model)
@@ -21,14 +22,16 @@ class SimTrain(object):
         if(out_path):
             extractor.save(out_path)
 
-def pairs_dataset(data_dict,get_cat):
+def pairs_dataset(data_dict,get_cat,n_sample=None):
     pairs=all_pairs(data_dict.names())
+    if(n_sample):
+        pairs=subsample(pairs,n_sample)
     X,y=[],[]
     for name_i,name_j in pairs:
         cat_i=get_cat(name_i,name_j)
         if(not (cat_i is None)):
             X.append((data_dict[name_i],data_dict[name_j]))
-            y.append(cat_i  )
+            y.append(cat_i)
     X=np.array(X)
     X=[X[:,0],X[:,1]]
     return X,y
@@ -81,5 +84,9 @@ def eucl_dist_output_shape(shapes):
     return (shape1[0], 1)
 
 def subsample(pairs,k=3):
+    random.shuffle(pairs)
     return [pair_i for i,pair_i in enumerate(pairs)
-                if(i%k==0)]
+                if((i%k)==0)]
+
+def all_cat(name_i,name_j):
+    return int(name_i.get_cat()==name_j.get_cat())

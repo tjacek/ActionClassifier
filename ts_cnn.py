@@ -10,15 +10,48 @@ from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras import regularizers
 from keras.models import load_model
-import files,spline,data.seqs,utils,ens
+import files,spline,data.seqs,utils,ens,sim
+
+def basic_exp(in_path,n_epochs=1000):
+    path,name=os.path.split(in_path)
+    basic_path="%s/basic" % path
+    files.make_dir(basic_path)
+    paths=files.get_paths(basic_path,["spline","nn","feats"])
+    paths["seqs"]=in_path
+    print(paths)
+#    train_nn=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
+    train=get_train(nn_type="wide")
+    extract=get_extract()#utils.Extract(data.seqs.read_seqs)
+    spline.upsample(paths['seqs'],paths['spline'],size=64)
+    train_nn(paths["spline"],paths["nn"],n_epochs)
+    extract(paths["spline"],paths["nn"],paths["feats"])
+
+def binary_exp(in_path,dir_path,n_epochs=1000):
+    files.make_dir(dir_path)
+    input_paths=files.top_files("%s/seqs" % in_path)
+    train=get_train(nn_type="wide")
+    print(input_paths)
+    ensemble1D(input_paths,dir_path,train,n_epochs)
 
 def get_train(nn_type="wide"):
+    read=data.seqs.read_seqs
     if(nn_type=="narrow"):
-        raise Exception("Narrow")
-        read=narrow_read
-        return utils.TrainNN(read,make_narrow1D),Extract(read)
-    read=seqs.read_seqs
-    return utils.TrainNN(read,basic_model),Extract(read)
+        return utils.TrainNN(read,make_narrow1D,to_dataset)
+    return utils.TrainNN(read,make_wide1D,to_dataset)
+
+def get_extract():
+    return utils.Extract(data.seqs.read_seqs)
+
+def ensemble1D(input_paths,out_path,train,n_epochs=1000,size=64):
+#    train=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
+    extract=get_extract()#utils.Extract(data.seqs.read_seqs)
+    funcs=[ [spline.upsample,["seqs","spline","size"]],
+            [train,["spline","nn","n_epochs"]],
+            [extract,["spline","nn","feats"]]]
+    dir_names=["spline","nn","feats"]
+    ensemble=ens.EnsTransform(funcs,dir_names)
+    arg_dict={'size':size,'n_epochs':n_epochs}
+    ensemble(input_paths,out_path, arg_dict)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -69,38 +102,6 @@ def narrow_read(in_path):
         for name_i,seq_i in seq_dict.items()}
     return seqs.Seqs(seq_dict)
 
-def basic_exp(in_path,n_epochs=1000):
-    path,name=os.path.split(in_path)
-    basic_path="%s/basic" % path
-    files.make_dir(basic_path)
-    paths=files.get_paths(basic_path,["spline","nn","feats"])
-    paths["seqs"]=in_path
-    print(paths)
-    train_nn=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
-    extract=utils.Extract(data.seqs.read_seqs)
-    spline.upsample(paths['seqs'],paths['spline'],size=64)
-    train_nn(paths["spline"],paths["nn"],n_epochs)
-    extract(paths["spline"],paths["nn"],paths["feats"])
-
-def binary_exp(in_path,n_epochs=1000,dir_name="narrow"):
-    binary_path="%s/%s" % (in_path,dir_name)
-    files.make_dir(binary_path)
-    input_paths=files.top_files("%s/seqs" % in_path)
-    train,extract=convnet.get_train("narrow")
-    ensemble1D(input_paths,binary_path,train,extract)
-#   binary(input_paths,binary_path)
-
-def ensemble1D(in_path,out_path,n_epochs=1000,size=64):
-    train=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
-    extract=utils.Extract(data.seqs.read_seqs)
-    funcs=[ [spline.upsample,["seqs","spline","size"]],
-            [train,["spline","nn","n_epochs"]],
-            [extract,["spline","nn","feats"]]]
-    dir_names=["spline","nn","feats"]
-    input_paths=files.top_files(in_path)
-    ensemble=ens.EnsTransform(funcs,dir_names)
-    arg_dict={'size':size,'n_epochs':n_epochs}
-    ensemble(input_paths,out_path, arg_dict)
-
 if __name__ == "__main__":
-    ensemble1D("../clean3/agum/ens/seqs","../clean3/agum/ens/basic")
+#    ensemble1D("../clean3/base/ens/seqs","../clean3/base/ens/basic")
+    binary_exp("../clean3/base/ens","../clean3/base/ens/basic")
