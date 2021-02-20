@@ -24,6 +24,8 @@ class SplineUpsampling(object):
             return cs(old_x)
 
 def ens_upsample(in_path,out_path,size=64):
+    def helper(in_path,out_path):
+        return upsample(in_path,out_path,size)
     files.ens_template(in_path,out_path,upsample)
 
 def upsample(in_path,out_path,size=64):
