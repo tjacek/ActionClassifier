@@ -1,4 +1,4 @@
-import files,utils
+import files,utils,spline
 
 class EnsTransform(object):
 	def __init__(self,funcs,dir_names,input_dir="seqs"):
@@ -51,3 +51,10 @@ def ens_template(in_path,out_path,fun):
 def binarize(y,i):
 	y_i=[ int(y_j==i) for y_j in y]
 	return utils.to_one_hot(y_i,n_cats=2)
+
+def ts_ensemble(train,extract):
+    funcs=[ [spline.upsample,["seqs","spline","size"]],
+            [train,["spline","nn","n_epochs"]],
+            [extract,["spline","nn","feats"]]]
+    dir_names=["spline","nn","feats"]
+    return EnsTransform(funcs,dir_names)

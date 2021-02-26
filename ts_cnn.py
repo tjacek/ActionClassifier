@@ -42,14 +42,9 @@ def get_train(nn_type="wide"):
 def get_extract():
     return utils.Extract(data.seqs.read_seqs)
 
-def ensemble1D(input_paths,out_path,train,n_epochs=1000,size=64):
-#    train=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
-    extract=get_extract()#utils.Extract(data.seqs.read_seqs)
-    funcs=[ [spline.upsample,["seqs","spline","size"]],
-            [train,["spline","nn","n_epochs"]],
-            [extract,["spline","nn","feats"]]]
-    dir_names=["spline","nn","feats"]
-    ensemble=ens.EnsTransform(funcs,dir_names)
+def ensemble1D(input_paths,out_path,train,n_epochs=1000,size=128):#64):
+    extract=get_extract()
+    ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
     ensemble(input_paths,out_path, arg_dict)
 
@@ -104,4 +99,4 @@ def narrow_read(in_path):
 
 if __name__ == "__main__":
 #    ensemble1D("../clean3/base/ens/seqs","../clean3/base/ens/basic")
-    binary_exp("../clean3/base/ens","../clean3/base/ens/basic")
+    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
