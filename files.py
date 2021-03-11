@@ -51,34 +51,28 @@ def person_selector(name_i):
     person_i=int(name_i.split('_')[1])
     return person_i%2==1
 
-def make_path(path):
-    paths=path.split("/")
-    for i in range(len(paths)):
-        path_i="/".join(paths[:i+1])
-        make_dir(path_i)
+#def make_path(path):
+#    paths=path.split("/")
+#    for i in range(len(paths)):
+#        path_i="/".join(paths[:i+1])
+#        make_dir(path_i)
 
 def make_dir(path):
     if(not os.path.isdir(path)):
         os.mkdir(path)
 
-def replace_path(in_path,out_path):
-    paths=in_path.split('/')[1:]
-    paths=[out_path]+paths
-    return "/".join(paths)
-
-def recursive_transform(in_path,out_path,name,fun):
-    def helper(root):
-        out_i=replace_path(root,out_path)            
-        make_path(out_i)
-        fun(root,out_i)
-    for (root,dirs,files) in os.walk(in_path, topdown=True): 
-        if(root.split('/')[-1]==name):
-            if(dirs):
-                for path_j in dirs:
-                    in_i="%s/%s" % (root,path_j)
-                    helper(in_i)
-            else:
-                helper(root)
+#def replace_path(in_path,out_path):
+#    paths=in_path.split('/')[1:]
+#    paths=[out_path]+paths
+#    return "/".join(paths)
 
 def get_paths(dir_path,sufixes):
     return {sufix_i:"%s/%s"%(dir_path,sufix_i) for sufix_i in sufixes}
+
+def prepare_dirs(in_path,out_dir,sub_dirs):
+    path,name=os.path.split(in_path)
+    basic_path="%s/%s" % (path,out_dir)
+    make_dir(basic_path)
+    paths=get_paths(basic_path,sub_dirs)
+    paths[name]=in_path
+    return paths
