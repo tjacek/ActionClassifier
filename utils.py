@@ -1,4 +1,5 @@
 import numpy as np
+import keras.models
 from keras.models import load_model
 from keras.models import Model
 from keras import backend as K
@@ -23,18 +24,26 @@ class TrainNN(object):
             model.save(nn_path)
 
 class Extract(object):
-    def __init__(self,read,name="hidden",preproc=None):
+    def __init__(self,read,name="hidden",preproc=None,custom_layer=None):
         self.read=read
         self.name=name
         self.preproc=preproc
-        
+        self.custom_layer=custom_layer
+    
+    def get_model(self,nn_path):
+        if(self.custom_layer):
+            return keras.models.load_model(nn_path,
+                        custom_objects=self.custom_layer)
+        return load_model(nn_path)
+
     def __call__(self,in_path,nn_path,out_path):
-        K.clear_session()
-        gc.collect()
+#        K.clear_session()
+#        gc.collect()
         dataset=self.read(in_path)
         if(self.preproc):
             self.preproc(dataset)
-        model=load_model(nn_path)
+#        model=load_model(nn_path)
+        model=self.get_model(nn_path)
         extractor=Model(inputs=model.input,
                 outputs=model.get_layer(self.name).output)
         extractor.summary()

@@ -6,12 +6,12 @@ import files,utils,data.seqs,spline,ens
 
 class SimpleAttention(Layer):
     def __init__(self,**kwargs):
-        super(attention,self).__init__(**kwargs)
+        super(SimpleAttention,self).__init__(**kwargs)
 
     def build(self,input_shape):
         self.W=self.add_weight(name="att_weight",shape=(input_shape[-1],1),initializer="normal")
         self.b=self.add_weight(name="att_bias",shape=(input_shape[1],1),initializer="zeros")        
-        super(attention, self).build(input_shape)
+        super(SimpleAttention, self).build(input_shape)
 
     def call(self,x):
         et=K.squeeze(K.tanh(K.dot(x,self.W)+self.b),axis=-1)
@@ -24,14 +24,14 @@ class SimpleAttention(Layer):
         return (input_shape[0],input_shape[-1])
 
     def get_config(self):
-        return super(attention,self).get_config()
+        return super(SimpleAttention,self).get_config()
 
 def ensemble1D(in_path,out_name,n_epochs=1000,size=64):
     input_paths=files.top_files("%s/seqs" % in_path)
     out_path="%s/%s" % (in_path,out_name)
     files.make_dir(out_path)
     train=get_train()
-    extract=utils.Extract(data.seqs.read_seqs)
+    extract=utils.Extract(data.seqs.read_seqs,custom_layer={'SimpleAttention':SimpleAttention})
     ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
     ensemble(input_paths,out_path, arg_dict)
@@ -60,9 +60,9 @@ def make_lstm(params):
     x=MaxPooling1D(pool_size=pool_size[0],name='pool1')(x)
     x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=activ,name='conv2')(x)
 #    x=MaxPooling1D(pool_size=pool_size[1],name='pool2')(x)
-    att_in=LSTM(64,return_sequences=False,dropout=0.3,name="hidden",recurrent_dropout=0.2)(x)
-#    att_out=attention()(att_in)
-    outputs=Dense(params["n_cats"],activation='sigmoid',trainable=True)(att_in)
+    att_in=LSTM(64,return_sequences=True,dropout=0.3,recurrent_dropout=0.2)(x)
+    att_out=SimpleAttention(name="hidden")(att_in)
+    outputs=Dense(params["n_cats"],activation='sigmoid',trainable=True)(att_out)
     model=Model(input_img,outputs)
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
     model.summary()
@@ -70,4 +70,4 @@ def make_lstm(params):
 
 in_path="../dtw_paper/MSR/binary"
 #single_exp(in_path)
-ensemble1D(in_path,"atten",n_epochs=1000,size=64)
+ensemble1D(in_path,"atten",n_epochs=10,size=64)
