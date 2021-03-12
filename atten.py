@@ -2,7 +2,7 @@ from keras.layers import Layer
 from keras.layers import Input,Dense,Conv1D, MaxPooling1D,LSTM
 from keras.models import Model
 import keras.backend as K
-import files,utils,data.seqs,spline
+import files,utils,data.seqs,spline,ens
 
 class SimpleAttention(Layer):
     def __init__(self,**kwargs):
@@ -26,18 +26,21 @@ class SimpleAttention(Layer):
     def get_config(self):
         return super(attention,self).get_config()
 
+def ensemble1D(in_path,out_name,n_epochs=1000,size=64):
+    input_paths=files.top_files("%s/seqs" % in_path)
+    out_path="%s/%s" % (in_path,out_name)
+    files.make_dir(out_path)
+    train=get_train()
+    extract=utils.Extract(data.seqs.read_seqs)
+    ensemble=ens.ts_ensemble(train,extract)
+    arg_dict={'size':size,'n_epochs':n_epochs}
+    ensemble(input_paths,out_path, arg_dict)
+
 def single_exp(in_path,out_name="atten"):
     train=get_train()
     extract=utils.Extract(data.seqs.read_seqs)
     seq_path="%s/%s" % (in_path,"nn0")
     utils.single_exp_template(in_path,out_name,train,extract,seq_path)
-    
-#    paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
-#    paths["seqs"]="%s/%s" % (paths["seqs"],"nn0")
-#    print(paths)
-#    spline.upsample(paths['seqs'],paths['spline'],size=64)   
-#    train(paths["spline"],paths["nn"])
-#    extract(paths["spline"],paths["nn"],paths["feats"])
 
 def get_train():
     read=data.seqs.read_seqs
@@ -65,5 +68,6 @@ def make_lstm(params):
     model.summary()
     return model
 
-in_path="../dtw_paper/MSR/binary/seqs"
-single_exp(in_path)
+in_path="../dtw_paper/MSR/binary"
+#single_exp(in_path)
+ensemble1D(in_path,"atten",n_epochs=1000,size=64)
