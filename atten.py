@@ -26,6 +26,19 @@ class SimpleAttention(Layer):
     def get_config(self):
         return super(attention,self).get_config()
 
+def single_exp(in_path,out_name="atten"):
+    train=get_train()
+    extract=utils.Extract(data.seqs.read_seqs)
+    seq_path="%s/%s" % (in_path,"nn0")
+    utils.single_exp_template(in_path,out_name,train,extract,seq_path)
+    
+#    paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
+#    paths["seqs"]="%s/%s" % (paths["seqs"],"nn0")
+#    print(paths)
+#    spline.upsample(paths['seqs'],paths['spline'],size=64)   
+#    train(paths["spline"],paths["nn"])
+#    extract(paths["spline"],paths["nn"],paths["feats"])
+
 def get_train():
     read=data.seqs.read_seqs
     return utils.TrainNN(read,make_lstm,to_dataset)
@@ -44,7 +57,7 @@ def make_lstm(params):
     x=MaxPooling1D(pool_size=pool_size[0],name='pool1')(x)
     x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=activ,name='conv2')(x)
 #    x=MaxPooling1D(pool_size=pool_size[1],name='pool2')(x)
-    att_in=LSTM(64,return_sequences=False,dropout=0.3,recurrent_dropout=0.2)(x)
+    att_in=LSTM(64,return_sequences=False,dropout=0.3,name="hidden",recurrent_dropout=0.2)(x)
 #    att_out=attention()(att_in)
     outputs=Dense(params["n_cats"],activation='sigmoid',trainable=True)(att_in)
     model=Model(input_img,outputs)
@@ -53,9 +66,4 @@ def make_lstm(params):
     return model
 
 in_path="../dtw_paper/MSR/binary/seqs"
-paths=files.prepare_dirs(in_path,"atten",["spline","nn","feats"])
-paths["seqs"]="%s/%s" % (paths["seqs"],"nn0")
-print(paths)
-spline.upsample(paths['seqs'],paths['spline'],size=64)
-train=get_train()
-train(paths["spline"],paths["nn"])
+single_exp(in_path)

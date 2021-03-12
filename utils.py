@@ -3,7 +3,8 @@ from keras.models import load_model
 from keras.models import Model
 from keras import backend as K
 import gc
-import data.feats,data.imgs,data.seqs,utils
+import data.feats,data.imgs,data.seqs
+import files,spline
 
 class TrainNN(object):
     def __init__(self,read,make_model,to_dataset):
@@ -15,7 +16,7 @@ class TrainNN(object):
         dataset=self.read(in_path)
         train,test=dataset.split()
         X,y,params=self.to_dataset(train)
-        y=utils.to_one_hot(y,params["n_cats"])
+        y=to_one_hot(y,params["n_cats"])
         model=self.make_model(params)
         model.fit(X,y,epochs=n_epochs,batch_size=32)
         if(nn_path):
@@ -68,6 +69,16 @@ class ExtractSeqs(object):
             x_i=np.array(dataset[name_i])
             feat_seqs[name_i]= extractor.predict(x_i)
         feat_seqs.save(out_path)
+
+def single_exp_template(in_path,out_name,train,extract,seq_path=None):
+    paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
+    if(seq_path):
+        paths["seqs"]=seq_path#"%s/%s" % (paths["seqs"],"nn0")
+    print(paths)
+    spline.upsample(paths['seqs'],paths['spline'],size=64)
+    train(paths["spline"],paths["nn"])
+    extract(paths["spline"],paths["nn"],paths["feats"])
+
 
 def check_model(nn_path):
     model=load_model(nn_path)
