@@ -13,25 +13,26 @@ from keras.models import load_model
 import files,spline,data.seqs,utils,ens,sim
 
 class TS_CNN(object):
-    def __init__(self,nn_type):
+    def __init__(self,nn_type,activ='relu'):
         self.nn_type=nn_type
+        self.activ=activ
 
     def __call__(self,params):
-        activ='relu'
+#        activ='relu'
         input_img=Input(shape=(params['ts_len'], params['n_feats']))
         n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
         if(self.nn_type=="narrow"):
-            x=Conv2D(32,kernel_size=(8, 1),activation='relu')(input_img)
+            x=Conv2D(32,kernel_size=(8, 1),activation=self.activ)(input_img)
             x=MaxPooling2D(pool_size=(4, 1))(x)
-            x=Conv2D(32, kernel_size=(8, 1),activation='relu')(x)
+            x=Conv2D(32, kernel_size=(8, 1),activation=self.activ)(x)
             x=MaxPooling2D(pool_size=(4, 1))(x)
         else:
-            x=Conv1D(n_kerns[0], kernel_size=kern_size[0],activation=activ,name='conv1')(input_img)
+            x=Conv1D(n_kerns[0], kernel_size=kern_size[0],activation=self.activ,name='conv1')(input_img)
             x=MaxPooling1D(pool_size=pool_size[0],name='pool1')(x)
-            x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=activ,name='conv2')(x)
+            x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=self.activ,name='conv2')(x)
             x=MaxPooling1D(pool_size=pool_size[1],name='pool2')(x)
         x=Flatten()(x)
-        x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
+        x=Dense(100, activation=self.activ,name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
         x=Dropout(0.5)(x)
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
@@ -58,7 +59,7 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    return utils.TrainNN(read,TS_CNN(nn_type),to_dataset)
+    return utils.TrainNN(read,TS_CNN(nn_type,"tanh"),to_dataset)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -73,5 +74,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_tests",n_epochs=1000)
+    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_tanh",n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
