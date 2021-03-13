@@ -12,41 +12,27 @@ from keras import regularizers
 from keras.models import load_model
 import files,spline,data.seqs,utils,ens,sim
 
-def basic_exp(in_path,n_epochs=1000):
-    path,name=os.path.split(in_path)
-    basic_path="%s/basic" % path
-    files.make_dir(basic_path)
-    paths=files.get_paths(basic_path,["spline","nn","feats"])
-    paths["seqs"]=in_path
+def simple_exp(in_path,n_epochs=1000):
     print(paths)
-#    train_nn=utils.TrainNN(data.seqs.read_seqs,make_wide1D,to_dataset)
     train=get_train(nn_type="wide")
-    extract=get_extract()#utils.Extract(data.seqs.read_seqs)
-    spline.upsample(paths['seqs'],paths['spline'],size=64)
-    train_nn(paths["spline"],paths["nn"],n_epochs)
-    extract(paths["spline"],paths["nn"],paths["feats"])
+    extract=utils.Extract(data.seqs.read_seqs)
+    utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
-def binary_exp(in_path,dir_path,n_epochs=1000):
-    files.make_dir(dir_path)
+def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
     input_paths=files.top_files("%s/seqs" % in_path)
+    out_path="%s/%s" % (in_path,out_name)
+    files.make_dir(out_path)
     train=get_train(nn_type="wide")
-    print(input_paths)
-    ensemble1D(input_paths,dir_path,train,n_epochs)
+    extract=utils.Extract(data.seqs.read_seqs)
+    ensemble=ens.ts_ensemble(train,extract)
+    arg_dict={'size':size,'n_epochs':n_epochs}
+    ensemble(input_paths,out_path, arg_dict)
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
     if(nn_type=="narrow"):
         return utils.TrainNN(read,make_narrow1D,to_dataset)
     return utils.TrainNN(read,make_wide1D,to_dataset)
-
-def get_extract():
-    return utils.Extract(data.seqs.read_seqs)
-
-def ensemble1D(input_paths,out_path,train,n_epochs=1000,size=128):#64):
-    extract=get_extract()
-    ensemble=ens.ts_ensemble(train,extract)
-    arg_dict={'size':size,'n_epochs':n_epochs}
-    ensemble(input_paths,out_path, arg_dict)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -98,5 +84,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-#    ensemble1D("../clean3/base/ens/seqs","../clean3/base/ens/basic")
-    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
+    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_tests",n_epochs=10)
+#    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")

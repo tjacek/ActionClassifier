@@ -29,21 +29,15 @@ class Extract(object):
         self.name=name
         self.preproc=preproc
         self.custom_layer=custom_layer
-    
-    def get_model(self,nn_path):
-        if(self.custom_layer):
-            return keras.models.load_model(nn_path,
-                        custom_objects=self.custom_layer)
-        return load_model(nn_path)
 
     def __call__(self,in_path,nn_path,out_path):
-#        K.clear_session()
-#        gc.collect()
+        K.clear_session()
+        gc.collect()
         dataset=self.read(in_path)
         if(self.preproc):
             self.preproc(dataset)
-#        model=load_model(nn_path)
-        model=self.get_model(nn_path)
+        model=load_model(nn_path,custom_objects=self.custom_layer)
+#        model=self.get_model(nn_path)
         extractor=Model(inputs=model.input,
                 outputs=model.get_layer(self.name).output)
         extractor.summary()
@@ -79,15 +73,14 @@ class ExtractSeqs(object):
             feat_seqs[name_i]= extractor.predict(x_i)
         feat_seqs.save(out_path)
 
-def single_exp_template(in_path,out_name,train,extract,seq_path=None):
+def single_exp_template(in_path,out_name,train,extract,seq_path=None,size=64):
     paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
     if(seq_path):
         paths["seqs"]=seq_path#"%s/%s" % (paths["seqs"],"nn0")
     print(paths)
-    spline.upsample(paths['seqs'],paths['spline'],size=64)
+    spline.upsample(paths['seqs'],paths['spline'],size)
     train(paths["spline"],paths["nn"])
     extract(paths["spline"],paths["nn"],paths["feats"])
-
 
 def check_model(nn_path):
     model=load_model(nn_path)
