@@ -13,11 +13,13 @@ from keras.models import load_model
 import files,spline,data.seqs,utils,ens,sim
 
 class TS_CNN(object):
-    def __init__(self,nn_type="wide",l1=0.01,dropout=0.5,activ='relu'):
+    def __init__(self,nn_type="wide",l1=0.01,dropout=0.5,
+                activ='relu',lr=0.001):
         self.nn_type=nn_type
         self.activ=activ
         self.l1=l1
         self.dropout=dropout
+        self.lr=lr
 
     def __call__(self,params):
         input_img=Input(shape=(params['ts_len'], params['n_feats']))
@@ -43,7 +45,7 @@ class TS_CNN(object):
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
         model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
+              optimizer=keras.optimizers.SGD(lr=self.lr,  momentum=0.9, nesterov=True))
         model.summary()
         return model
 
@@ -65,7 +67,7 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    return utils.TrainNN(read,TS_CNN(l1=None),to_dataset)
+    return utils.TrainNN(read,TS_CNN(lr=0.1),to_dataset)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -80,5 +82,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_no_l1",n_epochs=1000)
+    ensemble_exp("../dtw_paper/MHAD/binary","1D_CNN_lr01",n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
