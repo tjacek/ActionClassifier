@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.stats
-import ens,data.seqs
+import ens,data.seqs,files
 
 def ens_stast(in_path,out_path):
 	ens.ens_template(in_path,out_path,extract_feats)
@@ -27,4 +27,25 @@ def time_corl(feat_i):
     x_i=np.arange(float(n_size),step=1.0)
     return scipy.stats.pearsonr(x_i,feat_i)[0]
 
-ens_stast("../ens/seqs","../ens/feats" )
+
+def check_norm(in_path,single=False):
+    if(not single):
+        results=[ check_norm(path_i,True) 
+                for path_i in files.top_files(in_path)]
+        return [np.amax(results),np.amin(results),
+                    np.mean(results),np.median(results)]
+    seq_dict=data.seqs.read_seqs(in_path)
+    size,sucess=0,0
+    for seq_i in seq_dict.values():
+        for ts_j in seq_i.T:
+            if(scipy.stats.shapiro(ts_j)[1]<0.05):
+                sucess+=1
+            size+=1
+    print(size)
+    print(sucess/size)
+    return (sucess/size)
+
+if __name__ == "__main__":
+    stats=check_norm("../dtw_paper/MHAD/binary/seqs")
+    print(stats)
+#    ens_stast("../ens/seqs","../ens/feats" )
