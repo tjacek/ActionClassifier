@@ -4,6 +4,28 @@ from keras.models import Model
 import keras.backend as K
 import files,utils,data.seqs,spline,ens
 
+class TS_LSTM(object):
+    def __init__(self,atten=False,activ="relu"):
+        self.activ=activ
+        self.atten=atten
+
+    def __call__(self,params):
+        activ='relu'
+        input_img=Input(shape=(params['ts_len'], params['n_feats']))
+        n_kerns,kern_size,pool_size=[128,128],[8,8],[2,2]
+        x=Conv1D(n_kerns[0], kernel_size=kern_size[0],activation=self.activ,name='conv1')(input_img)
+        x=MaxPooling1D(pool_size=pool_size[0],name='pool1')(x)
+        x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=self.activ,name='conv2')(x)
+        atten_name,lstm_name=("hidden",None) if(self.atten) else (None,"hidden")
+        x=LSTM(64,return_sequences=self.atten,name=lstm_name,dropout=0.3,recurrent_dropout=0.2)(x)
+        if(self.atten):
+            x=SimpleAttention(name=atten_name)(x)
+        outputs=Dense(params["n_cats"],activation='sigmoid',trainable=True)(x)
+        model=Model(input_img,outputs)
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
+        model.summary()
+        return model
+
 class SimpleAttention(Layer):
     def __init__(self,**kwargs):
         super(SimpleAttention,self).__init__(**kwargs)
@@ -26,25 +48,26 @@ class SimpleAttention(Layer):
     def get_config(self):
         return super(SimpleAttention,self).get_config()
 
-def ensemble1D(in_path,out_name,n_epochs=1000,size=64):
+def ensemble1D(in_path,out_name,n_epochs=1000,size=64,atten=False):
     input_paths=files.top_files("%s/seqs" % in_path)
     out_path="%s/%s" % (in_path,out_name)
     files.make_dir(out_path)
-    train=get_train()
-    extract=utils.Extract(data.seqs.read_seqs,custom_layer={'SimpleAttention':SimpleAttention})
+    train,extract=get_train(atten)
     ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
     ensemble(input_paths,out_path, arg_dict)
 
-def single_exp(in_path,out_name="atten"):
-    train=get_train()
-    extract=utils.Extract(data.seqs.read_seqs)
+def single_exp(in_path,out_name="atten",atten=False):
+    train,extract=get_train(atten)
     seq_path="%s/%s" % (in_path,"nn0")
     utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
-def get_train():
+def get_train(atten=False):
     read=data.seqs.read_seqs
-    return utils.TrainNN(read,make_lstm,to_dataset)
+    train=utils.TrainNN(read,TS_LSTM(atten),to_dataset)
+    custom_layer={'SimpleAttention':SimpleAttention} if(atten) else None
+    extract=utils.Extract(read,custom_layer=custom_layer)
+    return train,extract
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -52,22 +75,6 @@ def to_dataset(seqs):
     params={'ts_len':X.shape[1],'n_feats':X.shape[2],'n_cats':n_cats}
     return X,y,params
 
-def make_lstm(params):
-    activ='relu'
-    input_img=Input(shape=(params['ts_len'], params['n_feats']))
-    n_kerns,kern_size,pool_size=[128,128],[8,8],[2,2]
-    x=Conv1D(n_kerns[0], kernel_size=kern_size[0],activation=activ,name='conv1')(input_img)
-    x=MaxPooling1D(pool_size=pool_size[0],name='pool1')(x)
-    x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=activ,name='conv2')(x)
-#    x=MaxPooling1D(pool_size=pool_size[1],name='pool2')(x)
-    att_in=LSTM(64,return_sequences=True,dropout=0.3,recurrent_dropout=0.2)(x)
-    att_out=SimpleAttention(name="hidden")(att_in)
-    outputs=Dense(params["n_cats"],activation='sigmoid',trainable=True)(att_out)
-    model=Model(input_img,outputs)
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
-    model.summary()
-    return model
-
-in_path="../dtw_paper/MSR/binary"
+in_path="../dtw_paper/MHAD/binary"
 #single_exp(in_path)
-ensemble1D(in_path,"atten",n_epochs=10,size=64)
+ensemble1D(in_path,"lstm",n_epochs=1000,size=64,atten=False)
