@@ -34,7 +34,8 @@ class Seqs(dict):
 		feat_dict=data.feats.Feats()
 		for name_i,seq_i in self.items():
 			if(single):
-				feat_dict[name_i]=[fun(ts_j) for ts_j in seq_i.T]
+				feats_i=[fun(ts_j) for ts_j in seq_i.T]
+				feat_dict[name_i]=np.array(feats_i).flatten()
 			else:
 				feat_dict[name_i]=fun(seq_i)
 		return feat_dict

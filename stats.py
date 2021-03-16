@@ -2,25 +2,32 @@ import numpy as np
 import scipy.stats
 import ens,data.seqs,files
 
-def ens_stast(in_path,out_path):
-	ens.ens_template(in_path,out_path,extract_feats)
+class Stats(object):
+    def __init__(self,fun):
+        self.fun=fun
 
-def extract_feats(in_path,out_path):
-	seq_dict=data.seqs.read_seqs(in_path)
-	feat_dict=seq_dict.to_feats(feat_vector)
-	feat_dict.save(out_path)
+    def __call__(self,in_path,out_path):
+        seq_dict=data.seqs.read_seqs(in_path)
+        def helper(ts_i):
+            if(np.all(ts_i==0)):
+                return np.zeros((len(self.fun)))
+            feats_i=np.array([fun_j(ts_i) for fun_j in self.fun])
+            return feats_i
+        feat_dict=seq_dict.to_feats(helper,single=True)
+        feat_dict.save(out_path)
 
-def feat_vector(seq_j):
-    feats=[]
-    for ts_k in seq_j.T:
-    	feats+=EBTF(ts_k)
-    return np.array(feats)
+    def ens(self,in_path,out_path):
+        ens.ens_template(in_path,out_path,self)
 
-def EBTF(feat_i):
-    if(np.all(feat_i==0)):
-        return [0.0,0.0,0.0,0.0]
-    return [np.mean(feat_i),np.std(feat_i),
-    	                scipy.stats.skew(feat_i),time_corl(feat_i)]
+def get_base_stats():
+    return Stats([np.mean,np.std,scipy.stats.skew,time_corl])
+
+def get_simple_stats():
+    return Stats([np.mean,np.std,time_corl])
+
+def get_extended_stats():
+    return Stats([np.mean,np.std,scipy.stats.skew,
+                    time_corl,scipy.stats.kurtosis])
 
 def time_corl(feat_i):
     n_size=feat_i.shape[0]
@@ -55,9 +62,12 @@ def check_feature(in_path):
         all_ts.append(X.flatten())
     all_ts=np.array(all_ts).flatten()
     print(basic_stats(all_ts))
-#        raise Exception(X.flatten().shape)
 
 if __name__ == "__main__":
-    stats=check_feature("../dtw_paper/MSR/binary/seqs")
-    print(stats)
-#    ens_stast("../ens/seqs","../ens/feats" )
+#    stats=check_feature("../dtw_paper/MSR/binary/seqs")
+#    print(stats)
+    dataset="MSR"
+    in_path="../dtw_paper/%s/binary/seqs" % dataset
+    out_path="../dtw_paper/%s/binary/stats_mod/base" % dataset
+    stats=get_base_stats()
+    stats.ens(in_path,out_path)
