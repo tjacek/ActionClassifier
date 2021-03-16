@@ -27,13 +27,16 @@ class Seqs(dict):
 		X=[self[name_i] for name_i in names]
 		if(self.equal_seqs()):
 			X=np.array(X)
-		y=[name_i.get_cat() for name_i in names]#int(name_i.split('_')[0])-1 for name_i in names]
+		y=[name_i.get_cat() for name_i in names]
 		return X,y
 
-	def to_feats(self,fun):
+	def to_feats(self,fun,single=False):
 		feat_dict=data.feats.Feats()
 		for name_i,seq_i in self.items():
-			feat_dict[name_i]=fun(seq_i)
+			if(single):
+				feat_dict[name_i]=[fun(ts_j) for ts_j in seq_i.T]
+			else:
+				feat_dict[name_i]=fun(seq_i)
 		return feat_dict
 
 	def save(self,out_path):
@@ -48,7 +51,7 @@ def read_seqs(in_path):
 	for path_i in paths:
 		data_i=np.load(path_i)
 		name_i=path_i.split('/')[-1]
-		name_i=files.Name(name_i)#clean(name_i)
+		name_i=files.Name(name_i).clean()
 		seq_dict[name_i]=data_i
 	return seq_dict
 

@@ -27,23 +27,24 @@ def time_corl(feat_i):
     x_i=np.arange(float(n_size),step=1.0)
     return scipy.stats.pearsonr(x_i,feat_i)[0]
 
+def basic_stats(data_i):
+    return [fun(data_i) for fun in [np.amax,np.amin,np.mean,np.median]]
 
 def check_norm(in_path,single=False):
     if(not single):
         results=[ check_norm(path_i,True) 
                 for path_i in files.top_files(in_path)]
-        return [np.amax(results),np.amin(results),
-                    np.mean(results),np.median(results)]
+        return basic_stats(results)
     seq_dict=data.seqs.read_seqs(in_path)
-    size,sucess=0,0
-    for seq_i in seq_dict.values():
-        for ts_j in seq_i.T:
-            if(scipy.stats.shapiro(ts_j)[1]<0.05):
-                sucess+=1
-            size+=1
-    print(size)
-    print(sucess/size)
-    return (sucess/size)
+    def norm_test(ts_i):
+        if(np.all(ts_i)==0):
+            return 1.0
+        return float(scipy.stats.shapiro(ts_i)[1]<0.05)
+    feat_dict= seq_dict.to_feats(norm_test,single=True)
+    X,y=feat_dict.to_dataset()
+    size,no_pass=np.product(X.shape),np.sum(X)
+    print(size,no_pass)
+    return (no_pass/size)
 
 if __name__ == "__main__":
     stats=check_norm("../dtw_paper/MHAD/binary/seqs")
