@@ -38,15 +38,26 @@ def check_norm(in_path,single=False):
     seq_dict=data.seqs.read_seqs(in_path)
     def norm_test(ts_i):
         if(np.all(ts_i)==0):
-            return 1.0
+            return -1.0
         return float(scipy.stats.shapiro(ts_i)[1]<0.05)
     feat_dict= seq_dict.to_feats(norm_test,single=True)
     X,y=feat_dict.to_dataset()
-    size,no_pass=np.product(X.shape),np.sum(X)
+    size,no_pass=np.product(X[X>=0].shape),np.sum(X[X>=0])
     print(size,no_pass)
     return (no_pass/size)
 
+def check_feature(in_path):
+    all_ts=[]
+    for path_i in files.top_files(in_path):
+        seq_dict_i=data.seqs.read_seqs(path_i)
+        feat_dict_i= seq_dict_i.to_feats(scipy.stats.kurtosis,single=True)
+        X,y=feat_dict_i.to_dataset()
+        all_ts.append(X.flatten())
+    all_ts=np.array(all_ts).flatten()
+    print(basic_stats(all_ts))
+#        raise Exception(X.flatten().shape)
+
 if __name__ == "__main__":
-    stats=check_norm("../dtw_paper/MHAD/binary/seqs")
+    stats=check_feature("../dtw_paper/MSR/binary/seqs")
     print(stats)
 #    ens_stast("../ens/seqs","../ens/feats" )
