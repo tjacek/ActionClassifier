@@ -8,6 +8,7 @@ import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
 from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
+from keras.layers.normalization import BatchNormalization
 from keras import regularizers
 from keras.models import load_model
 import files,spline,data.seqs,utils,ens,sim
@@ -36,14 +37,22 @@ class TS_CNN(object):
         x=Flatten()(x)
         reg=regularizers.l1(self.l1) if(self.l1) else None
         x=Dense(100, activation=self.activ,name="hidden",kernel_regularizer=reg)(x)
-        if(self.dropout):
-            x=Dropout(self.dropout)(x)
+#        if(self.dropout):
+#            x=Dropout(self.dropout)(x)
+        x=self.reg_layer(x)
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
         model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=self.optim_alg())
         model.summary()
         return model
+
+    def reg_layer(self,x):
+        if(self.dropout=="batch_norm"):
+            return BatchNormalization()(x)
+        if(self.dropout):
+            return Dropout(self.dropout)(x)
+        return x
 
 class Nestrov(object):
     def __init__(self,lr=0.001,momentum=0.9):
@@ -85,7 +94,7 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    train=utils.TrainNN(read,TS_CNN(optim_alg=Adam()),to_dataset)
+    train=utils.TrainNN(read,TS_CNN(dropout="batch_norm"),to_dataset)
     extract=utils.Extract(read)
     return train,extract
 
@@ -102,5 +111,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_adam",n_epochs=1000)
+    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_batch",n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
