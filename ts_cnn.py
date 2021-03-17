@@ -37,11 +37,8 @@ class TS_CNN(object):
             x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=self.activ,name='conv2')(x)
             x=MaxPooling1D(pool_size=pool_size[1],name='pool2')(x)
         x=Flatten()(x)
-        if(self.l1):
-            reg=regularizers.l1(self.l1)
-        else:
-            reg=None
-        x=Dense(100, activation=self.activ,name="hidden",kernel_regularizer=reg,)(x)
+        reg=regularizers.l1(self.l1) if(self.l1) else None
+        x=Dense(100, activation=self.activ,name="hidden",kernel_regularizer=reg)(x)
         if(self.dropout):
             x=Dropout(self.dropout)(x)
         x=Dense(units=params['n_cats'],activation='softmax')(x)
@@ -59,25 +56,31 @@ class Nestrov(object):
     def __call__(self):
         return keras.optimizers.SGD(lr=self.lr,  momentum=self.momentum, nesterov=True)
 
+class Adam(object):
+    def __init__(self,lr=0.01):
+        self.lr=lr
+    def __call__(self):
+        return keras.optimizers.Adam(learning_rate=self.lr)
+
 def simple_exp(in_path,n_epochs=1000):
     print(paths)
-    train=get_train(nn_type="wide")
-    extract=utils.Extract(data.seqs.read_seqs)
+    train,extract=get_train(nn_type="wide")
     utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
 def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
     input_paths=files.top_files("%s/seqs" % in_path)
     out_path="%s/%s" % (in_path,out_name)
     files.make_dir(out_path)
-    train=get_train(nn_type="wide")
-    extract=utils.Extract(data.seqs.read_seqs)
+    train,extract=get_train(nn_type="wide")
     ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
     ensemble(input_paths,out_path, arg_dict)
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    return utils.TrainNN(read,TS_CNN(),to_dataset)
+    train=utils.TrainNN(read,TS_CNN(optim_alg=Adam()),to_dataset)
+    extract=utils.Extract(read)
+    return train,extract
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
@@ -92,5 +95,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    ensemble_exp("../dtw_paper/MHAD/binary","1D_CNN_lr01",n_epochs=1000)
+    ensemble_exp("../dtw_paper/MSR/binary","1D_CNN_adam",n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
