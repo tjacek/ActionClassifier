@@ -25,17 +25,14 @@ class TS_CNN(object):
 
     def __call__(self,params):
         input_img=Input(shape=(params['ts_len'], params['n_feats']))
-        n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
         if(self.nn_type=="narrow"):
-            x=Conv2D(32,kernel_size=(8, 1),activation=self.activ)(input_img)
-            x=MaxPooling2D(pool_size=(4, 1))(x)
-            x=Conv2D(32, kernel_size=(8, 1),activation=self.activ)(x)
-            x=MaxPooling2D(pool_size=(4, 1))(x)
+            n_kerns,kern_size,pool_size=[32,32],[(8,1),(8,1)],[(4,1),(4,1)]
+            x=add_conv_layer(input_img,n_kerns,kern_size,
+                            pool_size,activ=self.activ,one_dim=False)
         else:
-            x=Conv1D(n_kerns[0], kernel_size=kern_size[0],activation=self.activ,name='conv1')(input_img)
-            x=MaxPooling1D(pool_size=pool_size[0],name='pool1')(x)
-            x=Conv1D(n_kerns[1], kernel_size=kern_size[1],activation=self.activ,name='conv2')(x)
-            x=MaxPooling1D(pool_size=pool_size[1],name='pool2')(x)
+            n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
+            x=add_conv_layer(input_img,n_kerns,kern_size,
+                            pool_size,activ=self.activ,one_dim=True)
         x=Flatten()(x)
         reg=regularizers.l1(self.l1) if(self.l1) else None
         x=Dense(100, activation=self.activ,name="hidden",kernel_regularizer=reg)(x)
@@ -61,6 +58,16 @@ class Adam(object):
         self.lr=lr
     def __call__(self):
         return keras.optimizers.Adam(learning_rate=self.lr)
+
+def add_conv_layer(input_img,n_kerns,kern_size,
+                    pool_size,activ='relu',one_dim=False):
+    x=input_img
+    Conv=Conv1D if(one_dim) else Conv2D
+    MaxPooling=MaxPooling1D if(one_dim) else MaxPooling2D
+    for i,n_kern_i in enumerate(n_kerns):
+        x=Conv(n_kern_i, kernel_size=kern_size[i],activation=activ,name='conv%d'%i)(x)
+        x=MaxPooling(pool_size=pool_size[i],name='pool%d' % i)(x)
+    return x
 
 def simple_exp(in_path,n_epochs=1000):
     print(paths)
