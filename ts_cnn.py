@@ -14,12 +14,14 @@ import files,spline,data.seqs,utils,ens,sim
 
 class TS_CNN(object):
     def __init__(self,nn_type="wide",l1=0.01,dropout=0.5,
-                activ='relu',lr=0.001):
+                activ='relu',optim_alg=None):
+        if(optim_alg is None):
+            optim_alg=Nestrov()
         self.nn_type=nn_type
         self.activ=activ
         self.l1=l1
         self.dropout=dropout
-        self.lr=lr
+        self.optim_alg=optim_alg
 
     def __call__(self,params):
         input_img=Input(shape=(params['ts_len'], params['n_feats']))
@@ -45,9 +47,17 @@ class TS_CNN(object):
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
         model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.SGD(lr=self.lr,  momentum=0.9, nesterov=True))
+              optimizer=self.optim_alg())
         model.summary()
         return model
+
+class Nestrov(object):
+    def __init__(self,lr=0.001,momentum=0.9):
+        self.lr=lr
+        self.momentum=momentum
+
+    def __call__(self):
+        return keras.optimizers.SGD(lr=self.lr,  momentum=self.momentum, nesterov=True)
 
 def simple_exp(in_path,n_epochs=1000):
     print(paths)
@@ -67,7 +77,7 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    return utils.TrainNN(read,TS_CNN(lr=0.1),to_dataset)
+    return utils.TrainNN(read,TS_CNN(),to_dataset)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
