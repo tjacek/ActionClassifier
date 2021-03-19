@@ -7,17 +7,17 @@ import os.path
 import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
 from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
-from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
 from keras.layers.normalization import BatchNormalization
 from keras import regularizers
 from keras.models import load_model
-import files,spline,data.seqs,utils,ens,sim
+import files,data.seqs,utils,ens,sim
+import deep
 
 class TS_CNN(object):
     def __init__(self,nn_type="wide",l1=0.01,dropout=0.5,
                 activ='relu',optim_alg=None):
         if(optim_alg is None):
-            optim_alg=Nestrov()
+            optim_alg=deep.Nestrov()
         self.nn_type=nn_type
         self.activ=activ
         self.l1=l1
@@ -51,36 +51,6 @@ class TS_CNN(object):
         if(self.dropout):
             return Dropout(self.dropout)(x)
         return x
-
-class Nestrov(object):
-    def __init__(self,lr=0.001,momentum=0.9):
-        self.lr=lr
-        self.momentum=momentum
-
-    def __call__(self):
-        return keras.optimizers.SGD(lr=self.lr,  momentum=self.momentum, nesterov=True)
-
-class Adam(object):
-    def __init__(self,lr=0.001):
-        self.lr=lr
-    def __call__(self):
-        return keras.optimizers.Adam(learning_rate=self.lr)
-
-class RMS(object):
-    def __init__(self,lr=0.001):
-        self.lr=lr
-    def __call__(self):
-        return keras.optimizers.RMSprop(learning_rate=self.lr)
-
-def add_conv_layer(input_img,n_kerns,kern_size,
-                    pool_size,activ='relu',one_dim=False):
-    x=input_img
-    Conv=Conv1D if(one_dim) else Conv2D
-    MaxPooling=MaxPooling1D if(one_dim) else MaxPooling2D
-    for i,n_kern_i in enumerate(n_kerns):
-        x=Conv(n_kern_i, kernel_size=kern_size[i],activation=activ,name='conv%d'%i)(x)
-        x=MaxPooling(pool_size=pool_size[i],name='pool%d' % i)(x)
-    return x
 
 def simple_exp(in_path,n_epochs=1000):
     print(paths)
