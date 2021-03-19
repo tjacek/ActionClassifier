@@ -14,10 +14,10 @@ import files,data.seqs,utils,ens,sim
 import deep
 
 class TS_CNN(object):
-    def __init__(self,nn_type="wide",l1=0.01,dropout=0.5,
+    def __init__(self,nn_type="wide",l1=0.01,dropout="batch_norm",
                 activ='relu',optim_alg=None):
         if(optim_alg is None):
-            optim_alg=deep.Nestrov()
+            optim_alg=deep.RMS()
         self.nn_type=nn_type
         self.activ=activ
         self.l1=l1
@@ -28,15 +28,17 @@ class TS_CNN(object):
         input_img=Input(shape=(params['ts_len'], params['n_feats']))
         if(self.nn_type=="narrow"):
             n_kerns,kern_size,pool_size=[32,32],[(8,1),(8,1)],[(4,1),(4,1)]
-            x=add_conv_layer(input_img,n_kerns,kern_size,
+            x=deep.add_conv_layer(input_img,n_kerns,kern_size,
                             pool_size,activ=self.activ,one_dim=False)
         else:
             n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
-            x=add_conv_layer(input_img,n_kerns,kern_size,
+            x=deep.add_conv_layer(input_img,n_kerns,kern_size,
                             pool_size,activ=self.activ,one_dim=True)
         x=Flatten()(x)
         reg=regularizers.l1(self.l1) if(self.l1) else None
-        x=Dense(100, activation=self.activ,name="hidden",kernel_regularizer=reg)(x)
+        
+        name="prebatch" if(self.dropout=="batch_norm") else "hidden"
+        x=Dense(100, activation=self.activ,name=name,kernel_regularizer=reg)(x)
         x=self.reg_layer(x)
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
@@ -47,7 +49,7 @@ class TS_CNN(object):
 
     def reg_layer(self,x):
         if(self.dropout=="batch_norm"):
-            return BatchNormalization()(x)
+            return BatchNormalization(name="hidden")(x)
         if(self.dropout):
             return Dropout(self.dropout)(x)
         return x
@@ -58,15 +60,35 @@ def simple_exp(in_path,n_epochs=1000):
     utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
 def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
-    input_paths= prepare_ens_dir(in_path,out_name,in_name="seqs")
+    input_paths=prepare_ens_dir(in_path,out_name,in_name="seqs")[0]
     train,extract=get_train(nn_type="wide")
     ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
     ensemble(input_paths,out_path, arg_dict)
 
+def multi_exp(in_path,out_name,n_epochs=1000,size=64):
+    out_path="%s/%s" % (in_path,out_name)
+    files.make_dir(out_path)
+    exp={"no_l1":TS_CNN(l1=None),"dropout_0.5":TS_CNN(dropout=0.5),
+        "adam":TS_CNN(optim_alg=deep.Adam()),
+        "nestrov":TS_CNN(optim_alg=deep.Nestrov()),
+        "tanh":TS_CNN(activ='tanh'),"base":TS_CNN()}
+    extract=utils.Extract(data.seqs.read_seqs)
+    arg_dict={'size':size,'n_epochs':n_epochs}
+    for name_i,make_cnn_i in exp.items():
+        input_paths=files.top_files("%s/seqs" % in_path)
+        out_i="%s/%s/%s" % (in_path,out_name,name_i)
+        files.make_dir(out_i)
+#        raise Exception(out_i)
+        
+        train_i=utils.TrainNN(data.seqs.read_seqs,make_cnn_i,to_dataset)
+        ensemble=ens.ts_ensemble(train_i,extract)
+#        raise Exception(out_i)
+        ensemble(input_paths,out_i, arg_dict)
+
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    train=utils.TrainNN(read,TS_CNN(),to_dataset,64)
+    train=utils.TrainNN(read,TS_CNN(),to_dataset)
     extract=utils.Extract(read)
     return train,extract
 
@@ -83,5 +105,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    ensemble_exp("../dtw_paper/MSR/binary/","1D_CNN_batch_64",n_epochs=1000)
+    multi_exp("../dtw_paper/MSR/binary","1D_CNN",n_epochs=10)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")

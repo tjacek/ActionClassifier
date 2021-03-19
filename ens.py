@@ -16,7 +16,6 @@ class EnsTransform(object):
 				for key_i,path_i in dirs.items()}
 			args_i={**args_i,**arg_dict}
 			args_i[self.input_dir]=path_i
-			print(path_i)
 			for fun,arg_names in self.funcs:
 				fun_args=[args_i[name_k]  
 							for name_k in arg_names]
@@ -60,7 +59,7 @@ def ts_ensemble(train,extract):
     return EnsTransform(funcs,dir_names)
 
 def prepare_ens_dir(in_path,out_name,in_name="seqs"):
-	input_paths=files.top_files("%s/%s" % (in_path,name))
+    input_paths=files.top_files("%s/%s" % (in_path,in_name))
     out_path="%s/%s" % (in_path,out_name)
     files.make_dir(out_path)
-    return input_paths
+    return input_paths#,out_path

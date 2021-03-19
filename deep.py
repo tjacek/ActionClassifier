@@ -1,3 +1,4 @@
+import keras
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D#,Lambda
 
 class Nestrov(object):
