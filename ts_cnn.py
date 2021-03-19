@@ -98,7 +98,7 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
-    train=utils.TrainNN(read,TS_CNN(optim_alg=RMS()),to_dataset)
+    train=utils.TrainNN(read,TS_CNN(),to_dataset,64)
     extract=utils.Extract(read)
     return train,extract
 
@@ -115,5 +115,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    ensemble_exp("../dtw_paper/MHAD/binary/","1D_CNN_rms",n_epochs=1000)
+    ensemble_exp("../dtw_paper/MSR/binary/","1D_CNN_batch_64",n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")

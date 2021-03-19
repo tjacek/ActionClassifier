@@ -8,10 +8,11 @@ import data.feats,data.imgs,data.seqs
 import files,spline
 
 class TrainNN(object):
-    def __init__(self,read,make_model,to_dataset):
+    def __init__(self,read,make_model,to_dataset,batch_size=32):
         self.read=read      
         self.make_model=make_model
         self.to_dataset=to_dataset
+        self.batch_size=batch_size
 
     def __call__(self,in_path,nn_path,n_epochs=5):
         dataset=self.read(in_path)
@@ -19,7 +20,7 @@ class TrainNN(object):
         X,y,params=self.to_dataset(train)
         y=to_one_hot(y,params["n_cats"])
         model=self.make_model(params)
-        model.fit(X,y,epochs=n_epochs,batch_size=32)
+        model.fit(X,y,epochs=n_epochs,batch_size=self.batch_size)
         if(nn_path):
             model.save(nn_path)
 
