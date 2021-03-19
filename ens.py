@@ -58,3 +58,9 @@ def ts_ensemble(train,extract):
             [extract,["spline","nn","feats"]]]
     dir_names=["spline","nn","feats"]
     return EnsTransform(funcs,dir_names)
+
+def prepare_ens_dir(in_path,out_name,in_name="seqs"):
+	input_paths=files.top_files("%s/%s" % (in_path,name))
+    out_path="%s/%s" % (in_path,out_name)
+    files.make_dir(out_path)
+    return input_paths

@@ -58,9 +58,7 @@ def simple_exp(in_path,n_epochs=1000):
     utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
 def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
-    input_paths=files.top_files("%s/seqs" % in_path)
-    out_path="%s/%s" % (in_path,out_name)
-    files.make_dir(out_path)
+    input_paths= prepare_ens_dir(in_path,out_name,in_name="seqs")
     train,extract=get_train(nn_type="wide")
     ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
