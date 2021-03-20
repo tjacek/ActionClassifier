@@ -68,23 +68,22 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def multi_exp(in_path,out_name,n_epochs=1000,size=64):
     out_path="%s/%s" % (in_path,out_name)
-    files.make_dir(out_path)
+#    files.make_dir(out_path)
     exp={"no_l1":TS_CNN(l1=None),"dropout_0.5":TS_CNN(dropout=0.5),
         "adam":TS_CNN(optim_alg=deep.Adam()),
         "nestrov":TS_CNN(optim_alg=deep.Nestrov()),
         "tanh":TS_CNN(activ='tanh'),"base":TS_CNN()}
     extract=utils.Extract(data.seqs.read_seqs)
     arg_dict={'size':size,'n_epochs':n_epochs}
-    for name_i,make_cnn_i in exp.items():
-        input_paths=files.top_files("%s/seqs" % in_path)
-        out_i="%s/%s/%s" % (in_path,out_name,name_i)
-        files.make_dir(out_i)
-#        raise Exception(out_i)
-        
-        train_i=utils.TrainNN(data.seqs.read_seqs,make_cnn_i,to_dataset)
-        ensemble=ens.ts_ensemble(train_i,extract)
-#        raise Exception(out_i)
-        ensemble(input_paths,out_i, arg_dict)
+    ens.multimodel_ensemble(in_path,out_path,exp_dict,
+                            extract,arg_dict)
+#    for name_i,make_cnn_i in exp.items():
+#        input_paths=files.top_files("%s/seqs" % in_path)
+#        out_i="%s/%s/%s" % (in_path,out_name,name_i)
+#        files.make_dir(out_i)   
+#        train_i=utils.TrainNN(data.seqs.read_seqs,make_cnn_i,to_dataset)
+#        ensemble=ens.ts_ensemble(train_i,extract)
+#        ensemble(input_paths,out_i, arg_dict)
 
 def get_train(nn_type="wide"):
     read=data.seqs.read_seqs
@@ -105,5 +104,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    multi_exp("../dtw_paper/MSR/binary","1D_CNN",n_epochs=10)
+    multi_exp("../dtw_paper/MHAD/binary","1D_CNN",n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
