@@ -2,7 +2,7 @@ from keras.layers import Layer
 from keras.layers import Input,Dense,Conv1D, MaxPooling1D,LSTM
 from keras.models import Model
 import keras.backend as K
-import files,utils,data.seqs,spline,ens
+import files,utils,data.seqs,ens
 
 class TS_LSTM(object):
     def __init__(self,atten=False,activ="relu"):
@@ -48,6 +48,17 @@ class SimpleAttention(Layer):
     def get_config(self):
         return super(SimpleAttention,self).get_config()
 
+def multi_exp(in_path,out_name,n_epochs=1000,size=64):
+    out_path="%s/%s" % (in_path,out_name)
+    train_dict={"lstm":TS_LSTM(atten=False),
+                "atten":TS_LSTM(atten=True)}
+    train_dict={name_i:utils.TrainNN(data.seqs.read_seqs,train_i,to_dataset)
+                    for name_i,train_i in train_dict.items()}
+    extract=utils.Extract(data.seqs.read_seqs)
+    arg_dict={'size':size,'n_epochs':n_epochs}
+    ens.multimodel_ensemble(in_path,out_path,train_dict,
+                            extract,arg_dict)
+
 def ensemble1D(in_path,out_name,n_epochs=1000,size=64,atten=False):
     input_paths=files.top_files("%s/seqs" % in_path)
     out_path="%s/%s" % (in_path,out_name)
@@ -75,6 +86,5 @@ def to_dataset(seqs):
     params={'ts_len':X.shape[1],'n_feats':X.shape[2],'n_cats':n_cats}
     return X,y,params
 
-in_path="../dtw_paper/MHAD/binary"
-#single_exp(in_path)
-ensemble1D(in_path,"lstm",n_epochs=1000,size=64,atten=False)
+in_path="../dtw_paper/MSR/binary"
+multi_exp(in_path,"1D_CNN",n_epochs=1000,size=64)

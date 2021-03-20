@@ -61,10 +61,9 @@ def ts_ensemble(train,extract):
 def multimodel_ensemble(in_path,out_path,train_dict,
 					extract,arg_dict,in_dict="seqs"):
     files.make_dir(out_path)
-    for name_i,make_cnn_i in train_dict.items():
+    for name_i,train_i in train_dict.items():
         input_paths=files.top_files("%s/%s" % (in_path,in_dict))
-        out_i="%s/%s/%s" % (in_path,out_name,name_i)
+        out_i="%s/%s" % (out_path,name_i)
         files.make_dir(out_i)   
-        train_i=utils.TrainNN(data.seqs.read_seqs,make_cnn_i,to_dataset)
-        ensemble=ens.ts_ensemble(train_i,extract)
+        ensemble=ts_ensemble(train_i,extract)
         ensemble(input_paths,out_i, arg_dict)
