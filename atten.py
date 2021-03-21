@@ -52,12 +52,10 @@ def multi_exp(in_path,out_name,n_epochs=1000,size=64):
     out_path="%s/%s" % (in_path,out_name)
     train_dict={"lstm":TS_LSTM(atten=False),
                 "atten":TS_LSTM(atten=True)}
-    train_dict={name_i:utils.TrainNN(data.seqs.read_seqs,train_i,to_dataset)
+    train_dict={name_i:get_train(train_i)
                     for name_i,train_i in train_dict.items()}
-    extract=utils.Extract(data.seqs.read_seqs)
     arg_dict={'size':size,'n_epochs':n_epochs}
-    ens.multimodel_ensemble(in_path,out_path,train_dict,
-                            extract,arg_dict)
+    ens.multimodel_ensemble(in_path,out_path,train_dict,arg_dict)
 
 def ensemble1D(in_path,out_name,n_epochs=1000,size=64,atten=False):
     input_paths=files.top_files("%s/seqs" % in_path)
@@ -73,10 +71,12 @@ def single_exp(in_path,out_name="atten",atten=False):
     seq_path="%s/%s" % (in_path,"nn0")
     utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
-def get_train(atten=False):
+def get_train(ts_lstm=None):
+    if(ts_lstm is None):
+        ts_lstm=TS_LSTM()
     read=data.seqs.read_seqs
-    train=utils.TrainNN(read,TS_LSTM(atten),to_dataset)
-    custom_layer={'SimpleAttention':SimpleAttention} if(atten) else None
+    train=utils.TrainNN(read,ts_lstm,to_dataset)
+    custom_layer={'SimpleAttention':SimpleAttention} if(ts_lstm.atten) else None
     extract=utils.Extract(read,custom_layer=custom_layer)
     return train,extract
 
