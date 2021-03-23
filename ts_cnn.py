@@ -6,9 +6,7 @@ import numpy as np
 import os.path
 import keras,keras.backend as K,keras.utils
 from keras.models import Model,Sequential
-from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
-from keras.layers.normalization import BatchNormalization
-from keras import regularizers
+from keras.layers import Input,Dense
 from keras.models import load_model
 import files,data.seqs,utils,ens,sim
 import deep
@@ -34,25 +32,13 @@ class TS_CNN(object):
             n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
             x=deep.add_conv_layer(input_img,n_kerns,kern_size,
                             pool_size,activ=self.activ,one_dim=True)
-        x=Flatten()(x)
-        reg=regularizers.l1(self.l1) if(self.l1) else None
-        
-        name="prebatch" if(self.dropout=="batch_norm") else "hidden"
-        x=Dense(100, activation=self.activ,name=name,kernel_regularizer=reg)(x)
-        x=self.reg_layer(x)
+        x=deep.full_layer(x,self.l1,self.dropout,self.activ)
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
         model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=self.optim_alg())
         model.summary()
         return model
-
-    def reg_layer(self,x):
-        if(self.dropout=="batch_norm"):
-            return BatchNormalization(name="hidden")(x)
-        if(self.dropout):
-            return Dropout(self.dropout)(x)
-        return x
 
 def simple_exp(in_path,n_epochs=1000):
     print(paths)
@@ -68,26 +54,21 @@ def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
 
 def multi_exp(in_path,out_name,n_epochs=1000,size=64):
     out_path="%s/%s" % (in_path,out_name)
-#    files.make_dir(out_path)
-    exp={"no_l1":TS_CNN(l1=None),"dropout_0.5":TS_CNN(dropout=0.5),
+    train_dict={"no_l1":TS_CNN(l1=None),"dropout_0.5":TS_CNN(dropout=0.5),
         "adam":TS_CNN(optim_alg=deep.Adam()),
         "nestrov":TS_CNN(optim_alg=deep.Nestrov()),
         "tanh":TS_CNN(activ='tanh'),"base":TS_CNN()}
-    extract=utils.Extract(data.seqs.read_seqs)
+#    extract=utils.Extract(data.seqs.read_seqs)
+    train_dict={name_i:get_train(train_i)
+                    for name_i,train_i in train_dict.items()}
     arg_dict={'size':size,'n_epochs':n_epochs}
-    ens.multimodel_ensemble(in_path,out_path,exp_dict,
-                            extract,arg_dict)
-#    for name_i,make_cnn_i in exp.items():
-#        input_paths=files.top_files("%s/seqs" % in_path)
-#        out_i="%s/%s/%s" % (in_path,out_name,name_i)
-#        files.make_dir(out_i)   
-#        train_i=utils.TrainNN(data.seqs.read_seqs,make_cnn_i,to_dataset)
-#        ensemble=ens.ts_ensemble(train_i,extract)
-#        ensemble(input_paths,out_i, arg_dict)
+    ens.multimodel_ensemble(in_path,out_path,train_dict,arg_dict)
 
-def get_train(nn_type="wide"):
+def get_train(ts_cnn=None):
+    if(ts_cnn is None):
+        ts_cnn=TS_CNN()
     read=data.seqs.read_seqs
-    train=utils.TrainNN(read,TS_CNN(),to_dataset)
+    train=utils.TrainNN(read,ts_cnn,to_dataset)
     extract=utils.Extract(read)
     return train,extract
 

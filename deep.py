@@ -1,5 +1,8 @@
 import keras
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D#,Lambda
+from keras.layers import Dropout,Flatten,Dense
+from keras.layers.normalization import BatchNormalization
+
 
 class Nestrov(object):
     def __init__(self,lr=0.001,momentum=0.9):
@@ -30,3 +33,13 @@ def add_conv_layer(input_img,n_kerns,kern_size,
         x=Conv(n_kern_i, kernel_size=kern_size[i],activation=activ,name='conv%d'%i)(x)
         x=MaxPooling(pool_size=pool_size[i],name='pool%d' % i)(x)
     return x
+
+def full_layer(x,l1=0.01,dropout=0.5,activ='relu'):
+    x=Flatten()(x)
+    reg=regularizers.l1(l1) if(l1) else None
+    name="prebatch" if(dropout=="batch_norm") else "hidden"
+    x=Dense(100, activation=activ,name=name,kernel_regularizer=reg)(x)
+    if(dropout=="batch_norm"):
+        return BatchNormalization(name="hidden")(x)
+    if(dropout):
+        return Dropout(dropout)(x)
