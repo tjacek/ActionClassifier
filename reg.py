@@ -1,5 +1,5 @@
 from keras.layers import Input,Dense
-import deep,data.seqs,data.feats
+import deep,data.seqs,stats#data.feats
 
 class TS_REG(object):
     def __init__(self,optim_alg=None):
@@ -20,18 +20,18 @@ class TS_REG(object):
         model.summary()
         return model
 
-def simple_exp(x_path,y_path,n_epochs=1000):
+def simple_exp(in_path,n_epochs=1000):
     seq_dict=data.seqs.read_seqs(x_path)
-    feat_dict=data.feats.read_feats(y_path)
-    X=seq_dict.to_dataset()[0]
-    y=feat_dict.to_dataset()[0]
-    params={'ts_len':64,'n_feats':100,'n_cats':400}
+    X,y,params=to_dataset(seq_dict)
+
+def to_dataset(seqs):
+    get_stats=stats.get_base_stats()
+    stat_feats=get_stats.compute_feats(seqs)
+    X=seqs.to_dataset()[0]
+    y=stat_feats.to_dataset()[0]
+    params={'ts_len':64,'n_feats':X[0].shape[1],'n_outputs':y.shape[1]}
     return X,y,params
-    make_model=TS_REG() 
-    make_model(params)
-#    print(len(X))
-#    print(y.shape)
 
 x_path="../dtw_paper/MSR/binary/seqs/nn0"
 y_path="../dtw_paper/MSR/binary/stats/feats/nn0"
-simple_exp(x_path,y_path,n_epochs=1000)
+simple_exp(x_path,n_epochs=1000)

@@ -8,13 +8,17 @@ class Stats(object):
 
     def __call__(self,in_path,out_path):
         seq_dict=data.seqs.read_seqs(in_path)
+        feat_dict=self.compute_exp(seq_dict)
+        feat_dict.save(out_path)
+
+    def compute_feats(self,seq_dict):
         def helper(ts_i):
             if(np.all(ts_i==0)):
                 return np.zeros((len(self.fun)))
             feats_i=np.array([fun_j(ts_i) for fun_j in self.fun])
             return feats_i
-        feat_dict=seq_dict.to_feats(helper,single=True)
-        feat_dict.save(out_path)
+        return seq_dict.to_feats(helper,single=True)
+        
 
     def ens(self,in_path,out_path):
         ens.ens_template(in_path,out_path,self)
