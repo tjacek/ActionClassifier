@@ -39,17 +39,23 @@ class Extract(object):
         if(self.preproc):
             self.preproc(dataset)
         model=load_model(nn_path,custom_objects=self.custom_layer)
-#        model=self.get_model(nn_path)
-        extractor=Model(inputs=model.input,
+        if(self.name):
+            extractor=Model(inputs=model.input,
                 outputs=model.get_layer(self.name).output)
+        else:
+            extractor=model
         extractor.summary()
         X,y=dataset.to_dataset()
         names=dataset.names()
         feat_dict=data.feats.Feats()
         for i,name_i in enumerate(dataset.names()):
-            x_i=np.expand_dims(X[i],axis=0)#extractor.predict(X[i])
+            x_i=np.expand_dims(X[i],axis=0)
             feat_dict[name_i]=extractor.predict(x_i)
-        feat_dict.save(out_path)
+            if(not self.name):
+                feat_dict[name_i]=feat_dict[name_i].T
+        if(out_path):
+            feat_dict.save(out_path)
+        return feat_dict
 
 class ExtractSeqs(object):
     def __init__(self,read=None,name="hidden",preproc=None):
@@ -75,15 +81,22 @@ class ExtractSeqs(object):
             feat_seqs[name_i]= extractor.predict(x_i)
         feat_seqs.save(out_path)
 
-def single_exp_template(in_path,out_path,train,extract,size=64):
+#class FullExtract(object):
+#    def __init__(self,read=None,name="hidden"):
+#        self.read=read
+#        self.name = name
+    
+#    def __call__(self,in_path,nn_path,out_path):
+#        gc.collect()
+#        dataset=self.read(in_path)
+#        model=load_model(nn_path)     
+
+def single_exp_template(in_path,out_path,train,extract,
+                            size=64,n_epochs=1000):
     paths=files.prepare_dirs(out_path,["spline","nn","feats"])
     paths['seqs']=in_path
-#    paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
-#    if(seq_path):
-#        paths["seqs"]=seq_path
-#    print(paths)
     spline.upsample(paths['seqs'],paths['spline'],size)
-    train(paths["spline"],paths["nn"])
+    train(paths["spline"],paths["nn"],n_epochs=n_epochs)
     extract(paths["spline"],paths["nn"],paths["feats"])
 
 def check_model(nn_path):
