@@ -55,13 +55,3 @@ def read_seqs(in_path):
 		name_i=files.Name(name_i).clean()
 		seq_dict[name_i]=data_i
 	return seq_dict
-
-def rec_split(in_path,out_path):
-	def helper(in_i,out_i):
-		print(in_i)
-		print(out_i)
-		seqs_i=read_seqs(in_i)
-		train,test=seqs_i.split()
-		train.save("%s/train" % out_i)
-		test.save("%s/test" % out_i)
-	files.recursive_transform(in_path,out_path,"seqs",helper)

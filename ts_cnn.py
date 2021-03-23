@@ -5,9 +5,8 @@ tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import os.path
 import keras,keras.backend as K,keras.utils
-from keras.models import Model,Sequential
+from keras.models import Model,Sequential,load_model
 from keras.layers import Input,Dense
-from keras.models import load_model
 import files,data.seqs,utils,ens,sim
 import deep
 
@@ -58,7 +57,6 @@ def multi_exp(in_path,out_name,n_epochs=1000,size=64):
         "adam":TS_CNN(optim_alg=deep.Adam()),
         "nestrov":TS_CNN(optim_alg=deep.Nestrov()),
         "tanh":TS_CNN(activ='tanh'),"base":TS_CNN()}
-#    extract=utils.Extract(data.seqs.read_seqs)
     train_dict={name_i:get_train(train_i)
                     for name_i,train_i in train_dict.items()}
     arg_dict={'size':size,'n_epochs':n_epochs}

@@ -87,7 +87,7 @@ def read_feats(in_path):
         raw=line_i.split('#')
         if(len(raw)>1):
             data_i,info_i=raw[0],raw[-1]
-            info_i= files.clean(info_i)
+            info_i= files.Name(info_i).clean()#files.clean(info_i)
             feat_dict[info_i]=np.fromstring(data_i,sep=',')
     return feat_dict
 
