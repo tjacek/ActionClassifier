@@ -18,7 +18,8 @@ class TrainNN(object):
         dataset=self.read(in_path)
         train,test=dataset.split()
         X,y,params=self.to_dataset(train)
-        y=to_one_hot(y,params["n_cats"])
+        if("n_cats" in params ):
+            y=to_one_hot(y,params["n_cats"])
         model=self.make_model(params)
         model.fit(X,y,epochs=n_epochs,batch_size=self.batch_size)
         if(nn_path):
@@ -74,11 +75,13 @@ class ExtractSeqs(object):
             feat_seqs[name_i]= extractor.predict(x_i)
         feat_seqs.save(out_path)
 
-def single_exp_template(in_path,out_name,train,extract,seq_path=None,size=64):
-    paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
-    if(seq_path):
-        paths["seqs"]=seq_path#"%s/%s" % (paths["seqs"],"nn0")
-    print(paths)
+def single_exp_template(in_path,out_path,train,extract,size=64):
+    paths=files.prepare_dirs(out_path,["spline","nn","feats"])
+    paths['seqs']=in_path
+#    paths=files.prepare_dirs(in_path,out_name,["spline","nn","feats"])
+#    if(seq_path):
+#        paths["seqs"]=seq_path
+#    print(paths)
     spline.upsample(paths['seqs'],paths['spline'],size)
     train(paths["spline"],paths["nn"])
     extract(paths["spline"],paths["nn"],paths["feats"])

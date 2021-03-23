@@ -2,7 +2,7 @@ import keras
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D#,Lambda
 from keras.layers import Dropout,Flatten,Dense
 from keras.layers.normalization import BatchNormalization
-
+from keras import regularizers
 
 class Nestrov(object):
     def __init__(self,lr=0.001,momentum=0.9):
