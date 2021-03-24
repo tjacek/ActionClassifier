@@ -1,7 +1,8 @@
 import numpy as np
 from keras.models import Model,load_model
 from keras.layers import Input,Dense
-import deep,data.seqs,data.feats,stats,utils
+import deep,data.seqs,data.feats,stats
+import ens,utils,files
 
 class TS_REG(object):
     def __init__(self,optim_alg=None,activ='relu'):
@@ -25,11 +26,23 @@ class TS_REG(object):
         return model
 
 def simple_exp(in_path,out_path,n_epochs=1000):
-    read=data.seqs.read_seqs
-    train=utils.TrainNN(read,TS_REG(),to_dataset)
-    extract=utils.Extract(read)
+    train,extract=get_train()
     utils.single_exp_template(in_path,out_path,
     	train,extract,size=64,n_epochs=n_epochs)
+
+def ensemble_exp(seq_path,out_path,n_epochs=1000,size=64):
+    files.make_dir(out_path)
+    train,extract=get_train()
+    ensemble=ens.ts_ensemble(train,extract)
+    arg_dict={'size':size,'n_epochs':n_epochs}
+    input_paths=files.top_files(seq_path)
+    ensemble(input_paths,out_path,arg_dict)
+
+def get_train():
+	read=data.seqs.read_seqs
+	train=utils.TrainNN(read,TS_REG(),to_dataset)
+	extract=utils.Extract(read)
+	return train,extract
 
 def to_dataset(seqs):
     get_stats=stats.get_base_stats()
@@ -65,9 +78,10 @@ def check_regression(seq_path,nn_path):
     		for name_i in reg_feats.keys()]
     print(np.mean(res))
 
-seq_path="../dtw_paper/MSR/binary/seqs/nn0"
+seq_path="../dtw_paper/MSR/binary/seqs/"
+ensemble_exp(seq_path,"ens_test")
 #simple_exp(seq_path,"test",n_epochs=1000)
 spline_path="test/spline"
-nn_path="test/nn"
-pretrain_clf(spline_path,nn_path)
+#nn_path="test/nn"
+#pretrain_clf(spline_path,nn_path)
 #check_regression(spline_path,nn_path)
