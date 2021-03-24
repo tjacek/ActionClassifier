@@ -38,6 +38,17 @@ def ensemble_exp(seq_path,out_path,n_epochs=1000,size=64):
     input_paths=files.top_files(seq_path)
     ensemble(input_paths,out_path,arg_dict)
 
+def ensemble_pretrain(in_path,n_epochs=100):
+	extract=utils.Extract(data.seqs.read_seqs)
+	funcs=[[pretrain_clf,["spline","nn","pretrain","n_epochs"]],
+		   [extract,["spline","pretrain","pre_feats"]]]
+	dir_names=["spline","nn","pretrain","pre_feats"]
+	ensemble=ens.EnsTransform(funcs,dir_names,input_dir="spline")
+	arg_dict={"n_epochs":n_epochs}
+	spline_path="%s/spline" % in_path
+	input_paths=[path_i for path_i in files.top_files(spline_path)]
+	ensemble(input_paths,in_path,arg_dict)
+
 def get_train():
 	read=data.seqs.read_seqs
 	train=utils.TrainNN(read,TS_REG(),to_dataset)
@@ -53,7 +64,8 @@ def to_dataset(seqs):
     		'n_outputs':y.shape[1]}
     return X,y,params
 
-def pretrain_clf(spline_path,nn_path,n_epochs=100):
+def pretrain_clf(spline_path,nn_path,out_path,n_epochs=100):
+	print((spline_path,nn_path,out_path,n_epochs))
 	seq_dict=data.seqs.read_seqs(spline_path)
 	X,y=seq_dict.to_dataset()
 	n_cats=max(y)+1
@@ -63,6 +75,8 @@ def pretrain_clf(spline_path,nn_path,n_epochs=100):
 	clf_model.summary()
 	y=utils.to_one_hot(y,n_cats)
 	clf_model.fit(X,y,epochs=n_epochs,batch_size=32)
+	if(out_path):
+		clf_model.save(out_path)
 
 def check_regression(seq_path,nn_path):
     read=data.seqs.read_seqs
@@ -79,7 +93,10 @@ def check_regression(seq_path,nn_path):
     print(np.mean(res))
 
 seq_path="../dtw_paper/MSR/binary/seqs/"
-ensemble_exp(seq_path,"ens_test")
+#ensemble_exp(seq_path,"ens_test")
+ensemble_pretrain("ens_test",n_epochs=1000)
+
+
 #simple_exp(seq_path,"test",n_epochs=1000)
 spline_path="test/spline"
 #nn_path="test/nn"
