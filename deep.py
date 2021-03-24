@@ -1,8 +1,10 @@
 import keras
+from keras.models import Model
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D#,Lambda
 from keras.layers import Dropout,Flatten,Dense
 from keras.layers.normalization import BatchNormalization
 from keras import regularizers
+import keras.losses
 
 class Nestrov(object):
     def __init__(self,lr=0.001,momentum=0.9):
@@ -47,3 +49,11 @@ def full_layer(x,size=100,l1=0.01,dropout=0.5,activ='relu'):
         return BatchNormalization(name="hidden")(x)
     if(dropout):
         return Dropout(dropout)(x)
+
+def clf_nn(x,model_input,n_cats,optim_alg):
+    x=Dense(units=n_cats,activation='softmax')(x)
+    clf_model = Model(model_input, x)
+    clf_model.summary()
+    clf_model.compile(loss=keras.losses.categorical_crossentropy,
+                        optimizer=optim_alg())
+    return clf_model

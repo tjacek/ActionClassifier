@@ -1,5 +1,5 @@
 import numpy as np
-from keras.models import Model
+from keras.models import Model,load_model
 from keras.layers import Input,Dense
 import deep,data.seqs,data.feats,stats,utils
 
@@ -40,6 +40,17 @@ def to_dataset(seqs):
     		'n_outputs':y.shape[1]}
     return X,y,params
 
+def pretrain_clf(spline_path,nn_path,n_epochs=100):
+	seq_dict=data.seqs.read_seqs(spline_path)
+	X,y=seq_dict.to_dataset()
+	n_cats=max(y)+1
+	reg_model=load_model(nn_path)
+	x=reg_model.get_layer("hidden").output
+	clf_model=deep.clf_nn(x,reg_model.input,n_cats,deep.RMS())
+	clf_model.summary()
+	y=utils.to_one_hot(y,n_cats)
+	clf_model.fit(X,y,epochs=n_epochs,batch_size=32)
+
 def check_regression(seq_path,nn_path):
     read=data.seqs.read_seqs
     extract=utils.Extract(read,name=None)
@@ -53,11 +64,10 @@ def check_regression(seq_path,nn_path):
     		np.mean(np.abs(reg_feats[name_i]-stat_feats[name_i]))
     		for name_i in reg_feats.keys()]
     print(np.mean(res))
-#    feat_dict=data.feats.read(feat_path)
-#    print(len(feat_dict))
 
 seq_path="../dtw_paper/MSR/binary/seqs/nn0"
 #simple_exp(seq_path,"test",n_epochs=1000)
 spline_path="test/spline"
 nn_path="test/nn"
-check_regression(spline_path,nn_path)
+pretrain_clf(spline_path,nn_path)
+#check_regression(spline_path,nn_path)
