@@ -9,13 +9,14 @@ class TS_REG(object):
             optim_alg=deep.RMS()
         self.optim_alg=optim_alg
         self.activ=activ
+        self.dropout="batch_norm"
 
     def __call__(self,params):
         input_img=Input(shape=(params['ts_len'], params['n_feats']))
-        n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
+        n_kerns,kern_size,pool_size=[196,196],[8,8],[2,2]
         x=deep.add_conv_layer(input_img,n_kerns,kern_size,
                             pool_size,activ=self.activ,one_dim=True)
-        x=deep.full_layer(x,l1=None)
+        x=deep.full_layer(x,size=196,l1=None,dropout=self.dropout)
         x=Dense(units=params['n_outputs'],activation='relu')(x)
         model = Model(input_img, x)
         model.compile(loss='mean_squared_error',
@@ -46,17 +47,17 @@ def check_regression(seq_path,nn_path):
     seq_dict=data.seqs.read_seqs(seq_path)
     get_stats=stats.get_base_stats()
     stat_feats=get_stats.compute_feats(seq_dict)
-    reg_feats=reg_feats.split()[0]
-    stat_feats=stat_feats.split()[0]
+    reg_feats=reg_feats.split()[1]
+    stat_feats=stat_feats.split()[1]
     res=[ #np.linalg.norm(reg_feats[name_i]-stat_feats[name_i]) 
     		np.mean(np.abs(reg_feats[name_i]-stat_feats[name_i]))
     		for name_i in reg_feats.keys()]
-    print(res)
+    print(np.mean(res))
 #    feat_dict=data.feats.read(feat_path)
 #    print(len(feat_dict))
 
 seq_path="../dtw_paper/MSR/binary/seqs/nn0"
-simple_exp(seq_path,"test",n_epochs=1000)
-#spline_path="test/spline"
-#nn_path="test/nn"
-#check_regression(spline_path,nn_path)
+#simple_exp(seq_path,"test",n_epochs=1000)
+spline_path="test/spline"
+nn_path="test/nn"
+check_regression(spline_path,nn_path)
