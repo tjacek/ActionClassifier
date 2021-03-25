@@ -31,7 +31,7 @@ class TS_CNN(object):
             n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
             x=deep.add_conv_layer(input_img,n_kerns,kern_size,
                             pool_size,activ=self.activ,one_dim=True)
-        x=deep.full_layer(x,self.l1,self.dropout,self.activ)
+        x=deep.full_layer(x,100,self.l1,self.dropout,self.activ)
         x=Dense(units=params['n_cats'],activation='softmax')(x)
         model = Model(input_img, x)
         model.compile(loss=keras.losses.categorical_crossentropy,
