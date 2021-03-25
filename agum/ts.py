@@ -1,8 +1,8 @@
 import sys
 sys.path.append("..")
-import data.seqs,files,spline,ts_cnn
+import data.seqs,files,spline,ts_cnn,ens
 
-class TSAgum(object):
+class Agum(object):
 	def __init__(self, agum_fun):
 		self.agum_fun=agum_fun
 		
@@ -32,12 +32,26 @@ def agum_exp(input_path,out_path,n_epochs=1000):
 	files.make_dir(out_path)
 	paths=files.get_paths(out_path,["spline","agum","nn","feats"])
 	spline.upsample(input_path,paths["spline"],size=64)
-	agum=TSAgum([ts_scale])
+	agum=Agum([ts_scale])
 	agum(paths["spline"],paths["agum"])
 	train,extract=ts_cnn.get_train()
 	train(paths["agum"],paths["nn"],n_epochs)
 	extract(paths["agum"],paths["nn"],paths["feats"])
 
-seq_path="../../dtw_paper/MSR/binary/seqs/nn0"
+def ensemble_agum(in_path,out_path,n_epochs=1000,size=64):
+	train,extract=ts_cnn.get_train()
+	agum=Agum([ts_scale])
+	funcs=[ [spline.upsample,["seqs","spline","size"]],
+            [agum,["spline","agum"]],
+            [train,["agum","nn","n_epochs"]],
+            [extract,["agum","nn","feats"]]]
+	dir_names=["spline","agum","nn","feats"]
+	ensemble=ens.EnsTransform(funcs,dir_names)
+	arg_dict={"n_epochs":n_epochs,"size":size}
+	input_paths=files.top_files(in_path)
+	files.make_dir(out_path)
+	ensemble(input_paths,out_path,arg_dict)    
+
+seq_path="../../dtw_paper/MSR/binary/seqs"
 #ensemble_exp(seq_path,"ens_test")
-agum_exp(seq_path,"agum",n_epochs=1000)
+ensemble_agum(seq_path,"agum",n_epochs=1000)
