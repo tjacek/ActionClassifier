@@ -51,11 +51,19 @@ def binarize(y,i):
 	y_i=[ int(y_j==i) for y_j in y]
 	return utils.to_one_hot(y_i,n_cats=2)
 
-def ts_ensemble(train,extract):
-    funcs=[ [spline.upsample,["seqs","spline","size"]],
-            [train,["spline","nn","n_epochs"]],
-            [extract,["spline","nn","feats"]]]
+def ts_ensemble(train,extract,preproc=None):
+    if(preproc):
+        funcs=[ [spline.upsample,["seqs","spline","size"]],
+            	[preproc,["spline","preproc"]],
+            	[train,["preproc","nn","n_epochs"]],
+            	[extract,["spline","nn","feats"]]]
+    else:
+    	funcs=[ [spline.upsample,["seqs","spline","size"]],
+            	[train,["spline","nn","n_epochs"]],
+            	[extract,["spline","nn","feats"]]]
     dir_names=["spline","nn","feats"]
+    if(preproc):
+    	dir_names.append("preproc")
     return EnsTransform(funcs,dir_names)
 
 def multimodel_ensemble(in_path,out_path,train_dict,
