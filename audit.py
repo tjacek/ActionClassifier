@@ -1,4 +1,11 @@
-import data.imgs
+import data.imgs,data.seqs,data.actions
+
+def ts_imgs(in_path,out_path):
+    seq_dict=data.seqs.read_seqs(in_path)
+    ts_imgs=data.actions.ActionImgs()
+    for name_i,seq_i in seq_dict.items():
+        ts_imgs[name_i]=seq_i*100
+    ts_imgs.save(out_path)
 
 def seq_stats(in_path):
     frames=data.imgs.read_frame_seqs(in_path,n_split=1)
@@ -23,5 +30,5 @@ def mean_action_size(in_path):
     print(sum(values))
 
 if __name__=="__main__":
-#    check_model("../action/ens/nn/0")
-    mean_action_size('../../common/frames/full')
+    in_path="../dtw_paper/MSR/binary/seqs/nn0"
+    ts_imgs(in_path,"test")
