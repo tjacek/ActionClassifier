@@ -30,6 +30,12 @@ class Seqs(dict):
 		y=[name_i.get_cat() for name_i in names]
 		return X,y
 
+	def transform(self,fun,new=False,single=True):
+		seq_dict= Seqs() if(new) else self
+		for name_i,seq_i in self.items():
+			seq_dict[name_i]=fun(seq_i)
+		return seq_dict
+
 	def to_feats(self,fun,single=False):
 		feat_dict=data.feats.Feats()
 		for name_i,seq_i in self.items():

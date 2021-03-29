@@ -3,12 +3,35 @@ physical_devices = tf.config.experimental.list_physical_devices('GPU')
 print("physical_devices-------------", len(physical_devices))
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
-import keras,keras.backend as K,keras.utils
-from keras.models import Model,Sequential
-from keras.layers import Input,Dense, Dropout, Flatten,GlobalAveragePooling1D
-from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D,Lambda
-from keras import regularizers
-import utils,data.imgs,ens
+import keras
+from keras.layers import Input,Dense
+from keras.models import Model
+import deep
+
+class FrameCNN(object):
+    def __init__(self,dropout="batch_norm",l1=0.01,
+                        activ='relu',optim_alg=None):
+        if(optim_alg is None):
+            optim_alg=deep.RMS()
+        self.dropout=dropout
+        self.activ=activ
+        self.l1=l1
+        self.optim_alg=optim_alg
+
+    def __call__(self,params):
+        input_img=Input(shape=(params['dims']))
+        n_kerns,kern_size=[32,16,16],[(3,3),(3,3),(3,3)]
+        pool_size=[(2,2),(2,2),(2,2)]
+        x=deep.add_conv_layer(input_img,n_kerns,kern_size,
+                            pool_size,activ=self.activ,one_dim=False)
+        x=deep.full_layer(x,size=100,l1=self.l1,
+            dropout=self.dropout,activ=self.activ)
+        x=Dense(units=params['n_cats'],activation='softmax')(x)
+        model = Model(input_img, x)
+        model.compile(loss=keras.losses.categorical_crossentropy,
+              optimizer=self.optim_alg())
+        model.summary()
+        return model
 
 def train(in_path,nn_path,n_epochs=5):
     train_model=utils.TrainNN(read_proj,old_cnn,to_dataset)
@@ -35,23 +58,23 @@ def to_dataset(train):
     params={"dim":train.dims(),"n_cats":train.n_cats()}
     return np.array(X),y,params
 
-def old_cnn(params):
-    input_img=Input(shape=params["dim"])
-    x=Conv2D(32,kernel_size=(3,3),activation='relu')(input_img)
-    x=MaxPooling2D(pool_size=(2,2))(x)
-    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
-    x=MaxPooling2D(pool_size=(2, 2))(x)
-    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
-    x=MaxPooling2D(pool_size=(2, 2))(x)
-    x=Flatten()(x)
-    x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
-    x=Dropout(0.5)(x)
-    x=Dense(units=params['n_cats'],activation='softmax')(x)
-    model = Model(input_img, x)
-    model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
-    model.summary()
-    return model
+#def old_cnn(params):
+#    input_img=Input(shape=params["dim"])
+#    x=Conv2D(32,kernel_size=(3,3),activation='relu')(input_img)
+#    x=MaxPooling2D(pool_size=(2,2))(x)
+#    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
+#    x=MaxPooling2D(pool_size=(2, 2))(x)
+#    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
+#    x=MaxPooling2D(pool_size=(2, 2))(x)
+#    x=Flatten()(x)
+#    x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
+#    x=Dropout(0.5)(x)
+#    x=Dense(units=params['n_cats'],activation='softmax')(x)
+#    model = Model(input_img, x)
+#    model.compile(loss=keras.losses.categorical_crossentropy,
+#              optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
+#    model.summary()
+#    return model
 
 def ens_exp(in_path,out_path,n_epochs=5,n_cats=12):
     binary_train=binary_gen(in_path,n_epochs)
@@ -73,6 +96,5 @@ def binary_gen(in_path,n_epochs=5):
         model.save(nn_path)
     return binary_train
 
-#train("../3DHOI","../nn_test",n_epochs=5)
-#extract("../3DHOI","../nn_test","../nn_seqs")
-ens_exp("../3DHOI","../ens",n_epochs=200,n_cats=12)
+frame_cnn=FrameCNN()
+frame_cnn({'dims':(64,64,1),'n_cats':20})
