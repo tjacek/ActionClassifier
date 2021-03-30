@@ -6,7 +6,7 @@ import numpy as np
 import keras
 from keras.layers import Input,Dense
 from keras.models import Model
-import deep
+import deep,utils
 
 class FrameCNN(object):
     def __init__(self,dropout="batch_norm",l1=0.01,
@@ -33,13 +33,15 @@ class FrameCNN(object):
         model.summary()
         return model
 
-def train(in_path,nn_path,n_epochs=5):
-    train_model=utils.TrainNN(read_proj,old_cnn,to_dataset)
-    train_model(in_path,nn_path,n_epochs)
+def simple_exp(in_path,n_epochs=1000):
+    train,extract=get_train()
+    utils.single_exp_template(in_path,out_name,train,extract,seq_path)
 
-def extract(in_path,nn_path,out_path):
+def get_train():
+    frame_cnn=FrameCNN()
+    train_model=utils.TrainNN(read_proj,frame_cnn,to_dataset)
     extract=utils.ExtractSeqs(read_proj)
-    extract(in_path,nn_path,out_path)
+    return extract,train
 
 def read_proj(in_path):
     dataset=data.imgs.read_frame_seqs(in_path)
@@ -57,24 +59,6 @@ def to_dataset(train):
             y.append(cat_i)
     params={"dim":train.dims(),"n_cats":train.n_cats()}
     return np.array(X),y,params
-
-#def old_cnn(params):
-#    input_img=Input(shape=params["dim"])
-#    x=Conv2D(32,kernel_size=(3,3),activation='relu')(input_img)
-#    x=MaxPooling2D(pool_size=(2,2))(x)
-#    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
-#    x=MaxPooling2D(pool_size=(2, 2))(x)
-#    x=Conv2D(16, kernel_size=(3, 3),activation='relu')(x)
-#    x=MaxPooling2D(pool_size=(2, 2))(x)
-#    x=Flatten()(x)
-#    x=Dense(100, activation='relu',name="hidden",kernel_regularizer=regularizers.l1(0.01),)(x)
-#    x=Dropout(0.5)(x)
-#    x=Dense(units=params['n_cats'],activation='softmax')(x)
-#    model = Model(input_img, x)
-#    model.compile(loss=keras.losses.categorical_crossentropy,
-#              optimizer=keras.optimizers.SGD(lr=0.001,  momentum=0.9, nesterov=True))
-#    model.summary()
-#    return model
 
 def ens_exp(in_path,out_path,n_epochs=5,n_cats=12):
     binary_train=binary_gen(in_path,n_epochs)
