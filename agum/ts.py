@@ -1,6 +1,8 @@
 import sys
 sys.path.append("..")
-import data.seqs,files,spline,ts_cnn,ens
+import numpy as np
+import data.seqs,files,spline
+import deep,ts_cnn,ens
 
 class Agum(object):
 	def __init__(self, agum_fun):
@@ -28,19 +30,29 @@ class Agum(object):
 def ts_scale(seq_i):
 	return [2*seq_i,0.5*seq_i]
 
+def ts_reverse(seq_i):
+	return [np.flip(seq_i,axis=0)]
+
+def ts_binary(seq_i):
+#	seq_i=seq_i.astype(int)
+#	seq_i=seq_i.astype(float)
+	seq_i=np.sign(seq_i)
+	return [seq_i]
+
 def agum_exp(input_path,out_path,n_epochs=1000):
 	files.make_dir(out_path)
 	paths=files.get_paths(out_path,["spline","agum","nn","feats"])
 	spline.upsample(input_path,paths["spline"],size=64)
-	agum=Agum([ts_scale])
+	agum=Agum([ts_scale,magnitude_warp])
 	agum(paths["spline"],paths["agum"])
 	train,extract=ts_cnn.get_train()
 	train(paths["agum"],paths["nn"],n_epochs)
 	extract(paths["agum"],paths["nn"],paths["feats"])
 
-def ensemble_agum(in_path,out_path,n_epochs=1000,size=64):
-	train,extract=ts_cnn.get_train()
-	agum=Agum([ts_scale])
+def ensemble_agum(in_path,out_path,n_epochs=1000,size=128):
+	model=ts_cnn.TS_CNN(dropout=0.5,l1=None,optim_alg=deep.Nestrov())
+	train,extract=ts_cnn.get_train(model)
+	agum=Agum([ts_binary])
 	funcs=[ [spline.upsample,["seqs","spline","size"]],
             [agum,["spline","agum"]],
             [train,["agum","nn","n_epochs"]],
@@ -54,4 +66,4 @@ def ensemble_agum(in_path,out_path,n_epochs=1000,size=64):
 
 seq_path="../../dtw_paper/MSR/binary/seqs"
 #ensemble_exp(seq_path,"ens_test")
-ensemble_agum(seq_path,"agum",n_epochs=1000)
+ensemble_agum(seq_path,"agum10",n_epochs=1000)
