@@ -6,7 +6,7 @@ import numpy as np
 import keras
 from keras.layers import Input,Dense
 from keras.models import Model
-import deep,utils
+import deep,utils,files,data.imgs
 
 class FrameCNN(object):
     def __init__(self,dropout="batch_norm",l1=0.01,
@@ -33,20 +33,23 @@ class FrameCNN(object):
         model.summary()
         return model
 
-def simple_exp(in_path,n_epochs=1000):
+def simple_exp(in_path,out_path,n_epochs=1000):
+    paths=files.prepare_dirs(out_path,["nn","feats"])
+    paths['frames']=in_path
     train,extract=get_train()
-    utils.single_exp_template(in_path,out_name,train,extract,seq_path)
+    train(paths["frames"],paths["nn"],n_epochs=n_epochs)
+    extract(paths["frames"],paths["nn"],paths["feats"])
 
 def get_train():
     frame_cnn=FrameCNN()
-    train_model=utils.TrainNN(read_proj,frame_cnn,to_dataset)
+    train=utils.TrainNN(read_proj,frame_cnn,to_dataset)
     extract=utils.ExtractSeqs(read_proj)
-    return extract,train
+    return train,extract
 
 def read_proj(in_path):
     dataset=data.imgs.read_frame_seqs(in_path)
     def helper(frame_i):
-        return np.array(np.vsplit(frame_i,3)).T
+        return np.array(np.vsplit(frame_i,2)).T
     dataset.transform(helper,new=False,single=True)
     return dataset
 
@@ -57,7 +60,7 @@ def to_dataset(train):
         for frame_j in seq_i:
             X.append(frame_j)
             y.append(cat_i)
-    params={"dim":train.dims(),"n_cats":train.n_cats()}
+    params={"dims":train.dims(),"n_cats":train.n_cats()}
     return np.array(X),y,params
 
 def ens_exp(in_path,out_path,n_epochs=5,n_cats=12):
@@ -80,5 +83,4 @@ def binary_gen(in_path,n_epochs=5):
         model.save(nn_path)
     return binary_train
 
-frame_cnn=FrameCNN()
-frame_cnn({'dims':(64,64,1),'n_cats':20})
+simple_exp("../time","test",n_epochs=10)
