@@ -46,12 +46,19 @@ def get_train():
     extract=utils.ExtractSeqs(read_proj)
     return train,extract
 
-def read_proj(in_path):
+def read_proj(in_path,n_split=None):
     dataset=data.imgs.read_frame_seqs(in_path)
+    if(n_split is None):
+        n_split=get_n_split(dataset)
     def helper(frame_i):
-        return np.array(np.vsplit(frame_i,2)).T
+        return np.array(np.vsplit(frame_i,n_split)).T
     dataset.transform(helper,new=False,single=True)
     return dataset
+
+def get_n_split(dataset):
+    dims=dataset.dims()
+    max_i,min_i=max(dims),min(dims)
+    return int(max_i/min_i)
 
 def to_dataset(train):
     X,y=[],[]
