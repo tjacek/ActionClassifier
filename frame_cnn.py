@@ -6,7 +6,7 @@ import numpy as np
 import keras
 from keras.layers import Input,Dense
 from keras.models import Model
-import deep,utils,files,data.imgs
+import deep,utils,files,ens,data.imgs
 
 class FrameCNN(object):
     def __init__(self,dropout="batch_norm",l1=0.01,
@@ -70,24 +70,25 @@ def to_dataset(train):
     params={"dims":train.dims(),"n_cats":train.n_cats()}
     return np.array(X),y,params
 
-def ens_exp(in_path,out_path,n_epochs=5,n_cats=12):
-    binary_train=binary_gen(in_path,n_epochs)
-    funcs=[[extract,["in_path","nn","feats"]]]
-    dir_names=["feats"]
+def ens_exp(in_path,out_path,n_epochs=5,n_cats=20):
+    binary_train=binary_gen(in_path,FrameCNN(),n_epochs)
+    extract=utils.ExtractSeqs(read_proj)
+    funcs=[[extract,["in_path","nn","seqs"]]]
+    dir_names=["seqs"]
     arg_dict={'in_path':in_path}        
     binary_ens=ens.BinaryEns(binary_train,funcs,dir_names)
     binary_ens(out_path,n_cats,arg_dict)
 
-def binary_gen(in_path,n_epochs=5):
+def binary_gen(in_path,frame_cnn,n_epochs=5):
     dataset=read_proj(in_path)
     train,test=dataset.split()
     X,y,params=to_dataset(train)
     params["n_cats"]=2
     def binary_train(nn_path,i):
         y_i=ens.binarize(y,i)
-        model=old_cnn(params)
+        model=frame_cnn(params)
         model.fit(X,y_i,epochs=n_epochs,batch_size=32)
         model.save(nn_path)
     return binary_train
 
-simple_exp("../time","test",n_epochs=10)
+ens_exp("../time","test2",n_epochs=5)
