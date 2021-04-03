@@ -36,6 +36,13 @@ def add_conv_layer(input_img,n_kerns,kern_size,
         x=MaxPooling(pool_size=pool_size[i],name='pool%d' % i)(x)
     return x
 
+def add_model_conv(model,n_kerns,kern_size,pool_size,activ='relu'):
+    for i,n_kern_i in enumerate(n_kerns):
+        conv_i,pool_i='conv%d' % i,'pool%d' % i
+        model.add(Conv1D(n_kern_i, kernel_size=kern_size[i],
+                        activation=activ,name=conv_i))    
+        model.add(MaxPooling1D(pool_size=pool_size[i],name=pool_i))
+
 def full_layer(x,size=100,l1=0.01,dropout=0.5,activ='relu'):
     x=Flatten()(x)
     reg=regularizers.l1(l1) if(l1) else None
