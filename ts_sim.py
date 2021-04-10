@@ -4,16 +4,18 @@ import data.seqs,files,utils,spline,ens
 import sim,ts_cnn,deep
 
 class TS_SIM(object):
-    def __init__(self, n_hidden=100,activ='relu'):
+    def __init__(self, n_hidden=100,activ='relu',l1=0.01):
         self.activ=activ
         self.n_hidden=n_hidden
+        self.l1=l1
         
     def __call__(self,model,params):
         n_kerns,kern_size,pool_size=[128,128],[8,8],[4,2]
         deep.add_model_conv(model,n_kerns,kern_size,pool_size,self.activ)
         model.add(Flatten())
+        reg=None if(self.l1 is None) else regularizers.l1(self.l1)
         model.add(Dense(self.n_hidden, activation=self.activ,
-            name='hidden',kernel_regularizer=regularizers.l1(0.01)))
+            name='hidden',kernel_regularizer=reg))
         return model
 
 def binary_exp(in_path,dir_path,n_epochs=1000):
@@ -39,6 +41,6 @@ def get_train():
 		return train_sim(in_path,out_path,n_epochs,params=params)
 	return train
 
-in_path="../dtw_paper/MHAD"
-out_path="../dtw_paper/MHAD/sim"
+in_path="../dtw_paper/MSR"
+out_path="../dtw_paper/MHAD/sim_no_l1"
 binary_exp(in_path,out_path,n_epochs=300)
