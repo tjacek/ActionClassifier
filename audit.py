@@ -29,6 +29,12 @@ def mean_action_size(in_path):
     print(np.median(values))
     print(sum(values))
 
+def dataset_size(in_path):
+    seq_dict=data.seqs.read_seqs(in_path)
+    train,test=seq_dict.split()
+    print(len(train))
+    print(len(test))
+
 if __name__=="__main__":
-    in_path="../dtw_paper/MSR/binary/seqs/nn0"
-    ts_imgs(in_path,"test")
+    in_path="../../2021_III/dtw_paper/MHAD/binary/seqs/nn0"
+    dataset_size(in_path)
