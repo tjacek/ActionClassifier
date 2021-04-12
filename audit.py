@@ -1,4 +1,4 @@
-import data.imgs,data.seqs,data.actions
+import data.imgs,data.seqs,data.actions,files
 
 def ts_imgs(in_path,out_path):
     seq_dict=data.seqs.read_seqs(in_path)
@@ -32,8 +32,9 @@ def mean_action_size(in_path):
 def dataset_size(in_path):
     seq_dict=data.seqs.read_seqs(in_path)
     train,test=seq_dict.split()
-    print(len(train))
-    print(len(test))
+    print("n_feats %d" % train.dim())
+    print("train %d" % len(train))
+    print("test %d" %len(test))
 
 if __name__=="__main__":
     in_path="../../2021_III/dtw_paper/MHAD/binary/seqs/nn0"
