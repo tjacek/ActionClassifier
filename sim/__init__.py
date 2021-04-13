@@ -4,11 +4,12 @@ from keras.models import Model,Sequential
 from keras.layers import Input,Lambda
 
 class SimTrain(object):
-    def __init__(self,get_model,get_cat,read=None,n_sample=None):
+    def __init__(self,get_model,get_cat,read=None,n_sample=None,batch_size=64):
         self.get_model=get_model
         self.get_cat=get_cat
         self.read=read
         self.n_sample=n_sample
+        self.batch_size=batch_size
 
     def __call__(self,data_dict,out_path=None,n_epochs=5,params=None):
         if(type(data_dict)==str):
@@ -18,7 +19,7 @@ class SimTrain(object):
         if(not params):
             params={'input_shape':(data_dict.dim(),)}
         siamese_net,extractor=build_siamese(params,self.get_model)
-        siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
+        siamese_net.fit(X,y,epochs=n_epochs,batch_size=self.batch_size)
         if(out_path):
             extractor.save(out_path)
 
