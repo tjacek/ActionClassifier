@@ -1,4 +1,4 @@
-import data.imgs,data.seqs,data.actions,files
+import data.imgs,data.seqs,data.actions,files,sim
 
 def ts_imgs(in_path,out_path):
     seq_dict=data.seqs.read_seqs(in_path)
@@ -36,6 +36,17 @@ def dataset_size(in_path):
     print("train %d" % len(train))
     print("test %d" %len(test))
 
+def n_pairs(in_path):
+    seq_dict=data.seqs.read_seqs(in_path)
+    train,test=seq_dict.split()
+    pairs=sim.all_pairs(train.names())
+    print("n_pairs:%d" % len(pairs))
+    cats=[ sim.all_cat(name_i,name_j) 
+            for name_i,name_j in pairs]
+    print("Positive %d" % sum(cats))
+    print("Negative %d" % (len(cats)-sum(cats)))
+
 if __name__=="__main__":
-    in_path="../../2021_III/dtw_paper/MHAD/binary/seqs/nn0"
-    dataset_size(in_path)
+    in_path="../dtw_paper/MHAD/binary/seqs/nn0"
+#    dataset_size(in_path)
+    n_pairs(in_path)
