@@ -39,14 +39,18 @@ class TS_CNN(object):
         model.summary()
         return model
 
-def simple_exp(in_path,n_epochs=1000):
-    print(paths)
-    train,extract=get_train(nn_type="wide")
-    utils.single_exp_template(in_path,out_name,train,extract,seq_path)
+def simple_exp(in_path,out_path,n_epochs=1000):
+    ts_cnn=TS_CNN(dropout=0.5,activ='elu',
+                    optim_alg=deep.Nestrov())
+    train,extract=get_train(ts_cnn)
+    utils.single_exp_template(in_path,out_path,train,extract)
 
 def ensemble_exp(in_path,out_name,n_epochs=1000,size=64):
-    input_paths=prepare_ens_dir(in_path,out_name,in_name="seqs")[0]
-    train,extract=get_train(nn_type="wide")
+    input_paths=files.top_files("%s/seqs" % in_path)
+    out_path="%s/%s" % (in_path,out_name)
+    ts_cnn=TS_CNN(dropout=0.5,activ='elu',
+                    optim_alg=deep.Nestrov())
+    train,extract=get_train(ts_cnn)
     ensemble=ens.ts_ensemble(train,extract)
     arg_dict={'size':size,'n_epochs':n_epochs}
     ensemble(input_paths,out_path, arg_dict)
@@ -83,5 +87,5 @@ def narrow_read(in_path):
     return seqs.Seqs(seq_dict)
 
 if __name__ == "__main__":
-    multi_exp("../dtw_paper/MHAD/binary","1D_CNN",n_epochs=1000)
+    ensemble_exp("../dtw_paper/MHAD/binary",'elu',n_epochs=1000)
 #    binary_exp("../dtw_paper/MHAD/binary/","../dtw_paper/MHAD/binary/1D_CNN_128")
