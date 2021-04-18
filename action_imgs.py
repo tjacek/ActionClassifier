@@ -5,7 +5,7 @@ tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import cv2
 import data.imgs,files,data.feats,data.actions
-import sim.imgs
+import sim,sim.imgs
 
 def diff_action(in_path,out_path):
 	def helper(frames):
@@ -23,15 +23,12 @@ def mean_action(in_path,out_path,dims=(64,64)):
 def action_one_shot(in_path,out_path=None,n_epochs=5):
     dtw_feats=data.actions.read_actions(in_path)
     dtw_feats.transform(lambda img_i: np.expand_dims(img_i,axis=-1))
-    def all_cat(name_i,name_j):
-        return int(name_i.split('_')[0]==name_j.split('_')[0])
     make_model=sim.imgs.make_conv
-    sim_train=sim.SimTrain(make_model,all_cat)
+    sim_train=sim.SimTrain(make_model,sim.all_cat)
     params={'input_shape':(64,64,1)}
     sim_train(dtw_feats,out_path,n_epochs,params)
 
 from keras.models import load_model
-#import binary,ens
 
 def extract(in_path,nn_path,out_path):
     action_feats=data.actions.read_actions(in_path)
