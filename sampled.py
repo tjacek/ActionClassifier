@@ -1,3 +1,7 @@
+import tensorflow as tf
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+print("physical_devices-------------", len(physical_devices))
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import sim,sim.dist,sim.imgs
 import utils,data.imgs
@@ -12,7 +16,7 @@ def train(in_path,out_path=None,n_samples=3,n_epochs=5):
 	train.scale()
 	X,y=pairs_dataset(train)
 	params={ 'input_shape':train.dims(),"n_hidden":20}
-	siamese_net,extractor=sim.build_siamese(params,sim.imgs.make_conv)
+	siamese_net,extractor=sim.build_siamese(params,sim.imgs.SimConv())
 	siamese_net.fit(X,y,epochs=n_epochs,batch_size=64)
 	if(out_path):
 		extractor.save(out_path)
@@ -36,5 +40,5 @@ def extract(in_path,nn_path,out_path):
 	fun=utils.ExtractSeqs("hidden",preproc)
 	fun(in_path,nn_path,out_path)
 
-#train("../ICSS_exp/MSR/frames","test")
-extract("../ICSS_exp/MSR/frames","test","test2")
+train("../MSR/full","test")
+#extract("../ICSS_exp/MSR/frames","test","test2")
