@@ -34,6 +34,8 @@ class FrameSeqs(dict):
     def scale(self,dims=(64,64),new=False):
         def helper(img_j):
             img_j=cv2.resize(img_j,dsize=dims,interpolation=cv2.INTER_CUBIC)
+            if(img_j.ndim==3):
+                return img_j
             return np.expand_dims(img_j,axis=-1)
         return self.transform(helper,new,single=True)
 

@@ -25,8 +25,8 @@ class MinLength(object):
 		indexes=np.sort(indexes)
 		return [frames[i] for i in indexes]
 
-def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
-	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
+	frames=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=frames.split()
 	train.transform(MinLength(seq_len),single=False)
 	train.scale()
@@ -38,8 +38,8 @@ def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 	if(out_path):
 		model.save(out_path)
 
-def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
-	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
+	frames=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=frames.split()
 	train.scale()
 	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True}
@@ -53,7 +53,7 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20):
 		model.save(out_path)
 
 def make_lstm(params):
-	input_shape=(params['seq_len'], 64, 64, 1)
+	input_shape=(params['seq_len'], 64, 64, 3)
 	model=Sequential()
 	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
 	model.add(TimeDistributed(Activation('relu')))
@@ -95,8 +95,8 @@ def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
 	binary_ens(out_path,n_cats,arg_dict)
 
-def static_binary(in_path,n_epochs=5,seq_len=20):
-	dataset=data.imgs.read_frame_seqs(in_path,n_split=1)
+def static_binary(in_path,n_epochs=5,seq_len=20,n_channels=3):
+	dataset=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=dataset.split()
 	train.transform(MinLength(seq_len),single=False)
 	train.scale()
@@ -132,7 +132,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	lstm_exp('../ICSS_exp/MSR/frames','../ICSS_exp/MSR/lstm')
+	lstm_exp('../MSR/full','../MSR/lstm',n_epochs=5)
 #	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
