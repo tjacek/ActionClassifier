@@ -32,7 +32,7 @@ def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 	train.scale()
 	X,y=train.to_dataset()
 	y=keras.utils.to_categorical(y)
-	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True}
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True,"dims":train.dims()}
 	model=make_lstm(params)
 	model.fit(X,y,epochs=n_epochs,batch_size=8)
 	if(out_path):
@@ -42,7 +42,7 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=frames.split()
 	train.scale()
-	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True}
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True,"dims":train.dims()}
 	if(os.path.isfile(out_path)):
 		model=load_model(out_path)
 	else:
@@ -53,7 +53,7 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 		model.save(out_path)
 
 def make_lstm(params):
-	input_shape=(params['seq_len'], 64, 64, 3)
+	input_shape= (params['seq_len'],*params['dims']) #(params['seq_len'], 64, 64, 3)
 	model=Sequential()
 	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
 	model.add(TimeDistributed(Activation('relu')))
