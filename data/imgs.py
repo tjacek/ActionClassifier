@@ -71,6 +71,13 @@ class FrameSeqs(dict):
     def min_len(self):
         return min(self.seqs_len())
 
+class ReadFrames(object):
+    def __init__(self,n_split=1):
+        self.n_split=n_split
+
+    def __call__(self,in_path):
+        return read_frame_seqs(in_path,n_split=self.n_split)
+
 def read_frame_seqs(in_path,n_split=1):
     frame_seqs=FrameSeqs()
     for path_i in files.top_files(in_path):

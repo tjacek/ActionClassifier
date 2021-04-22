@@ -79,7 +79,7 @@ def make_lstm(params):
 	return model
 
 def extract(in_path,nn_path,out_path,seq_len=20):
-	read=data.imgs.read_frame_seqs
+	read=data.imgs.ReadFrames(3)
 	def preproc(dataset):
 		dataset.transform(MinLength(seq_len),single=False)
 		dataset.scale()
@@ -87,7 +87,7 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 	fun(in_path,nn_path,out_path)
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
-	n_cats=12
+	n_cats=20
 	binary_gen=dynamic_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
@@ -114,13 +114,12 @@ def dynamic_binary(in_path,n_epochs=5,seq_len=20):
 	train,test=frames.split()
 	train.scale()
 	params={'n_cats':2,"seq_len":seq_len,"drop":True,"dims":train.dims()}
-#	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),binary=0)
 	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),batch_size=4,n_agum=1,binary=0)
 	def binary_train(nn_path,i):
 		seq_gen.binary=i
 		model=make_lstm(params)
-		model.fit_generator(seq_gen,epochs=n_epochs)
-		model.save(nn_path)
+#		model.fit_generator(seq_gen,epochs=n_epochs)
+#		model.save(nn_path)
 	return binary_train
 
 def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
