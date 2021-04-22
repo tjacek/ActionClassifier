@@ -53,7 +53,7 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 		model.save(out_path)
 
 def make_lstm(params):
-	input_shape= (params['seq_len'],*params['dims']) #(params['seq_len'], 64, 64, 3)
+	input_shape= (params['seq_len'],*params['dims']) 
 	model=Sequential()
 	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
 	model.add(TimeDistributed(Activation('relu')))
@@ -110,11 +110,12 @@ def static_binary(in_path,n_epochs=5,seq_len=20,n_channels=3):
 	return binary_train		
 
 def dynamic_binary(in_path,n_epochs=5,seq_len=20):
-	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
+	frames=data.imgs.read_frame_seqs(in_path,n_split=3)
 	train,test=frames.split()
 	train.scale()
-	params={'n_cats':2,"seq_len":seq_len,"drop":True}
-	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),binary=0)
+	params={'n_cats':2,"seq_len":seq_len,"drop":True,"dims":train.dims()}
+#	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),binary=0)
+	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),batch_size=4,n_agum=1,binary=0)
 	def binary_train(nn_path,i):
 		seq_gen.binary=i
 		model=make_lstm(params)
@@ -132,7 +133,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	lstm_exp('../MSR/full','../MSR/lstm',n_epochs=5)
+	binary_lstm('../MSR/full','../MSR/lstm',n_epochs=5,seq_len=20)
 #	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
