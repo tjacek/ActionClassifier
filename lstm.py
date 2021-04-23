@@ -25,6 +25,36 @@ class MinLength(object):
 		indexes=np.sort(indexes)
 		return [frames[i] for i in indexes]
 
+class FRAME_LSTM(object):
+	def __init__(self,dropout=0.5,activ='relu'):
+		self.dropout=dropout
+		self.activ=activ
+
+	def __call__(self,params):
+		input_shape= (params['seq_len'],*params['dims']) 
+		model=Sequential()
+		model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
+		model.add(TimeDistributed(Activation(self.activ)))
+		model.add(TimeDistributed(Conv2D(32, (5, 5))))
+		model.add(TimeDistributed(Activation(self.activ)))
+		model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
+		model.add(TimeDistributed(Flatten()))
+		model.add(TimeDistributed(Dense(256)))
+		if( not (self.dropout is None)):
+			model.add(TimeDistributed(Dropout(self.dropout)))	
+		model.add(TimeDistributed(Dense(128, name="first_dense",
+				kernel_regularizer=regularizers.l1(0.01))))
+
+		model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
+		model.add(GlobalAveragePooling1D(name="global_avg"))
+		model.add(Dense(params['n_cats'],activation='softmax'))
+
+		model.compile(loss='categorical_crossentropy',
+			optimizer=keras.optimizers.Adadelta(),
+			metrics=['accuracy'])
+		model.summary()
+		return model
+
 def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=frames.split()
@@ -52,31 +82,30 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 	if(out_path):
 		model.save(out_path)
 
-def make_lstm(params):
-	input_shape= (params['seq_len'],*params['dims']) 
-	model=Sequential()
-	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
-	model.add(TimeDistributed(Activation('relu')))
-	model.add(TimeDistributed(Conv2D(32, (5, 5))))
-	model.add(TimeDistributed(Activation('relu')))
-	model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
-	model.add(TimeDistributed(Flatten()))
-	model.add(TimeDistributed(Dense(256)))
-	if(params['drop']):
-		model.add(TimeDistributed(Dropout(0.5)))	
-	model.add(TimeDistributed(Dense(128, name="first_dense",
-	 kernel_regularizer=regularizers.l1(0.01))))
-
-	model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
-#	model.add(TimeDistributed(Dense(n_cats), name="time_distr_dense_one"))
-	model.add(GlobalAveragePooling1D(name="global_avg"))
-	model.add(Dense(params['n_cats'],activation='softmax'))
-
-	model.compile(loss='categorical_crossentropy',
-		optimizer=keras.optimizers.Adadelta(),
-		metrics=['accuracy'])
-	model.summary()
-	return model
+#def make_lstm(params):
+#	input_shape= (params['seq_len'],*params['dims']) 
+#	model=Sequential()
+#	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
+#	model.add(TimeDistributed(Activation('relu')))
+#	model.add(TimeDistributed(Conv2D(32, (5, 5))))
+#	model.add(TimeDistributed(Activation('relu')))
+#	model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
+#	model.add(TimeDistributed(Flatten()))
+#	model.add(TimeDistributed(Dense(256)))
+#	if(params['drop']):
+#		model.add(TimeDistributed(Dropout(0.5)))	
+#	model.add(TimeDistributed(Dense(128, name="first_dense",
+#	 kernel_regularizer=regularizers.l1(0.01))))
+#
+#	model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
+#	model.add(GlobalAveragePooling1D(name="global_avg"))
+#	model.add(Dense(params['n_cats'],activation='softmax'))
+#
+#	model.compile(loss='categorical_crossentropy',
+#		optimizer=keras.optimizers.Adadelta(),
+#		metrics=['accuracy'])
+#	model.summary()
+#	return model
 
 def extract(in_path,nn_path,out_path,seq_len=20):
 	read=data.imgs.ReadFrames(3)
@@ -88,7 +117,7 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	n_cats=20
-	binary_gen=dynamic_binary(in_path,n_epochs,seq_len)
+	binary_gen=static_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
 	arg_dict={'in_path':in_path}		
@@ -100,12 +129,13 @@ def static_binary(in_path,n_epochs=5,seq_len=20,n_channels=3):
 	train,test=dataset.split()
 	train.transform(MinLength(seq_len),single=False)
 	train.scale()
-	params={'n_cats':2,"seq_len":seq_len,"drop":True}
+	params={'n_cats':2,"seq_len":seq_len,"dims":train.dims()}#,"drop":False}
 	X,y=train.to_dataset()
+	make_lstm=FRAME_LSTM()
 	def binary_train(nn_path,i):
 		y_i=ens.binarize(y,i)	
 		model=make_lstm(params)
-		model.fit(X,y_i,epochs=n_epochs,batch_size=8)
+		model.fit(X,y_i,epochs=n_epochs,batch_size=4)
 		model.save(nn_path)
 	return binary_train		
 
@@ -113,13 +143,13 @@ def dynamic_binary(in_path,n_epochs=5,seq_len=20):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=3)
 	train,test=frames.split()
 	train.scale()
-	params={'n_cats':2,"seq_len":seq_len,"drop":True,"dims":train.dims()}
+	params={'n_cats':2,"seq_len":seq_len,"dims":train.dims()}
 	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),batch_size=4,n_agum=1,binary=0)
 	def binary_train(nn_path,i):
 		seq_gen.binary=i
 		model=make_lstm(params)
-#		model.fit_generator(seq_gen,epochs=n_epochs)
-#		model.save(nn_path)
+		model.fit_generator(seq_gen,epochs=n_epochs)
+		model.save(nn_path)
 	return binary_train
 
 def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
