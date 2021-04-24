@@ -5,12 +5,12 @@ import utils
 class SeqGenerator(keras.utils.Sequence):
 	def __init__(self,dataset,agum,batch_size=8,n_agum=1,binary=None):
 		self.dataset=dataset
-#		self.n_cats=self.dataset.n_cats()
 		self.agum=agum
 		self.batch_size=batch_size
 		self.names=self.dataset.names()
 		self.n_agum=n_agum
 		self.binary=binary
+		self.n_epochs=0
 
 	def __len__(self):
 		return math.ceil(len(self.dataset)/self.batch_size)
@@ -26,7 +26,10 @@ class SeqGenerator(keras.utils.Sequence):
 		return X,y
 
 	def on_epoch_end(self):
-		np.random.shuffle(self.names)
+		self.n_epochs+=1
+		if(self.n_epochs>50):
+			self.n_epochs=0
+			np.random.shuffle(self.names)
 
 	def n_cats(self):
 		if( self.binary is None):

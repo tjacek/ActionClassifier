@@ -117,7 +117,7 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	n_cats=20
-	binary_gen=static_binary(in_path,n_epochs,seq_len)
+	binary_gen=dynamic_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
 	arg_dict={'in_path':in_path}		
@@ -145,6 +145,7 @@ def dynamic_binary(in_path,n_epochs=5,seq_len=20):
 	train.scale()
 	params={'n_cats':2,"seq_len":seq_len,"dims":train.dims()}
 	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),batch_size=4,n_agum=1,binary=0)
+	make_lstm=FRAME_LSTM()
 	def binary_train(nn_path,i):
 		seq_gen.binary=i
 		model=make_lstm(params)
@@ -162,7 +163,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	binary_lstm('../MSR/full','../MSR/lstm',n_epochs=5,seq_len=20)
+	binary_lstm('../MSR/full','../MSR/lstm2',n_epochs=400,seq_len=20)
 #	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
