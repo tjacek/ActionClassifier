@@ -11,6 +11,7 @@ from keras.layers.core import Dense, Dropout, Flatten, Activation
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.pooling import GlobalAveragePooling1D
 from keras.layers.recurrent import LSTM
+from keras.layers.normalization import BatchNormalization
 from keras import regularizers
 import keras.utils,keras.optimizers
 import data.imgs,utils,gen,ens,files
@@ -46,7 +47,8 @@ class FRAME_LSTM(object):
 				kernel_regularizer=regularizers.l1(0.01))))
 
 		model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
-		model.add(GlobalAveragePooling1D(name="global_avg"))
+		model.add(GlobalAveragePooling1D(name="prebatch"))
+		model.add(BatchNormalization(name="global_avg"))
 		model.add(Dense(params['n_cats'],activation='softmax'))
 
 		model.compile(loss='categorical_crossentropy',
@@ -82,32 +84,7 @@ def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
 	if(out_path):
 		model.save(out_path)
 
-#def make_lstm(params):
-#	input_shape= (params['seq_len'],*params['dims']) 
-#	model=Sequential()
-#	model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
-#	model.add(TimeDistributed(Activation('relu')))
-#	model.add(TimeDistributed(Conv2D(32, (5, 5))))
-#	model.add(TimeDistributed(Activation('relu')))
-#	model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
-#	model.add(TimeDistributed(Flatten()))
-#	model.add(TimeDistributed(Dense(256)))
-#	if(params['drop']):
-#		model.add(TimeDistributed(Dropout(0.5)))	
-#	model.add(TimeDistributed(Dense(128, name="first_dense",
-#	 kernel_regularizer=regularizers.l1(0.01))))
-#
-#	model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
-#	model.add(GlobalAveragePooling1D(name="global_avg"))
-#	model.add(Dense(params['n_cats'],activation='softmax'))
-#
-#	model.compile(loss='categorical_crossentropy',
-#		optimizer=keras.optimizers.Adadelta(),
-#		metrics=['accuracy'])
-#	model.summary()
-#	return model
-
-def extract(in_path,nn_path,out_path,seq_len=20):
+def extract(in_path,nn_path,out_path,seq_len=30):
 	read=data.imgs.ReadFrames(3)
 	def preproc(dataset):
 		dataset.transform(MinLength(seq_len),single=False)
@@ -117,7 +94,7 @@ def extract(in_path,nn_path,out_path,seq_len=20):
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	n_cats=20
-	binary_gen=dynamic_binary(in_path,n_epochs,seq_len)
+	binary_gen=static_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
 	arg_dict={'in_path':in_path}		
@@ -134,9 +111,9 @@ def static_binary(in_path,n_epochs=5,seq_len=20,n_channels=3):
 	make_lstm=FRAME_LSTM()
 	def binary_train(nn_path,i):
 		y_i=ens.binarize(y,i)	
-		model=make_lstm(params)
-		model.fit(X,y_i,epochs=n_epochs,batch_size=4)
-		model.save(nn_path)
+#		model=make_lstm(params)
+#		model.fit(X,y_i,epochs=n_epochs,batch_size=4)
+#		model.save(nn_path)
 	return binary_train		
 
 def dynamic_binary(in_path,n_epochs=5,seq_len=20):
@@ -163,7 +140,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	binary_lstm('../MSR/full','../MSR/lstm2',n_epochs=400,seq_len=20)
+	binary_lstm('../MSR/full','../MSR/lstm3',n_epochs=20,seq_len=30)
 #	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
