@@ -27,7 +27,7 @@ class MinLength(object):
 		return [frames[i] for i in indexes]
 
 class FRAME_LSTM(object):
-	def __init__(self,dropout=0.5,activ='elu',batch=False,l1=0.01):
+	def __init__(self,dropout=None,activ='relu',batch=False,l1=None):#0.01):
 		self.dropout=dropout
 		self.activ=activ
 		self.batch=batch
@@ -49,7 +49,7 @@ class FRAME_LSTM(object):
 		model.add(TimeDistributed(Dense(128, name="first_dense",
 				activation=self.activ,kernel_regularizer=reg)))
 
-		model.add(LSTM(64, return_sequences=True, name="lstm_layer",activation=self.activ));
+		model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
 		
 		if(self.batch):
 			model.add(GlobalAveragePooling1D(name="prebatch",activation=self.activ))
@@ -64,30 +64,23 @@ class FRAME_LSTM(object):
 		model.summary()
 		return model
 
-def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
+def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3,static=True):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=frames.split()
-	train.transform(MinLength(seq_len),single=False)
-	train.scale()
-	X,y=train.to_dataset()
-	y=keras.utils.to_categorical(y)
-	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True,"dims":train.dims()}
-	model=make_lstm(params)
-	model.fit(X,y,epochs=n_epochs,batch_size=8)
-	if(out_path):
-		model.save(out_path)
-
-def train_gen_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3):
-	frames=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
-	train,test=frames.split()
-	train.scale()
-	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"drop":True,"dims":train.dims()}
-	if(os.path.isfile(out_path)):
-		model=load_model(out_path)
+	if(static):
+		train.transform(MinLength(seq_len),single=False)
 	else:
-		model=make_lstm(params)
-	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']))
-	model.fit_generator(seq_gen,epochs=n_epochs)
+		seq_gen=gen.SeqGenerator(train,MinLength(seq_len))
+	train.scale()
+	params={'n_cats':frames.n_cats(),"seq_len":seq_len,"dims":train.dims()}
+	make_lstm=FRAME_LSTM()
+	model=make_lstm(params)
+	if(static):
+		X,y=train.to_dataset()
+		y=keras.utils.to_categorical(y)
+		model.fit(X,y,epochs=n_epochs,batch_size=2)
+	else:
+		model.fit_generator(seq_gen,epochs=n_epochs)
 	if(out_path):
 		model.save(out_path)
 
@@ -129,36 +122,6 @@ def get_binary(in_path,n_epochs=5,seq_len=20,n_channels=3,static=True):
 		model.save(nn_path)
 	return binary_train		
 
-
-#def static_binary(in_path,n_epochs=5,seq_len=20,n_channels=3):
-#	dataset=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
-#	train,test=dataset.split()
-#	train.transform(MinLength(seq_len),single=False)
-#	train.scale()
-#	params={'n_cats':2,"seq_len":seq_len,"dims":train.dims(),"drop":False}
-#	X,y=train.to_dataset()
-#	make_lstm=FRAME_LSTM()
-#	def binary_train(nn_path,i):
-#		y_i=ens.binarize(y,i)	
-#		model=make_lstm(params)
-#		model.fit(X,y_i,epochs=n_epochs,batch_size=4)
-#		model.save(nn_path)
-#	return binary_train		
-
-#def dynamic_binary(in_path,n_epochs=5,seq_len=20):
-#	frames=data.imgs.read_frame_seqs(in_path,n_split=3)
-#	train,test=frames.split()
-#	train.scale()
-#	params={'n_cats':2,"seq_len":seq_len,"dims":train.dims()}
-#	seq_gen=gen.SeqGenerator(train,MinLength(params['seq_len']),batch_size=4,n_agum=1,binary=0)
-#	make_lstm=FRAME_LSTM()
-#	def binary_train(nn_path,i):
-#		seq_gen.binary=i
-#		model=make_lstm(params)
-#		model.fit_generator(seq_gen,epochs=n_epochs)
-#		model.save(nn_path)
-#	return binary_train
-
 def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	files.make_dir(out_path)
 	paths=files.get_paths(out_path,["nn","feats"])
@@ -169,7 +132,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	binary_lstm('../MSR/full','../MSR/lstm4',n_epochs=20,seq_len=30)
-#	train_lstm('../3DHOI/frames','../3DHOI/nn',n_epochs=200,seq_len=20)
+#	binary_lstm('../MSR/full','../MSR/lstm4',n_epochs=20,seq_len=30)
+	train_lstm('../MSR/full','../MSR/lstm_all',n_epochs=200,seq_len=30)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
