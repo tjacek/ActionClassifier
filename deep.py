@@ -1,6 +1,8 @@
 import keras
 from keras.models import Model
+from keras.layers.core import Activation
 from keras.layers import Conv2D,Conv1D, MaxPooling1D,MaxPooling2D#,Lambda
+from keras.layers.wrappers import TimeDistributed
 from keras.layers import Dropout,Flatten,Dense
 from keras.layers.normalization import BatchNormalization
 from keras import regularizers
@@ -64,3 +66,14 @@ def clf_nn(x,model_input,n_cats,optim_alg):
     clf_model.compile(loss=keras.losses.categorical_crossentropy,
                         optimizer=optim_alg())
     return clf_model
+
+def lstm_cnn(model,n_kern,kern_size,pool_size,activ,input_shape):
+    for i,n_kern_i in enumerate(n_kern):
+        if(i==0):
+            conv_i=Conv2D(n_kern_i,kern_size[i], padding='same')
+            model.add(TimeDistributed(conv_i,input_shape=input_shape))
+        else:
+            conv_i=Conv2D(n_kern_i,kern_size[i])
+            model.add(TimeDistributed(conv_i))
+        model.add(TimeDistributed(Activation(activ)))
+        model.add(TimeDistributed(MaxPooling2D(pool_size=pool_size[i])))

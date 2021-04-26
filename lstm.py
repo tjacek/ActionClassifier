@@ -14,7 +14,7 @@ from keras.layers.recurrent import LSTM
 from keras.layers.normalization import BatchNormalization
 from keras import regularizers
 import keras.utils,keras.optimizers
-import data.imgs,utils,gen,ens,files
+import data.imgs,utils,gen,ens,files,deep
 
 class MinLength(object):
 	def __init__(self,size):
@@ -27,39 +27,39 @@ class MinLength(object):
 		return [frames[i] for i in indexes]
 
 class FRAME_LSTM(object):
-	def __init__(self,dropout=None,activ='relu',batch=False,l1=None):#0.01):
+	def __init__(self,dropout=0.5,activ='relu',batch=True,optim_alg=None,l1=0.01):
+		if(optim_alg is None):
+			optim_alg=deep.Adam(0.00001)
 		self.dropout=dropout
 		self.activ=activ
 		self.batch=batch
 		self.l1=l1
+		self.optim_alg=optim_alg
 
 	def __call__(self,params):
 		input_shape= (params['seq_len'],*params['dims']) 
 		model=Sequential()
-		model.add(TimeDistributed(Conv2D(32, (5, 5), padding='same'), input_shape=input_shape))
-		model.add(TimeDistributed(Activation(self.activ)))
-		model.add(TimeDistributed(Conv2D(32, (5, 5))))
-		model.add(TimeDistributed(Activation(self.activ)))
-		model.add(TimeDistributed(MaxPooling2D(pool_size=(4, 4))))
+		n_kern,kern_size,pool_size=[32,32],[(5,5),(5,5)],[(2,2),(2,2)]
+		deep. lstm_cnn(model,n_kern,kern_size,pool_size,self.activ,input_shape)
 		model.add(TimeDistributed(Flatten()))
 		model.add(TimeDistributed(Dense(256)))
 		if( not (self.dropout is None)):
 			model.add(TimeDistributed(Dropout(self.dropout)))	
 		reg=None if(self.l1  is None) else regularizers.l1(self.l1)
 		model.add(TimeDistributed(Dense(128, name="first_dense",
-				activation=self.activ,kernel_regularizer=reg)))
+				kernel_regularizer=reg)))
 
 		model.add(LSTM(64, return_sequences=True, name="lstm_layer"));
 		
 		if(self.batch):
-			model.add(GlobalAveragePooling1D(name="prebatch",activation=self.activ))
+			model.add(GlobalAveragePooling1D(name="prebatch"))
 			model.add(BatchNormalization(name="global_avg"))
 		else:
 			model.add(GlobalAveragePooling1D(name="global_avg"))
 		model.add(Dense(params['n_cats'],activation='softmax'))
 
 		model.compile(loss='categorical_crossentropy',
-			optimizer=keras.optimizers.Adadelta(),
+			optimizer=self.optim_alg(),#keras.optimizers.Adadelta(),
 			metrics=['accuracy'])
 		model.summary()
 		return model
@@ -78,7 +78,7 @@ def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3,static
 	if(static):
 		X,y=train.to_dataset()
 		y=keras.utils.to_categorical(y)
-		model.fit(X,y,epochs=n_epochs,batch_size=2)
+		model.fit(X,y,epochs=n_epochs,batch_size=8)
 	else:
 		model.fit_generator(seq_gen,epochs=n_epochs)
 	if(out_path):
@@ -122,17 +122,14 @@ def get_binary(in_path,n_epochs=5,seq_len=20,n_channels=3,static=True):
 		model.save(nn_path)
 	return binary_train		
 
-def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,gen=False):
+def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,static=True):
 	files.make_dir(out_path)
 	paths=files.get_paths(out_path,["nn","feats"])
-	if(gen):
-		train_gen_lstm(in_path,paths['nn'],n_epochs,seq_len)
-	else:
-		train_lstm(in_path,paths['nn'],n_epochs,seq_len)
+	train_lstm(in_path,paths['nn'],n_epochs,seq_len,static=static)
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
 #	binary_lstm('../MSR/full','../MSR/lstm4',n_epochs=20,seq_len=30)
-	train_lstm('../MSR/full','../MSR/lstm_all',n_epochs=200,seq_len=30)
+	lstm_exp('../MSR/full','../MSR/lstm_all2',n_epochs=200,seq_len=30)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
