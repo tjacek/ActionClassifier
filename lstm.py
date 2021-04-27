@@ -39,7 +39,7 @@ class FRAME_LSTM(object):
 	def __call__(self,params):
 		input_shape= (params['seq_len'],*params['dims']) 
 		model=Sequential()
-		n_kern,kern_size,pool_size=[32,32],[(5,5),(5,5)],[(2,2),(2,2)]
+		n_kern,kern_size,pool_size=[64,64,64],[(5,5),(5,5),(5,5)],[(2,2),(2,2),(2,2)]
 		deep. lstm_cnn(model,n_kern,kern_size,pool_size,self.activ,input_shape)
 		model.add(TimeDistributed(Flatten()))
 		model.add(TimeDistributed(Dense(256)))
@@ -129,7 +129,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,static=True):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-#	binary_lstm('../MSR/full','../MSR/lstm4',n_epochs=20,seq_len=30)
-	lstm_exp('../MSR/full','../MSR/lstm_all2',n_epochs=200,seq_len=30)
+	binary_lstm('../MSR/full','../MSR/lstm5',n_epochs=200,seq_len=30)
+#	lstm_exp('../MSR/full','../MSR/lstm_all3',n_epochs=200,seq_len=30)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)

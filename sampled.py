@@ -4,7 +4,13 @@ print("physical_devices-------------", len(physical_devices))
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 import numpy as np
 import sim,sim.dist,sim.imgs
-import utils,data.imgs
+import utils,data.imgs,files
+
+def sampled_exp(in_path,out_path,n_samples=3,n_epochs=5):
+	files.make_dir(out_path)
+	paths=files.get_paths(out_path,["nn","seqs"])
+	train(in_path,paths["nn"],n_samples,n_epochs)
+	extract(in_path,paths['nn'],paths['seqs'])
 
 def train(in_path,out_path=None,n_samples=3,n_epochs=5):
 	frames=data.imgs.read_frame_seqs(in_path,n_split=1)
@@ -34,11 +40,11 @@ def pairs_dataset(train,k=5):
 	X=[X[:,0],X[:,1]]
 	return X,y
 
-def extract(in_path,nn_path,out_path):
+def extract(in_path,nn_path,out_path,n_channels=1):
+	read=data.imgs.ReadFrames(n_channels)
 	def preproc(dataset):
 		dataset.scale()
-	fun=utils.ExtractSeqs("hidden",preproc)
+	fun=utils.ExtractSeqs(read,"hidden",preproc)
 	fun(in_path,nn_path,out_path)
 
-train("../MSR/full","test")
-#extract("../ICSS_exp/MSR/frames","test","test2")
+sampled_exp("../MSR/full","test",n_epochs=500)
