@@ -89,10 +89,6 @@ def single_exp_template(in_path,out_path,train,extract,
     train(paths["spline"],paths["nn"],n_epochs=n_epochs)
     extract(paths["spline"],paths["nn"],paths["feats"])
 
-def check_model(nn_path):
-    model=load_model(nn_path)
-    model.summary()
-
 def to_one_hot(y,n_cats=20):
     one_hot=np.zeros((len(y),n_cats))
     for i,y_i in enumerate(y):

@@ -1,3 +1,4 @@
+from keras.models import load_model
 import data.imgs,data.seqs,data.actions,files,sim
 
 def ts_imgs(in_path,out_path):
@@ -46,7 +47,10 @@ def n_pairs(in_path):
     print("Positive %d" % sum(cats))
     print("Negative %d" % (len(cats)-sum(cats)))
 
+def check_model(nn_path):
+    model=load_model(nn_path)
+    model.summary()
+
 if __name__=="__main__":
-    in_path="../dtw_paper/MHAD/binary/seqs/nn0"
-#    dataset_size(in_path)
-    n_pairs(in_path)
+    in_path="../ICSS/3DHOI/ens/nn/0"
+    check_model(in_path)
