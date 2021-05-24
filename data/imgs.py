@@ -91,6 +91,8 @@ def read_frame_seqs(in_path,n_split=1):
 
 def read_frame(in_path,n_split=1):
     frame_ij=cv2.imread(in_path,cv2.IMREAD_GRAYSCALE)
+    if(n_split is None):
+        n_split=int(frame_ij.shape[1] /frame_ij.shape[0])    
     if(n_split==1):
         return frame_ij
     return np.array(np.vsplit(frame_ij,n_split)).T
