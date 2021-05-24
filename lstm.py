@@ -27,7 +27,7 @@ class MinLength(object):
 		return [frames[i] for i in indexes]
 
 class FRAME_LSTM(object):
-	def __init__(self,dropout=0.5,activ='relu',batch=True,optim_alg=None,l1=0.01):
+	def __init__(self,dropout=0.5,activ='relu',batch=False,optim_alg=None,l1=0.01):
 		if(optim_alg is None):
 			optim_alg=deep.Adam(0.00001)
 		self.dropout=dropout
@@ -85,7 +85,7 @@ def train_lstm(in_path,out_path=None,n_epochs=200,seq_len=20,n_channels=3,static
 		model.save(out_path)
 
 def extract(in_path,nn_path,out_path,seq_len=30):
-	read=data.imgs.ReadFrames(3)
+	read=data.imgs.ReadFrames(None)
 	def preproc(dataset):
 		dataset.transform(MinLength(seq_len),single=False)
 		dataset.scale()
@@ -93,7 +93,7 @@ def extract(in_path,nn_path,out_path,seq_len=30):
 	fun(in_path,nn_path,out_path)
 
 def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
-	n_cats=20
+	n_cats=10
 	binary_gen=get_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
@@ -101,7 +101,7 @@ def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
 	binary_ens(out_path,n_cats,arg_dict)
 
-def get_binary(in_path,n_epochs=5,seq_len=20,n_channels=3,static=True):
+def get_binary(in_path,n_epochs=5,seq_len=20,n_channels=None,static=True):
 	dataset=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
 	train,test=dataset.split()
 	if(static):
@@ -129,7 +129,7 @@ def lstm_exp(in_path,out_path,n_epochs=200,seq_len=20,static=True):
 	extract(in_path,paths['nn'],paths['feats'],seq_len)
 
 if __name__ == "__main__":
-	binary_lstm('../MSR/full','../MSR/lstm5',n_epochs=200,seq_len=30)
+	binary_lstm('../forth/box','../forth/lstm',n_epochs=200,seq_len=30)
 #	lstm_exp('../MSR/full','../MSR/lstm_all3',n_epochs=200,seq_len=30)
 #	extract('../3DHOI/frames','../3DHOI/nn','../3DHOI/feats',seq_len=20)
 #	binary_lstm("../MSR/frames","../MSR/ens4",n_epochs=250,seq_len=20)
