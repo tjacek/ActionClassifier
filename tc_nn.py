@@ -1,13 +1,15 @@
 from tcn import TCN, tcn_full_summary
+import keras.losses
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 import data.seqs,utils
 
 def make_tcn(params):
     tcn_layer = TCN(input_shape=(params["ts_len"], params["n_feats"]))
-    m = Sequential([tcn_layer,Dense(1)])
-    m.compile(optimizer='adam', loss='mse')
+    m = Sequential([tcn_layer,Dense(units=params['n_cats'],activation='softmax')])
+    m.compile(optimizer='adam', loss=keras.losses.categorical_crossentropy)
     tcn_full_summary(m, expand_residual_blocks=False)
+    return m
 
 def simple_exp(in_path,out_path,n_epochs=1000):
     ts_cnn=make_tcn
