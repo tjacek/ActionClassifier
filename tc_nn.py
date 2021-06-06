@@ -1,17 +1,20 @@
 from tcn import TCN, tcn_full_summary
+import numpy as np
 import keras.losses
+import tensorflow as tf
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
+from keras.models import Model
 import data.seqs,utils
 
 def make_tcn(params):
-    tcn_layer = TCN(input_shape=(params["ts_len"], params["n_feats"]))
+    tcn_layer = TCN(input_shape=(params["ts_len"], params["n_feats"]),name="tcn_layer")
     m = Sequential([tcn_layer,Dense(units=params['n_cats'],activation='softmax')])
     m.compile(optimizer='adam', loss=keras.losses.categorical_crossentropy)
     tcn_full_summary(m, expand_residual_blocks=False)
     return m
 
-def simple_exp(in_path,out_path,n_epochs=100):
+def simple_exp(in_path,out_path,n_epochs=10):
     train,extract=train_tcn,extract_tcn
     utils.single_exp_template(in_path,out_path,train,extract,
         n_epochs=n_epochs)
@@ -31,17 +34,16 @@ def extract_tcn(in_path,nn_path,out_path):
     X,y,params=to_dataset(dataset)
     model=make_tcn(params)
     model.load_weights(nn_path)    
-    raise Exception("OK")
-#        model=load_model(nn_path)
-#        extractor=Model(inputs=model.input,
-#                outputs=model.get_layer(self.name).output)
-#        extractor.summary()
-#        names=dataset.names()
-#        feat_seqs=data.seqs.Seqs()
-#        for i,name_i in enumerate(dataset.names()):
-#            x_i=np.array(dataset[name_i])
-#            feat_seqs[name_i]= extractor.predict(x_i)
-#        feat_seqs.save(out_path)
+    print(dir(model.input))
+    extractor=tf.keras.models.Model(inputs=model.input,
+                outputs=model.get_layer("tcn_layer").output)
+    extractor.summary()
+    feat_seqs=data.seqs.Seqs()
+    for i,name_i in enumerate(dataset.names()):
+        x_i=np.array(dataset[name_i])
+        x_i=np.expand_dims(x_i,axis=0)
+        feat_seqs[name_i]= extractor.predict(x_i)
+    feat_seqs.save(out_path)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
