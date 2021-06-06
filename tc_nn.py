@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 from keras.models import Model
-import data.seqs,utils
+import data.feats,utils
 
 def make_tcn(params):
     tcn_layer = TCN(input_shape=(params["ts_len"], params["n_feats"]),name="tcn_layer")
@@ -38,12 +38,13 @@ def extract_tcn(in_path,nn_path,out_path):
     extractor=tf.keras.models.Model(inputs=model.input,
                 outputs=model.get_layer("tcn_layer").output)
     extractor.summary()
-    feat_seqs=data.seqs.Seqs()
+    feats=data.feats.Feats()
     for i,name_i in enumerate(dataset.names()):
         x_i=np.array(dataset[name_i])
         x_i=np.expand_dims(x_i,axis=0)
-        feat_seqs[name_i]= extractor.predict(x_i)
-    feat_seqs.save(out_path)
+        feats[name_i]= extractor.predict(x_i)
+#        raise Exception(feat[name_i].shape)
+    feats.save(out_path)
 
 def to_dataset(seqs):
     X,y=seqs.to_dataset()
