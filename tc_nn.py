@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 from keras.models import Model
-import data.feats,utils
+import data.feats,utils,ens
 
 def make_tcn(params):
     tcn_layer = TCN(input_shape=(params["ts_len"], params["n_feats"]),name="tcn_layer")
@@ -14,10 +14,23 @@ def make_tcn(params):
     tcn_full_summary(m, expand_residual_blocks=False)
     return m
 
-def simple_exp(in_path,out_path,n_epochs=10):
+def simple_exp(in_path,out_path,n_epochs=100):
     train,extract=train_tcn,extract_tcn
     utils.single_exp_template(in_path,out_path,train,extract,
         n_epochs=n_epochs)
+
+def ensemble_exp(in_path,out_path,n_epochs=100):
+    ens.BinaryEns( ,funcs=[extract_tcn])
+
+
+def binary_lstm(in_path,out_path,n_epochs=5):
+    n_cats=10
+	binary_gen=get_binary(in_path,n_epochs,seq_len)
+	funcs=[[extract,["in_path","nn","feats"]]]
+	dir_names=["feats"]
+	arg_dict={'in_path':in_path}		
+	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
+	binary_ens(out_path,n_cats,arg_dict)
 
 def train_tcn(in_path,nn_path,n_epochs=5):
     dataset=data.seqs.read_seqs(in_path)

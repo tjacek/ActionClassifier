@@ -26,7 +26,8 @@ class TrainNN(object):
             model.save(nn_path)
 
 class Extract(object):
-    def __init__(self,read,name="hidden",preproc=None,custom_layer=None):
+    def __init__(self,read,name="hidden",preproc=None,
+                    custom_layer=None):
         self.read=read
         self.name=name
         self.preproc=preproc

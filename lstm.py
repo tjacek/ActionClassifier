@@ -92,8 +92,7 @@ def extract(in_path,nn_path,out_path,seq_len=30):
 	fun=utils.Extract(read,name="global_avg",preproc=preproc)
 	fun(in_path,nn_path,out_path)
 
-def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
-	n_cats=10
+def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20,n_cats=12):
 	binary_gen=get_binary(in_path,n_epochs,seq_len)
 	funcs=[[extract,["in_path","nn","feats"]]]
 	dir_names=["feats"]
@@ -101,14 +100,19 @@ def binary_lstm(in_path,out_path,n_epochs=5,seq_len=20):
 	binary_ens=ens.BinaryEns(binary_gen,funcs,dir_names)
 	binary_ens(out_path,n_cats,arg_dict)
 
-def get_binary(in_path,n_epochs=5,seq_len=20,n_channels=None,static=True):
-	dataset=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
+def get_binary(in_path,n_epochs=5,seq_len=20,n_channels=None,
+                static=True,scale=True):
+	if(type(in_path)==str):
+	    dataset=data.imgs.read_frame_seqs(in_path,n_split=n_channels)
+	else:
+		dataset=in_path
 	train,test=dataset.split()
 	if(static):
 		train.transform(MinLength(seq_len),single=False)
 	else:
 		seq_gen=gen.SeqGenerator(train,MinLength(seq_len),batch_size=4,n_agum=1,binary=0)
-	train.scale()
+	if(scale):
+		train.scale()
 	params={'n_cats':2,"seq_len":seq_len,"dims":train.dims(),"drop":False}
 	X,y=train.to_dataset()
 	make_lstm=FRAME_LSTM()

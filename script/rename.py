@@ -1,20 +1,33 @@
-import shutil,os
+#import shutil,os
+import sys
+sys.path.append("..")
+import json
+import data.imgs,files,lstm
 
-def rename_dicts(in_path,out_path):
-    if(not os.path.isdir(out_path)):
-        os.mkdir(out_path)
-    for name_i in os.listdir(in_path):
-        in_i="%s/%s" % (in_path,name_i)
-        out_i="%s/%s" % (out_path,add_cat(name_i))
-        print(out_i)
-        shutil.move(in_i,out_i)
+def rename_exp(in_path,rename_path,out_path):
+    seqs_dict=data.imgs.read_frame_seqs(in_path)
+    seqs_dict.scale()
+    rename_dict=rename_dicts(seqs_dict,rename_path)
+    lstm.binary_lstm(rename_dict,out_path,n_epochs=5,seq_len=20,n_cats=12)
 
-def add_cat(name_i):
-    raw=name_i.split("_")
-    cat=str(int(raw[0])+1)
-    raw=[cat]+raw[1:]
-    return "_".join(raw)
+def rename_dicts(seqs_dict,rename_path):
+    rename=read_rename(rename_path)
+    print(rename.keys())
+    rename_seqs=data.imgs.FrameSeqs()
+    for name_i,rename_i in rename.items():
+        rename_seqs[rename_i]=seqs_dict[name_i]
+    return rename_seqs
 
-in_path="../../forth/box"
-out_path="../../forth/box2"
-rename_dicts(in_path,out_path)
+def read_rename(path):
+    rename= json.load(open("%s.json" % path))
+    return { files.Name(name_i):files.Name(rename_i) 
+                for name_i,rename_i in rename.items()}
+
+#def add_cat(name_i):
+#    raw=name_i.split("_")
+#    cat=str(int(raw[0])+1)
+#    raw=[cat]+raw[1:]
+#    return "_".join(raw)
+
+in_path="../../raw_3DHOI/3DHOI/frames"
+rename_exp(in_path,"rename","test")
