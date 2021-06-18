@@ -8,7 +8,8 @@ def rename_exp(in_path,rename_path,out_path):
     seqs_dict=data.imgs.read_frame_seqs(in_path)
     seqs_dict.scale()
     rename_dict=rename_dicts(seqs_dict,rename_path)
-    lstm.binary_lstm(rename_dict,out_path,n_epochs=5,seq_len=20,n_cats=12)
+    pair=(in_path,rename_dict)
+    lstm.binary_lstm(pair,out_path,n_epochs=5,seq_len=30,n_cats=12)
 
 def rename_dicts(seqs_dict,rename_path):
     rename=read_rename(rename_path)
