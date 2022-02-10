@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import files,data.imgs
+from . import DataDict
 
 class ActionImgs(dict):
 	def __init__(self, arg=[]):
@@ -23,13 +24,6 @@ class ActionImgs(dict):
 		for name_i,img_i in self.items():
 			data_dict[name_i]=fun(img_i)
 		return data_dict
-
-	def names(self):
-		return sorted(self.keys(),key=files.natural_keys) 
-
-	def split(self,selector=None):
-		train,test=files.split(self,selector)
-		return ActionImgs(train),ActionImgs(test)
 
 	def save(self,out_path):
 		files.make_dir(out_path)

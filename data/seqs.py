@@ -1,7 +1,8 @@
 import numpy as np
 import files,data.feats
+from . import DataDict
 
-class Seqs(dict):
+class Seqs(DataDict):
 	def __init__(self,args=[]):
 		super(Seqs, self).__init__(args)
 
@@ -15,12 +16,12 @@ class Seqs(dict):
 	def dim(self):
 		return list(self.values())[0].shape[1]
 
-	def names(self):
-		return sorted(self.keys(),key=files.natural_keys) 
+#	def names(self):
+#		return sorted(self.keys(),key=files.natural_keys) 
 	
-	def split(self,selector=None):
-		train,test=files.split(self,selector)
-		return Seqs(train),Seqs(test)
+#	def split(self,selector=None):
+#		train,test=files.split(self,selector)
+#		return Seqs(train),Seqs(test)
 
 	def to_dataset(self):
 		names=self.names() 

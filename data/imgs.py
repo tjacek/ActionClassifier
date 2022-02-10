@@ -2,14 +2,11 @@ import numpy as np
 import cv2
 from keras.models import load_model
 import files,data.seqs
+from . import DataDict
 
-class FrameSeqs(dict):
+class FrameSeqs(DataDict):
     def __init__(self, args=[]):
         super(FrameSeqs, self).__init__(args)
-
-    def n_cats(self):
-        cats=[ name_i.get_cat() for name_i in self.keys()]
-        return max(cats)+1
 
     def n_persons(self):
         persons=set([ name_i.get_person() for name_i in self.keys()])
@@ -21,15 +18,8 @@ class FrameSeqs(dict):
             n+=len(seq_i)
         return n
 
-    def names(self):
-        return sorted(self.keys(),key=files.natural_keys) 
-
     def dims(self):
         return list(self.values())[0][0].shape
-
-    def split(self,selector=None):
-        train,test=files.split(self,selector)
-        return FrameSeqs(train),FrameSeqs(test)
 
     def scale(self,dims=(64,64),new=False):
         def helper(img_j):

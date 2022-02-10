@@ -3,8 +3,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
 import files
+from . import DataDict
 
-class Feats(dict):
+class Feats(DataDict):
 	def __init__(self, arg=[]):
 		super(Feats, self).__init__(arg)
 
@@ -16,26 +17,13 @@ class Feats(dict):
 			new_feats[name_i]=x_i
 		return new_feats
 
-	def n_cats(self):
-		return max(self.get_cats())+1
-
 	def dim(self):
 		return list(self.values())[0].shape[0]
-
-	def names(self):
-		return sorted(self.keys(),key=files.natural_keys) 
-	
-	def split(self,selector=None):
-		train,test=files.split(self,selector)
-		return Feats(train),Feats(test)
 
 	def to_dataset(self):
 		names=self.names()
 		X=np.array([self[name_i] for name_i in names])
 		return X,self.get_cats()
-
-	def get_cats(self):
-	    return [ int(name_i.split('_')[0])-1 for name_i in self.names()]
 	
 	def transform(self,extractor):
 		feat_dict={	name_i: extractor(feat_i)
@@ -102,7 +90,6 @@ def common_names(names1,names2):
 
 def unified_exp(in_path):
 	all_feats=read_feats(files.top_files(in_path))
-#	raise Exception(all_feats.dim())
 	train_model(all_feats)
 
 if __name__ == "__main__":
